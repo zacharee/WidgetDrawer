@@ -1,6 +1,5 @@
 package tk.zwander.widgetdrawer.adapters
 
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -11,17 +10,14 @@ import android.view.ViewGroup
 import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.misc.CustomHost
+import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.utils.screenSize
-import tk.zwander.widgetdrawer.views.CustomHostView
-import tk.zwander.widgetdrawer.views.Drawer
 
 class DrawerAdapter(private val manager: AppWidgetManager,
-                    private val appWidgetHost: CustomHost,
+                    private val appWidgetHost: DrawerHost,
                     private val removedCallback: (position: Int) -> Unit) : RecyclerView.Adapter<DrawerAdapter.DrawerVH>() {
     val widgets = ArrayList<OverrideWidgetInfo>()
 

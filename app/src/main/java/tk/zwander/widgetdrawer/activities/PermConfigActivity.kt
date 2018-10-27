@@ -3,6 +3,8 @@ package tk.zwander.widgetdrawer.activities
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.widgetdrawer.views.Drawer
 
@@ -35,5 +37,16 @@ class PermConfigActivity : AppCompatActivity() {
 
         Drawer.onResult(this, resultCode, requestCode, data)
         finish()
+    }
+
+    private val buttons = ArrayList<Button>()
+
+    private fun loopThrough(parent: ViewGroup) {
+        for (i in 0 until parent.childCount) {
+            val child = parent.getChildAt(i)
+
+            if (child is Button) buttons.add(child)
+            else if (child is ViewGroup) loopThrough(child)
+        }
     }
 }

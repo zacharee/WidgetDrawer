@@ -6,18 +6,14 @@ import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomRecycler : RecyclerView {
+class DrawerRecycler : RecyclerView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
-    private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.Callback() {
-        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: ViewHolder): Int {
-            val drag = ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END
-            val swipe = ItemTouchHelper.START or ItemTouchHelper.END
-
-            return makeMovementFlags(drag, swipe)
-        }
-
+    private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+        ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
+        ItemTouchHelper.START or ItemTouchHelper.END
+    ) {
         override fun onMove(
             recyclerView: RecyclerView,
             viewHolder: ViewHolder,
@@ -30,6 +26,8 @@ class CustomRecycler : RecyclerView {
             if (allowReorder) onSwipeListener?.invoke(viewHolder, direction)
         }
 
+        override fun isItemViewSwipeEnabled() = allowReorder
+        override fun isLongPressDragEnabled() = allowReorder
     })
 
 
@@ -42,14 +40,14 @@ class CustomRecycler : RecyclerView {
 
     var allowReorder = false
         set(value) {
-            touchHelper.attachToRecyclerView(if (value) this else null)
+            adapter?.notifyDataSetChanged()
             field = value
         }
 
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-//        touchHelper.attachToRecyclerView(this)
+        touchHelper.attachToRecyclerView(this)
     }
 
     override fun onInterceptTouchEvent(e: MotionEvent?): Boolean {

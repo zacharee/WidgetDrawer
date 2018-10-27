@@ -6,12 +6,11 @@ import android.content.Context
 import android.util.Log
 import android.view.MotionEvent
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ListView
 
-class CustomHostView(context: Context) : AppWidgetHostView(context) {
+class DrawerHostView(context: Context) : AppWidgetHostView(context) {
     private val hasListView by lazy { hasListView(this) }
-    private val recView: CustomRecycler
-        get() = parent.parent as CustomRecycler
 
     private fun hasListView(parent: ViewGroup): Boolean {
         return if (parent is ListView) true

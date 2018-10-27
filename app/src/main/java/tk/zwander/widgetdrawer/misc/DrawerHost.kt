@@ -4,14 +4,14 @@ import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import tk.zwander.widgetdrawer.views.CustomHostView
+import tk.zwander.widgetdrawer.views.DrawerHostView
 
-class CustomHost(context: Context, id: Int) : AppWidgetHost(context, id) {
+class DrawerHost(context: Context, id: Int) : AppWidgetHost(context, id) {
     override fun onCreateView(
         context: Context,
         appWidgetId: Int,
         appWidget: AppWidgetProviderInfo?
     ): AppWidgetHostView {
-        return CustomHostView(context)
+        return DrawerHostView(context)
     }
 }

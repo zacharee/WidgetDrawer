@@ -2,7 +2,6 @@ package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
 import android.app.Activity
-import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.*
@@ -12,22 +11,18 @@ import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.WindowManager
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
-import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.PERM_CODE
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
-import tk.zwander.widgetdrawer.misc.CustomHost
+import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
@@ -73,7 +68,7 @@ class Drawer : ConstraintLayout {
         }
 
     private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val host = CustomHost(context.applicationContext, 1003)
+    private val host = DrawerHost(context.applicationContext, 1003)
     private val manager = AppWidgetManager.getInstance(context.applicationContext)
     private val prefs = PrefsManager(context)
     private val adapter = DrawerAdapter(manager, host) { position ->
@@ -243,8 +238,8 @@ class Drawer : ConstraintLayout {
 
     private fun removeWidget(position: Int) {
         val info = adapter.removeAt(position)
-        prefs.putCurrentWidgets(adapter.widgets)
         host.deleteAppWidgetId(info.id)
+        prefs.putCurrentWidgets(adapter.widgets)
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

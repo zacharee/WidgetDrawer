@@ -26,7 +26,7 @@
             android:clickable="true"
             android:focusable="true"
             android:background="?android:selectableItemBackgroundBorderless"
-            android:text="@string/allow_reorder"
+            android:text="@string/edit_mode"
             android:textColor="#fff"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -69,7 +69,7 @@
 
     </LinearLayout>
 
-    <tk.zwander.widgetdrawer.views.CustomRecycler
+    <tk.zwander.widgetdrawer.views.DrawerRecycler
         android:id="@+id/widget_grid"
         android:layout_width="match_parent"
         android:layout_height="0dp"

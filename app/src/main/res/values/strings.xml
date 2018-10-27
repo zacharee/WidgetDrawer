@@ -1,4 +1,4 @@
 <resources>
     <string name="app_name">WidgetDrawer</string>
-    <string name="allow_reorder">Allow Reorder</string>
+    <string name="edit_mode">Edit Mode</string>
 </resources>
