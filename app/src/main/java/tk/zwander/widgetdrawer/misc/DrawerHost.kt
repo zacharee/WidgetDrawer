@@ -6,7 +6,7 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import tk.zwander.widgetdrawer.views.DrawerHostView
 
-class DrawerHost(context: Context, id: Int) : AppWidgetHost(context, id) {
+class DrawerHost(val context: Context, id: Int) : AppWidgetHost(context, id) {
     override fun onCreateView(
         context: Context,
         appWidgetId: Int,

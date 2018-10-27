@@ -8,7 +8,7 @@ import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 
 class PrefsManager(context: Context) {
     companion object {
-        const val WIDGETS = "saved_widget_order"
+        const val WIDGETS = "saved_widgets"
     }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)

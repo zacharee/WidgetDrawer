@@ -1,6 +1,8 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
+import android.animation.TimeInterpolator
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -12,10 +14,13 @@ import android.os.Bundle
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.WindowManager
+import android.view.animation.*
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
+import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.PERM_CODE
@@ -71,9 +76,7 @@ class Drawer : ConstraintLayout {
     private val host = DrawerHost(context.applicationContext, 1003)
     private val manager = AppWidgetManager.getInstance(context.applicationContext)
     private val prefs = PrefsManager(context)
-    private val adapter = DrawerAdapter(manager, host) { position ->
-        removeWidget(position)
-    }
+    private val adapter = DrawerAdapter(manager, host, prefs)
 
     private val resultReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -98,10 +101,16 @@ class Drawer : ConstraintLayout {
         add_widget.setOnClickListener { pickWidget() }
         close_drawer.setOnClickListener { hideDrawer() }
 
-        widget_grid.onMoveListener = { _, viewHolder, target ->
-            Collections.swap(adapter.widgets, viewHolder.adapterPosition, target.adapterPosition)
+        adapter.setHasStableIds(true)
 
-            adapter.notifyItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+        widget_grid.onMoveListener = { _, viewHolder, target ->
+            val oldPos = viewHolder.adapterPosition
+            val newPos = target.adapterPosition
+
+            val widget = adapter.widgets.removeAt(oldPos)
+            adapter.widgets.add(newPos, widget)
+
+            adapter.notifyItemMoved(oldPos, newPos)
 
             prefs.putCurrentWidgets(adapter.widgets)
             true
@@ -113,7 +122,57 @@ class Drawer : ConstraintLayout {
 
         toggle_reorder.setOnCheckedChangeListener { _, isChecked ->
             widget_grid.allowReorder = isChecked
+            if (isChecked) adapter.showEdit() else adapter.hideEdit()
+            val anim = if (isChecked) ValueAnimator.ofInt(action_bar_wrapper.measuredHeight, action_bar_wrapper.measuredHeight * 2)
+                            else ValueAnimator.ofInt(action_bar_wrapper.measuredHeight, (action_bar_wrapper.measuredHeight / 2f).toInt())
+
+            anim.addUpdateListener {
+                action_bar_wrapper.layoutParams = action_bar_wrapper.layoutParams.apply {
+                    height = it.animatedValue.toString().toInt()
+                }
+            }
+            anim.interpolator = if (isChecked) DecelerateInterpolator() else AccelerateInterpolator()
+            anim.start()
         }
+
+        val listener = OnClickListener { view ->
+
+            adapter.widgets.filter { it.isSelected }.forEach { widget ->
+                if (widget.isSelected) {
+                    var changed = false
+                    val index = adapter.widgets.indexOf(widget)
+
+                    when (view.id) {
+                        R.id.expand_horiz -> {
+                            changed = widget.isFullWidth != true
+                            widget.isFullWidth = true
+                        }
+                        R.id.collapse_horiz -> {
+                            changed = widget.isFullWidth != false
+                            widget.isFullWidth = false
+                        }
+                        R.id.expand_vert -> if (widget.forcedHeight < DrawerAdapter.SIZE_MAX) {
+                            changed = true
+                            widget.forcedHeight++
+                        }
+                        R.id.collapse_vert -> if (widget.forcedHeight > DrawerAdapter.SIZE_MIN) {
+                            changed = true
+                            widget.forcedHeight--
+                        }
+                    }
+
+                    if (changed) {
+                        prefs.putCurrentWidgets(adapter.widgets)
+                        adapter.notifyItemChanged(index)
+                    }
+                }
+            }
+        }
+
+        expand_horiz.setOnClickListener(listener)
+        expand_vert.setOnClickListener(listener)
+        collapse_horiz.setOnClickListener(listener)
+        collapse_vert.setOnClickListener(listener)
 
         setPadding(0, context.statusBarHeight(), 0, 0)
     }
@@ -144,8 +203,7 @@ class Drawer : ConstraintLayout {
         alpha = 0f
         try {
             wm.addView(this, params)
-        } catch (e: Exception) {
-        }
+        } catch (e: Exception) {}
 
         animate()
             .alpha(1.0f)
@@ -228,12 +286,8 @@ class Drawer : ConstraintLayout {
         showDrawer()
     }
 
-    private fun addSavedWidget(id: Int) {
-        adapter.addItem(createSavedWidget(id))
-    }
-
     private fun createSavedWidget(id: Int): OverrideWidgetInfo {
-        return OverrideWidgetInfo(id, -1, -1)
+        return OverrideWidgetInfo(id, DrawerAdapter.SIZE_DEF, false)
     }
 
     private fun removeWidget(position: Int) {

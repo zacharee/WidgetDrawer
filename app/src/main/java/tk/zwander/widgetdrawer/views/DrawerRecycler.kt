@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 
 class DrawerRecycler : RecyclerView {
     constructor(context: Context) : super(context)

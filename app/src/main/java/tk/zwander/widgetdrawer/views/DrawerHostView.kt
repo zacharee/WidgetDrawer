@@ -26,4 +26,13 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context) {
             hasList
         }
     }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        layoutParams = layoutParams.apply {
+            width = ViewGroup.LayoutParams.MATCH_PARENT
+            height = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+    }
 }
