@@ -57,7 +57,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = context.dpAsPx(6)
-        height = prefs.handleHeightPx.toInt()
+        height = context.dpAsPx(prefs.handleHeightDp)
         gravity = Gravity.TOP or prefs.handleSide
         y = prefs.handleYPx.toInt()
         format = PixelFormat.RGBA_8888
@@ -65,10 +65,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     init {
         setSide()
-        handleLeft.setTint(prefs.handleColor)
-        handleRight.setTint(prefs.handleColor)
+        setTint(prefs.handleColor)
         isClickable = true
         isFocusable = true
+        prefs.addPrefListener(this)
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -111,13 +111,18 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefsManager.HANDLE_HEIGHT -> {
-
+                params.height = context.dpAsPx(prefs.handleHeightDp)
+                updateLayout()
             }
 
             PrefsManager.HANDLE_COLOR -> {
-
+                setTint(prefs.handleColor)
             }
         }
+    }
+
+    fun onDestroy() {
+        prefs.removePrefListener(this)
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
@@ -136,6 +141,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         else
             prefs.handleColor
 
+        setTint(tint)
+    }
+
+    private fun setTint(tint: Int) {
         handleLeft.setTint(tint)
         handleRight.setTint(tint)
     }

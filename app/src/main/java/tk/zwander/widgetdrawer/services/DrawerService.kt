@@ -106,6 +106,7 @@ class DrawerService : Service() {
 
     override fun onDestroy() {
         drawer.onDestroy()
+        handle.onDestroy()
 
         try {
             windowManager.removeView(handle)

@@ -1,5 +1,6 @@
 package tk.zwander.widgetdrawer.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
@@ -18,7 +19,9 @@ class PrefsManager(private val context: Context) {
         const val HANDLE_HEIGHT = "handle_height"
         const val HANDLE_COLOR = "handle_color"
 
+        @SuppressLint("RtlHardcoded")
         const val HANDLE_LEFT = Gravity.LEFT
+        @SuppressLint("RtlHardcoded")
         const val HANDLE_RIGHT = Gravity.RIGHT
         const val HANDLE_UNCHANGED = -1
         const val HANDLE_COLOR_DEF = Color.WHITE
@@ -51,10 +54,10 @@ class PrefsManager(private val context: Context) {
         set(value) {
             putFloat(HANDLE_Y, value)
         }
-    var handleHeightPx: Float
-        get() = getFloat(HANDLE_HEIGHT, context.pxAsDp(300))
+    var handleHeightDp: Int
+        get() = getInt(HANDLE_HEIGHT, 140)
         set(value) {
-            putFloat(HANDLE_HEIGHT, value)
+            putInt(HANDLE_HEIGHT, value)
         }
     var handleColor: Int
         get() = getInt(HANDLE_COLOR, HANDLE_COLOR_DEF)
