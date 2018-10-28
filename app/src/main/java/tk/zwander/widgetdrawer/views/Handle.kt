@@ -3,6 +3,7 @@ package tk.zwander.widgetdrawer.views
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.*
 import android.util.AttributeSet
@@ -15,12 +16,14 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.utils.screenSize
+import kotlin.math.absoluteValue
 
 class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
         private const val LONG_PRESS_DELAY = 300
+        private const val SWIPE_THRESHOLD = 50
     }
 
     constructor(context: Context) : super(context)
@@ -34,6 +37,9 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private val gestureManager = GestureManager()
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val prefs by lazy { PrefsManager(context) }
+
+    private val handleLeft = resources.getDrawable(R.drawable.handle_left)
+    private val handleRight = resources.getDrawable(R.drawable.handle_right)
 
     private val longClickHandler = @SuppressLint("HandlerLeak")
     object : Handler() {
@@ -59,6 +65,8 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     init {
         setSide()
+        handleLeft.setTint(prefs.handleColor)
+        handleRight.setTint(prefs.handleColor)
         isClickable = true
         isFocusable = true
     }
@@ -73,7 +81,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             }
             MotionEvent.ACTION_UP -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
-                inMoveMode = false
+                setMoveMove(false)
                 prefs.handleYPx = params.y.toFloat()
             }
             MotionEvent.ACTION_MOVE -> {
@@ -117,9 +125,19 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     private fun setSide(gravity: Int = prefs.handleSide) {
-        background = context.resources.getDrawable(
-            if (gravity == PrefsManager.HANDLE_RIGHT) R.drawable.handle_right
-            else R.drawable.handle_left)
+        background = if (gravity == PrefsManager.HANDLE_RIGHT) handleRight
+                        else handleLeft
+    }
+
+    private fun setMoveMove(inMoveMode: Boolean) {
+        this.inMoveMode = inMoveMode
+        val tint = if (inMoveMode)
+            Color.argb(255, 120, 200, 255)
+        else
+            prefs.handleColor
+
+        handleLeft.setTint(tint)
+        handleRight.setTint(tint)
     }
 
     inner class GestureManager : GestureDetector.SimpleOnGestureListener() {
@@ -130,15 +148,18 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            return if (distanceX > 50 && distanceX > distanceY && !inMoveMode) {
-                onOpenListener?.invoke()
-                true
+            return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode) {
+                if ((distanceX > SWIPE_THRESHOLD && prefs.handleSide == PrefsManager.HANDLE_RIGHT)
+                    || distanceX < -SWIPE_THRESHOLD) {
+                    onOpenListener?.invoke()
+                    true
+                } else false
             } else false
         }
 
         fun onLongPress() {
             (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(50)
-            inMoveMode = true
+            setMoveMove(true)
         }
     }
 }

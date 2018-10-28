@@ -52,7 +52,7 @@ class PrefsManager(private val context: Context) {
             putFloat(HANDLE_Y, value)
         }
     var handleHeightPx: Float
-        get() = getFloat(HANDLE_HEIGHT, context.pxAsDp(100))
+        get() = getFloat(HANDLE_HEIGHT, context.pxAsDp(300))
         set(value) {
             putFloat(HANDLE_HEIGHT, value)
         }
