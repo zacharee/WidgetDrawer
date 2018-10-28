@@ -1,23 +1,29 @@
 package tk.zwander.widgetdrawer.services
 
 import android.annotation.SuppressLint
+import android.annotation.TargetApi
 import android.app.AppOpsManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.Process
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import tk.zwander.widgetdrawer.R
+import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.canDrawOverlays
 import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.Handle
+
+
 
 @SuppressLint("InflateParams")
 class DrawerService : Service() {
@@ -40,6 +46,7 @@ class DrawerService : Service() {
     private val handle by lazy { Handle(this) }
     private val drawer by lazy { LayoutInflater.from(this)
         .inflate(R.layout.drawer_layout, null, false) as Drawer }
+    private val prefs by lazy { PrefsManager(this) }
     private val overlayListener = AppOpsManager.OnOpChangedListener { op, packageName ->
         if (packageName == this.packageName) {
             when(op) {
@@ -85,7 +92,6 @@ class DrawerService : Service() {
         if (canDrawOverlays) {
             addHandle()
         } else {
-            Toast.makeText(this, R.string.allow_overlay, Toast.LENGTH_LONG).show()
             requestPermission()
         }
     }
@@ -96,8 +102,13 @@ class DrawerService : Service() {
         } catch (e: Exception) {}
     }
 
+    @TargetApi(Build.VERSION_CODES.M)
     private fun requestPermission() {
-
+        prefs.enabled = false
+        Toast.makeText(this, R.string.allow_overlay, Toast.LENGTH_LONG).show()
+        val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+        myIntent.data = Uri.parse("package:$packageName")
+        startActivity(myIntent)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
