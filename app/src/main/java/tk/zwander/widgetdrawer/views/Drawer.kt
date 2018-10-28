@@ -1,7 +1,7 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
-import android.animation.ValueAnimator
+import android.animation.TimeInterpolator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -10,12 +10,13 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View.OnClickListener
 import android.view.WindowManager
-import android.view.animation.AccelerateInterpolator
-import android.view.animation.DecelerateInterpolator
+import android.view.animation.AnticipateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -120,18 +121,22 @@ class Drawer : ConstraintLayout {
         }
 
         toggle_reorder.setOnCheckedChangeListener { _, isChecked ->
-            widget_grid.allowReorder = isChecked
-            if (isChecked) adapter.showEdit() else adapter.hideEdit()
-            val anim = if (isChecked) ValueAnimator.ofInt(action_bar_wrapper.measuredHeight, action_bar_wrapper.measuredHeight * 2)
-                            else ValueAnimator.ofInt(action_bar_wrapper.measuredHeight, (action_bar_wrapper.measuredHeight / 2f).toInt())
-
-            anim.addUpdateListener {
-                action_bar_wrapper.layoutParams = action_bar_wrapper.layoutParams.apply {
-                    height = it.animatedValue.toString().toInt()
-                }
-            }
-            anim.interpolator = if (isChecked) DecelerateInterpolator() else AccelerateInterpolator()
-            anim.start()
+            edit_bar.animate()
+                .scaleY(if (isChecked) 1f else 0f)
+                .setInterpolator(if (isChecked) OvershootInterpolator() as TimeInterpolator else AnticipateInterpolator())
+                .setDuration(500L)
+                .setListener(object : Animator.AnimatorListener {
+                    override fun onAnimationCancel(animation: Animator?) {}
+                    override fun onAnimationRepeat(animation: Animator?) {}
+                    override fun onAnimationStart(animation: Animator?) {}
+                    override fun onAnimationEnd(animation: Animator?) {
+                        Handler().postDelayed({
+                            widget_grid.allowReorder = isChecked
+                            if (isChecked) adapter.showEdit() else adapter.hideEdit()
+                        }, 50)
+                    }
+                })
+                .start()
         }
 
         val listener = OnClickListener { view ->
