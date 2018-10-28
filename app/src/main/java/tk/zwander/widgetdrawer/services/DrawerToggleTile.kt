@@ -10,6 +10,10 @@ import tk.zwander.widgetdrawer.utils.PrefsManager
 class DrawerToggleTile : TileService() {
     private val prefs by lazy { PrefsManager(this) }
 
+    override fun onStartListening() {
+        setState(prefs.enabled)
+    }
+
     override fun onClick() {
         val newState = !prefs.enabled
         prefs.enabled = newState
