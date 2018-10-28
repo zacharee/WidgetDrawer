@@ -108,6 +108,7 @@ class DrawerService : Service() {
         Toast.makeText(this, R.string.allow_overlay, Toast.LENGTH_LONG).show()
         val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
         myIntent.data = Uri.parse("package:$packageName")
+        myIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         startActivity(myIntent)
     }
 
