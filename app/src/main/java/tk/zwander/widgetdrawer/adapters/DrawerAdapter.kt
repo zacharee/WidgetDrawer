@@ -4,7 +4,6 @@ import android.appwidget.AppWidgetManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.cardview.widget.CardView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.widget_holder.view.*
@@ -13,6 +12,7 @@ import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import tk.zwander.widgetdrawer.views.DrawerHostView
 
 class DrawerAdapter(private val manager: AppWidgetManager,
                     private val appWidgetHost: DrawerHost,
@@ -47,16 +47,20 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         holder.itemView.selection.isChecked = isEditing && widget.isSelected
         holder.itemView.selection.visibility = if (isEditing) View.VISIBLE else View.GONE
         holder.itemView.selection.setOnClickListener { select(holder.adapterPosition) }
-        (holder.itemView.widget_frame as CardView).apply {
-//            if (childCount == 0) {
-//                setBackgroundColor(resources.getColor(R.color.cardBackground))
-//            }
+        holder.itemView.widget_frame.apply {
             removeAllViews()
-            addView(appWidgetHost.createView(
+
+            val view = appWidgetHost.createView(
                 holder.itemView.context,
                 widget.id,
                 info
-            ))
+            ) as DrawerHostView
+
+            addView(view)
+            view.selectionListener = {
+                holder.itemView.selection.isChecked = true
+                select(holder.adapterPosition)
+            }
         }
         holder.itemView.apply {
             layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
@@ -105,7 +109,6 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         if (isEditing) {
             deselectAll(position)
             widgets[position].isSelected = true
-            prefs.currentWidgets = widgets
         }
     }
 
