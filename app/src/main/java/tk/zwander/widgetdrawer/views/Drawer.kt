@@ -242,6 +242,7 @@ class Drawer : ConstraintLayout {
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, componentName)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_OPTIONS, options)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
         context.startActivity(intent)
     }
@@ -254,6 +255,7 @@ class Drawer : ConstraintLayout {
         intent.putExtra(EXTRA_APPWIDGET_CONFIGURE, configure)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
         intent.component = ComponentName(context, PermConfigActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
         context.startActivity(intent)
     }
@@ -262,6 +264,7 @@ class Drawer : ConstraintLayout {
         hideDrawer()
         val intent = Intent(context, WidgetSelectActivity::class.java)
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, host.allocateAppWidgetId())
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
         context.startActivity(intent)
     }
 
