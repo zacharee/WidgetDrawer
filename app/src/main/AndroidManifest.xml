@@ -4,6 +4,7 @@
     package="tk.zwander.widgetdrawer">
 
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission
         android:name="android.permission.BIND_APPWIDGET"
         tools:ignore="ProtectedPermissions" />

@@ -19,6 +19,9 @@ fun Context.dpAsPx(dpVal: Int) =
 fun Context.dpAsPx(dpVal: Float) =
     Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dpVal, resources.displayMetrics))
 
+fun Context.pxAsDp(pxVal: Int) =
+        TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PX, pxVal.toFloat(), resources.displayMetrics)
+
 fun Context.screenSize(): Point {
     val display = (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
     return Point().apply { display.getRealSize(this) }

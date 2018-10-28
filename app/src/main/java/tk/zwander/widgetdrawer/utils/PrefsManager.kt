@@ -7,7 +7,7 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 
-class PrefsManager(context: Context) {
+class PrefsManager(private val context: Context) {
     companion object {
         const val WIDGETS = "saved_widgets"
         const val ENABLED = "enabled"
@@ -18,7 +18,6 @@ class PrefsManager(context: Context) {
 
         const val HANDLE_LEFT = 0
         const val HANDLE_RIGHT = 1
-        const val HANDLE_Y_DEF = 64
         const val HANDLE_HEIGHT_DEF = 64
         const val HANDLE_COLOR_DEF = Color.WHITE
     }
@@ -45,10 +44,10 @@ class PrefsManager(context: Context) {
         set(value) {
             putInt(HANDLE_SIDE, value)
         }
-    var handleYDp: Int
-        get() = getInt(HANDLE_Y, HANDLE_Y_DEF)
+    var handleYPx: Float
+        get() = getFloat(HANDLE_Y, context.pxAsDp(64))
         set(value) {
-            putInt(HANDLE_Y, value)
+            putFloat(HANDLE_Y, value)
         }
     var handleHeightDp: Int
         get() = getInt(HANDLE_HEIGHT, HANDLE_HEIGHT_DEF)
