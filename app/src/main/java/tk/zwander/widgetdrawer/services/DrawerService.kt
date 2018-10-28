@@ -107,6 +107,10 @@ class DrawerService : Service() {
     override fun onDestroy() {
         drawer.onDestroy()
 
+        try {
+            windowManager.removeView(handle)
+        } catch (e: Exception) {}
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)
     }
