@@ -1,8 +1,10 @@
 package tk.zwander.widgetdrawer.utils
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
+import android.view.Gravity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
@@ -16,9 +18,9 @@ class PrefsManager(private val context: Context) {
         const val HANDLE_HEIGHT = "handle_height"
         const val HANDLE_COLOR = "handle_color"
 
-        const val HANDLE_LEFT = 0
-        const val HANDLE_RIGHT = 1
-        const val HANDLE_HEIGHT_DEF = 64
+        const val HANDLE_LEFT = Gravity.LEFT
+        const val HANDLE_RIGHT = Gravity.RIGHT
+        const val HANDLE_UNCHANGED = -1
         const val HANDLE_COLOR_DEF = Color.WHITE
     }
 
@@ -49,10 +51,10 @@ class PrefsManager(private val context: Context) {
         set(value) {
             putFloat(HANDLE_Y, value)
         }
-    var handleHeightDp: Int
-        get() = getInt(HANDLE_HEIGHT, HANDLE_HEIGHT_DEF)
+    var handleHeightPx: Float
+        get() = getFloat(HANDLE_HEIGHT, context.pxAsDp(100))
         set(value) {
-            putInt(HANDLE_HEIGHT, value)
+            putFloat(HANDLE_HEIGHT, value)
         }
     var handleColor: Int
         get() = getInt(HANDLE_COLOR, HANDLE_COLOR_DEF)
@@ -76,4 +78,10 @@ class PrefsManager(private val context: Context) {
     fun putStringSet(key: String, value: Set<String>) = prefs.edit().putStringSet(key, value).commit()
 
     fun remove(key: String) = prefs.edit().remove(key).commit()
+
+    fun addPrefListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
+            prefs.registerOnSharedPreferenceChangeListener(listener)
+
+    fun removePrefListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
+            prefs.unregisterOnSharedPreferenceChangeListener(listener)
 }

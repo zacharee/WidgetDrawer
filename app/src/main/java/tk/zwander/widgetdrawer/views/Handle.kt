@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.views
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.SharedPreferences
 import android.graphics.PixelFormat
 import android.os.*
 import android.util.AttributeSet
@@ -13,8 +14,9 @@ import android.widget.LinearLayout
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import tk.zwander.widgetdrawer.utils.screenSize
 
-class Handle : LinearLayout {
+class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         private const val MSG_LONG_PRESS = 0
 
@@ -26,84 +28,115 @@ class Handle : LinearLayout {
 
     var onOpenListener: (() -> Unit)? = null
 
+    private var inMoveMode = false
+    private var screenWidth = -1
+
     private val gestureManager = GestureManager()
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val prefs by lazy { PrefsManager(context) }
+
+    private val longClickHandler = @SuppressLint("HandlerLeak")
+    object : Handler() {
+        override fun handleMessage(msg: Message?) {
+            when (msg?.what) {
+                MSG_LONG_PRESS -> gestureManager.onLongPress()
+            }
+        }
+    }
 
     val params = WindowManager.LayoutParams().apply {
         type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
                 else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = context.dpAsPx(6)
-        height = context.dpAsPx(64)
-        gravity = Gravity.TOP or Gravity.RIGHT
+        height = prefs.handleHeightPx.toInt()
+        gravity = Gravity.TOP or prefs.handleSide
         y = prefs.handleYPx.toInt()
         format = PixelFormat.RGBA_8888
     }
 
     init {
-        background = context.resources.getDrawable(R.drawable.handle_right)
+        setSide()
         isClickable = true
         isFocusable = true
     }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        when (event?.action) {
+            MotionEvent.ACTION_DOWN -> {
+                screenWidth = context.screenSize().x
+                longClickHandler.sendEmptyMessageAtTime(MSG_LONG_PRESS,
+                    event.downTime + LONG_PRESS_DELAY)
+            }
+            MotionEvent.ACTION_UP -> {
+                longClickHandler.removeMessages(MSG_LONG_PRESS)
+                inMoveMode = false
+                prefs.handleYPx = params.y.toFloat()
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (inMoveMode) {
+                    val gravity = when {
+                        event.rawX <= 1/3f * screenWidth -> {
+                            PrefsManager.HANDLE_LEFT
+                        }
+                        event.rawX >= 2/3f * screenWidth -> {
+                            PrefsManager.HANDLE_RIGHT
+                        }
+                        else -> -1
+                    }
+                    params.y = (event.rawY - params.height / 2f).toInt()
+                    if (gravity != PrefsManager.HANDLE_UNCHANGED) {
+                        params.gravity = Gravity.TOP or gravity
+                        prefs.handleSide = gravity
+                        setSide(gravity)
+                    }
+                    updateLayout()
+                }
+            }
+        }
         return gestureManager.onTouchEvent(event)
+    }
+
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            PrefsManager.HANDLE_HEIGHT -> {
+
+            }
+
+            PrefsManager.HANDLE_COLOR -> {
+
+            }
+        }
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
         wm.updateViewLayout(this, params)
     }
 
+    private fun setSide(gravity: Int = prefs.handleSide) {
+        background = context.resources.getDrawable(
+            if (gravity == PrefsManager.HANDLE_RIGHT) R.drawable.handle_right
+            else R.drawable.handle_left)
+    }
+
     inner class GestureManager : GestureDetector.SimpleOnGestureListener() {
         val gestureDetector = GestureDetector(context, this, Handler(Looper.getMainLooper()))
 
-        private val longClickHandler = @SuppressLint("HandlerLeak")
-        object : Handler() {
-            override fun handleMessage(msg: Message?) {
-                when (msg?.what) {
-                    MSG_LONG_PRESS -> onLongPress()
-                }
-            }
-        }
-
-        private var inMoveMode = false
-
         fun onTouchEvent(event: MotionEvent?): Boolean {
-            when (event?.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    longClickHandler.sendEmptyMessageAtTime(MSG_LONG_PRESS,
-                        event.downTime + LONG_PRESS_DELAY)
-                }
-                MotionEvent.ACTION_UP -> {
-                    longClickHandler.removeMessages(MSG_LONG_PRESS)
-                    inMoveMode = false
-                    prefs.handleYPx = params.y.toFloat()
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (inMoveMode) {
-                        params.y = (event.rawY - params.height / 2f).toInt()
-                        updateLayout()
-                    }
-                }
-            }
-
-            gestureDetector.onTouchEvent(event)
-
-            return true
+            return gestureDetector.onTouchEvent(event)
         }
 
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float) =
-            if (distanceX > 50 && distanceX > distanceY && !inMoveMode) {
+        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+            return if (distanceX > 50 && distanceX > distanceY && !inMoveMode) {
                 onOpenListener?.invoke()
                 true
             } else false
+        }
 
-        private fun onLongPress() {
+        fun onLongPress() {
             (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(50)
             inMoveMode = true
         }
