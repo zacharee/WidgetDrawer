@@ -1,7 +1,6 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
-import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
@@ -13,11 +12,12 @@ import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.View.OnClickListener
 import android.view.WindowManager
-import android.view.animation.*
+import android.view.animation.AccelerateInterpolator
+import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.SimpleItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.widgetdrawer.R
@@ -32,7 +32,6 @@ import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
 import tk.zwander.widgetdrawer.utils.statusBarHeight
-import java.util.*
 
 class Drawer : ConstraintLayout {
     companion object {
@@ -112,7 +111,7 @@ class Drawer : ConstraintLayout {
 
             adapter.notifyItemMoved(oldPos, newPos)
 
-            prefs.putCurrentWidgets(adapter.widgets)
+            prefs.currentWidgets = adapter.widgets
             true
         }
 
@@ -162,7 +161,7 @@ class Drawer : ConstraintLayout {
                     }
 
                     if (changed) {
-                        prefs.putCurrentWidgets(adapter.widgets)
+                        prefs.currentWidgets = adapter.widgets
                         adapter.notifyItemChanged(index)
                     }
                 }
@@ -188,13 +187,13 @@ class Drawer : ConstraintLayout {
 
         LocalBroadcastManager.getInstance(context).registerReceiver(resultReceiver, IntentFilter(ACTION_RESULT))
 
-        adapter.addAll(prefs.getCurrentWidgets())
+        adapter.addAll(prefs.currentWidgets)
     }
 
     fun onDestroy() {
         hideDrawer()
         host.stopListening()
-        prefs.putCurrentWidgets(adapter.widgets)
+        prefs.currentWidgets = adapter.widgets
 
         LocalBroadcastManager.getInstance(context).unregisterReceiver(resultReceiver)
     }
@@ -282,7 +281,7 @@ class Drawer : ConstraintLayout {
     private fun addNewWidget(id: Int) {
         val info = createSavedWidget(id)
         adapter.addItem(info)
-        prefs.putCurrentWidgets(adapter.widgets)
+        prefs.currentWidgets = adapter.widgets
         showDrawer()
     }
 
@@ -293,7 +292,7 @@ class Drawer : ConstraintLayout {
     private fun removeWidget(position: Int) {
         val info = adapter.removeAt(position)
         host.deleteAppWidgetId(info.id)
-        prefs.putCurrentWidgets(adapter.widgets)
+        prefs.currentWidgets = adapter.widgets
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

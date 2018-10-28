@@ -1,9 +1,6 @@
 package tk.zwander.widgetdrawer.adapters
 
-import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetManager
-import android.appwidget.AppWidgetProviderInfo
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.adapters.DrawerAdapter.Companion.SIZE_DEF
-import tk.zwander.widgetdrawer.adapters.DrawerAdapter.Companion.SIZE_STEP_PX
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
-import tk.zwander.widgetdrawer.utils.screenSize
 
 class DrawerAdapter(private val manager: AppWidgetManager,
                     private val appWidgetHost: DrawerHost,
@@ -111,7 +105,7 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         if (isEditing) {
             deselectAll(position)
             widgets[position].isSelected = true
-            prefs.putCurrentWidgets(widgets)
+            prefs.currentWidgets = widgets
         }
     }
 
@@ -125,7 +119,7 @@ class DrawerAdapter(private val manager: AppWidgetManager,
             }
         }
 
-        prefs.putCurrentWidgets(widgets)
+        prefs.currentWidgets = widgets
     }
 
     private fun computeHeight(currentHeight: Int, expand: Int): Int {

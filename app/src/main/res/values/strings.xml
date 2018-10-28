@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">WidgetDrawer</string>
+
+    <!-- Title -->
     <string name="edit_mode">Edit Mode</string>
+
+    <!-- Messages -->
+    <string name="allow_overlay">Please allow WidgetDrawer to draw over other apps</string>
 </resources>
