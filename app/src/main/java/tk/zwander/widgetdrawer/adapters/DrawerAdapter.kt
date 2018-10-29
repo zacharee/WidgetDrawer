@@ -12,7 +12,6 @@ import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
-import tk.zwander.widgetdrawer.views.DrawerHostView
 
 class DrawerAdapter(private val manager: AppWidgetManager,
                     private val appWidgetHost: DrawerHost,
@@ -54,10 +53,10 @@ class DrawerAdapter(private val manager: AppWidgetManager,
                 holder.itemView.context,
                 widget.id,
                 info
-            ) as DrawerHostView
+            )
 
             addView(view)
-            view.selectionListener = {
+            view.setOnClickListener {
                 holder.itemView.selection.isChecked = true
                 select(holder.adapterPosition)
             }

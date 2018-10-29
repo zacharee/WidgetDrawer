@@ -1,7 +1,6 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
-import android.animation.TimeInterpolator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
@@ -13,11 +12,12 @@ import android.os.Bundle
 import android.os.Handler
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.OvershootInterpolator
-import androidx.constraintlayout.widget.ConstraintLayout
+import android.widget.LinearLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
@@ -34,7 +34,7 @@ import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
 import tk.zwander.widgetdrawer.utils.statusBarHeight
 
-class Drawer : ConstraintLayout {
+class Drawer : LinearLayout {
     companion object {
         const val ACTION_PERM = "PERMISSION"
         const val ACTION_CONFIG = "CONFIGURATION"
@@ -92,6 +92,7 @@ class Drawer : ConstraintLayout {
 
     init {
         setBackgroundColor(Color.argb(100, 0, 0, 0))
+        orientation = LinearLayout.VERTICAL
         alpha = 0.0f
     }
 
@@ -110,9 +111,10 @@ class Drawer : ConstraintLayout {
             val widget = adapter.widgets.removeAt(oldPos)
             adapter.widgets.add(newPos, widget)
 
+//            Collections.swap(adapter.widgets, oldPos, newPos)
+
             adapter.notifyItemMoved(oldPos, newPos)
 
-            prefs.currentWidgets = adapter.widgets
             true
         }
 
@@ -120,19 +122,42 @@ class Drawer : ConstraintLayout {
             removeWidget(viewHolder.adapterPosition)
         }
 
-        toggle_reorder.setOnCheckedChangeListener { _, isChecked ->
+        edit.setOnClickListener {
+            edit_bar.visibility = View.VISIBLE
             edit_bar.animate()
-                .scaleY(if (isChecked) 1f else 0f)
-                .setInterpolator(if (isChecked) OvershootInterpolator() as TimeInterpolator else AnticipateInterpolator())
-                .setDuration(500L)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setInterpolator(OvershootInterpolator())
+                .setDuration(500)
                 .setListener(object : Animator.AnimatorListener {
                     override fun onAnimationCancel(animation: Animator?) {}
                     override fun onAnimationRepeat(animation: Animator?) {}
                     override fun onAnimationStart(animation: Animator?) {}
                     override fun onAnimationEnd(animation: Animator?) {
                         Handler().postDelayed({
-                            widget_grid.allowReorder = isChecked
-                            if (isChecked) adapter.showEdit() else adapter.hideEdit()
+                            widget_grid.allowReorder = true
+                            adapter.showEdit()
+                        }, 50)
+                    }
+                })
+                .start()
+        }
+
+        go_back.setOnClickListener {
+            edit_bar.animate()
+                .scaleX(0f)
+                .scaleY(0f)
+                .setInterpolator(AnticipateInterpolator())
+                .setDuration(500L)
+                .setListener(object : Animator.AnimatorListener {
+                    override fun onAnimationCancel(animation: Animator?) {}
+                    override fun onAnimationRepeat(animation: Animator?) {}
+                    override fun onAnimationStart(animation: Animator?) {}
+                    override fun onAnimationEnd(animation: Animator?) {
+                        edit_bar.visibility = View.GONE
+                        Handler().postDelayed({
+                            widget_grid.allowReorder = false
+                            adapter.hideEdit()
                         }, 50)
                     }
                 })
@@ -140,7 +165,6 @@ class Drawer : ConstraintLayout {
         }
 
         val listener = OnClickListener { view ->
-
             adapter.widgets.filter { it.isSelected }.forEach { widget ->
                 if (widget.isSelected) {
                     var changed = false

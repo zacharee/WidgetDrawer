@@ -37,7 +37,7 @@ class PrefsManager(private val context: Context) {
             )
         }
         set(value) {
-            putString(WIDGETS, Gson().toJson(value))
+            putString(WIDGETS, Gson().toJson(ArrayList(value.apply { forEach { it.isSelected = false } })))
         }
     var enabled: Boolean
         get() = getBoolean(ENABLED, false)

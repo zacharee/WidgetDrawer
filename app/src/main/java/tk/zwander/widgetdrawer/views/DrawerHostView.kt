@@ -6,8 +6,6 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 
 class DrawerHostView(context: Context) : AppWidgetHostView(context) {
-    var selectionListener: ((id: Int) -> Unit)? = null
-
     private val recView: DrawerRecycler
         get() = parent.parent.parent as DrawerRecycler
 
@@ -22,7 +20,7 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context) {
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return if (recView.allowReorder) {
-            selectionListener?.invoke(appWidgetId)
+            performClick()
             true
         } else {
             super.onInterceptTouchEvent(ev)
