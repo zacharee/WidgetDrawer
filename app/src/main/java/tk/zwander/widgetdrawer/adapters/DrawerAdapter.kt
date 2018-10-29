@@ -16,14 +16,12 @@ import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
-import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
-    private val appWidgetHost: DrawerHost,
-    private val prefs: PrefsManager
+    private val appWidgetHost: DrawerHost
 ) : RecyclerView.Adapter<DrawerAdapter.DrawerVH>() {
     companion object {
         const val SIZE_MIN = -5
@@ -51,7 +49,7 @@ class DrawerAdapter(
     val widgets = ArrayList<OverrideWidgetInfo>()
 
     val selectedWidget: OverrideWidgetInfo?
-        get() = widgets.filter { it.id == selectedId }.firstOrNull()
+        get() = widgets.firstOrNull { it.id == selectedId }
 
     init {
         setHasStableIds(true)
@@ -95,7 +93,8 @@ class DrawerAdapter(
 
             selectedObservable
                 .subscribe {
-                    updateSelectionCheck(this, widgets[adapterPosition])
+                    if (adapterPosition != -1) updateSelectionCheck(this,
+                        widgets[adapterPosition])
                 }
         }
 

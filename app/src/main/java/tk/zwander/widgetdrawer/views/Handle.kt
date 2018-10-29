@@ -5,7 +5,10 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.graphics.PixelFormat
-import android.os.*
+import android.os.Build
+import android.os.Handler
+import android.os.Message
+import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
@@ -150,7 +153,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     inner class GestureManager : GestureDetector.SimpleOnGestureListener() {
-        val gestureDetector = GestureDetector(context, this, Handler(Looper.getMainLooper()))
+        private val gestureDetector = GestureDetector(context, this, handler)
 
         fun onTouchEvent(event: MotionEvent?): Boolean {
             return gestureDetector.onTouchEvent(event)

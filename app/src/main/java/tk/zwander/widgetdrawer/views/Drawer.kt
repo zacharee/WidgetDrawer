@@ -10,6 +10,7 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.View.OnClickListener
@@ -18,6 +19,7 @@ import android.view.animation.AnticipateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.widgetdrawer.R
@@ -33,6 +35,11 @@ import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.screenSize
 import tk.zwander.widgetdrawer.utils.statusBarHeight
+import java.util.*
+
+
+
+
 
 class Drawer : LinearLayout {
     companion object {
@@ -76,7 +83,7 @@ class Drawer : LinearLayout {
     private val host = DrawerHost(context.applicationContext, 1003)
     private val manager = AppWidgetManager.getInstance(context.applicationContext)
     private val prefs = PrefsManager(context)
-    private val adapter = DrawerAdapter(manager, host, prefs)
+    private val adapter = DrawerAdapter(manager, host)
 
     private val resultReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -93,7 +100,6 @@ class Drawer : LinearLayout {
     init {
         setBackgroundColor(Color.argb(100, 0, 0, 0))
         orientation = LinearLayout.VERTICAL
-        alpha = 0.0f
     }
 
     override fun onFinishInflate() {
@@ -102,14 +108,25 @@ class Drawer : LinearLayout {
         add_widget.setOnClickListener { pickWidget() }
         close_drawer.setOnClickListener { hideDrawer() }
 
+        widget_grid.itemAnimator = DefaultItemAnimator()
+
         widget_grid.onMoveListener = { _, viewHolder, target ->
-            val oldPos = viewHolder.adapterPosition
-            val newPos = target.adapterPosition
+            val fromPosition = viewHolder.adapterPosition
+            val toPosition = target.adapterPosition
 
-            val widget = adapter.widgets.removeAt(oldPos)
-            adapter.widgets.add(newPos, widget)
+            if (fromPosition < toPosition) {
+                for (i in fromPosition until toPosition) {
+                    Collections.swap(adapter.widgets, i, i + 1)
+                }
+            } else {
+                for (i in fromPosition downTo toPosition + 1) {
+                    Collections.swap(adapter.widgets, i, i - 1)
+                }
+            }
 
-            adapter.notifyItemMoved(oldPos, newPos)
+            adapter.notifyItemMoved(fromPosition, toPosition)
+
+            prefs.currentWidgets = adapter.widgets
 
             true
         }
@@ -132,7 +149,6 @@ class Drawer : LinearLayout {
                         adapter.isEditing = true
                     }
                 })
-                .start()
         }
 
         go_back.setOnClickListener {
@@ -149,7 +165,6 @@ class Drawer : LinearLayout {
                         adapter.isEditing = false
                     }
                 })
-                .start()
         }
 
         val listener = OnClickListener { view ->
@@ -214,33 +229,31 @@ class Drawer : LinearLayout {
     }
 
     fun showDrawer() {
-        alpha = 0f
         try {
             wm.addView(this, params)
         } catch (e: Exception) {}
 
         animate()
-            .alpha(1.0f)
+            .alpha(1f)
             .setListener(object : SimpleAnimatorListener() {
                 override fun onAnimationEnd(animation: Animator?) {
-                    alpha = 1.0f
+                    alpha = 1f
                 }
             })
-            .start()
     }
 
     fun hideDrawer() {
+        Log.e("WidgetDrawer", "hide")
         animate()
-            .alpha(0.0f)
+            .alpha(0f)
             .setListener(object : SimpleAnimatorListener() {
                 override fun onAnimationEnd(animation: Animator?) {
-                    alpha = 0.0f
+                    alpha = 0f
                     try {
                         wm.removeView(this@Drawer)
                     } catch (e: Exception) {}
                 }
             })
-            .start()
     }
 
     private fun getWidgetPermission(id: Int, componentName: ComponentName, options: Bundle? = null) {
