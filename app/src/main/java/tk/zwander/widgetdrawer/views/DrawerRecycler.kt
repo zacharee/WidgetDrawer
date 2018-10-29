@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.views
 
 import android.content.Context
 import android.util.AttributeSet
+import android.util.Log
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
@@ -20,18 +21,6 @@ class DrawerRecycler : RecyclerView {
             target: ViewHolder
         ): Boolean {
             return allowReorder && onMoveListener?.invoke(recyclerView, viewHolder, target) == true
-        }
-
-        override fun onMoved(
-            recyclerView: RecyclerView,
-            viewHolder: ViewHolder,
-            fromPos: Int,
-            target: ViewHolder,
-            toPos: Int,
-            x: Int,
-            y: Int
-        ) {
-            super.onMoved(recyclerView, viewHolder, fromPos, target, toPos, x, y)
         }
 
         override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
