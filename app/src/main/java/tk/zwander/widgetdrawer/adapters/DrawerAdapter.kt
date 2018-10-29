@@ -71,16 +71,6 @@ class DrawerAdapter(
 
         updateSelectionCheck(holder, widget)
 
-        editingObservable
-            .subscribe {
-                updateSelectionVisibility(holder)
-            }
-
-        selectedObservable
-            .subscribe {
-                updateSelectionCheck(holder, widget)
-            }
-
         holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
         holder.itemView.widget_frame.apply {
             removeAllViews()
@@ -96,6 +86,17 @@ class DrawerAdapter(
                 holder.itemView.selection.isChecked = true
                 if (isEditing) selectedId = widget.id
             }
+        }
+        holder.apply {
+            editingObservable
+                .subscribe {
+                    updateSelectionVisibility(this)
+                }
+
+            selectedObservable
+                .subscribe {
+                    updateSelectionCheck(this, widgets[adapterPosition])
+                }
         }
 
         updateDimens(holder, info, widget)
