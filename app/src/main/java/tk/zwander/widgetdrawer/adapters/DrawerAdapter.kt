@@ -1,7 +1,9 @@
 package tk.zwander.widgetdrawer.adapters
 
 import android.animation.Animator
+import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -9,6 +11,7 @@ import android.view.animation.AnticipateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.DrawerHost
@@ -17,9 +20,11 @@ import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
 
-class DrawerAdapter(private val manager: AppWidgetManager,
-                    private val appWidgetHost: DrawerHost,
-                    private val prefs: PrefsManager) : RecyclerView.Adapter<DrawerAdapter.DrawerVH>() {
+class DrawerAdapter(
+    private val manager: AppWidgetManager,
+    private val appWidgetHost: DrawerHost,
+    private val prefs: PrefsManager
+) : RecyclerView.Adapter<DrawerAdapter.DrawerVH>() {
     companion object {
         const val SIZE_MIN = -5
         const val SIZE_DEF = -1
@@ -28,25 +33,79 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         const val SIZE_STEP_PX = 100
     }
 
-    private var isEditing = false
+    var isEditing = false
         set(value) {
-            if (!value) deselectAll()
             field = value
+            if (!value) selectedId = -1
+            editingObservable.onNext(value)
+        }
+    var selectedId = -1
+        set(value) {
+            field = value
+            selectedObservable.onNext(value)
         }
 
+    private var editingObservable = BehaviorSubject.create<Boolean>()
+    private var selectedObservable = BehaviorSubject.create<Int>()
+
     val widgets = ArrayList<OverrideWidgetInfo>()
+
+    val selectedWidget: OverrideWidgetInfo?
+        get() = widgets.filter { it.id == selectedId }.firstOrNull()
+
+    init {
+        setHasStableIds(true)
+    }
 
     override fun getItemCount() = widgets.size
 
     override fun getItemId(position: Int) = widgets[position].id.toLong()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
+        DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
 
+    @SuppressLint("CheckResult")
     override fun onBindViewHolder(holder: DrawerVH, position: Int) {
         val widget = widgets[holder.adapterPosition]
         val info = manager.getAppWidgetInfo(widget.id)
 
+        updateSelectionCheck(holder, widget)
+
+        editingObservable
+            .subscribe {
+                updateSelectionVisibility(holder)
+            }
+
+        selectedObservable
+            .subscribe {
+                updateSelectionCheck(holder, widget)
+            }
+
+        holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
+        holder.itemView.widget_frame.apply {
+            removeAllViews()
+
+            val view = appWidgetHost.createView(
+                holder.itemView.context,
+                widget.id,
+                info
+            )
+
+            addView(view)
+            view.setOnClickListener {
+                holder.itemView.selection.isChecked = true
+                if (isEditing) selectedId = widget.id
+            }
+        }
+
+        updateDimens(holder, info, widget)
+    }
+
+    private fun updateSelectionCheck(holder: DrawerVH, widget: OverrideWidgetInfo) {
+        holder.itemView.selection.isChecked = widget.id == selectedId
+    }
+
+    private fun updateSelectionVisibility(holder: DrawerVH) {
         holder.itemView.selection.apply {
             if (isEditing) {
                 visibility = View.VISIBLE
@@ -61,7 +120,6 @@ class DrawerAdapter(private val manager: AppWidgetManager,
                             scaleY = 1f
                         }
                     })
-                    .start()
             } else {
                 animate()
                     .scaleX(0f)
@@ -75,27 +133,11 @@ class DrawerAdapter(private val manager: AppWidgetManager,
                             scaleY = 0f
                         }
                     })
-                    .start()
             }
         }
+    }
 
-        holder.itemView.selection.isChecked = isEditing && widget.isSelected
-        holder.itemView.selection.setOnClickListener { select(widget.id) }
-        holder.itemView.widget_frame.apply {
-            removeAllViews()
-
-            val view = appWidgetHost.createView(
-                holder.itemView.context,
-                widget.id,
-                info
-            )
-
-            addView(view)
-            view.setOnClickListener {
-                holder.itemView.selection.isChecked = true
-                select(widget.id)
-            }
-        }
+    private fun updateDimens(holder: DrawerVH, info: AppWidgetProviderInfo, widget: OverrideWidgetInfo) {
         holder.itemView.apply {
             layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
                 width = ViewGroup.LayoutParams.MATCH_PARENT
@@ -129,38 +171,8 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         return removed
     }
 
-    fun showEdit() {
-        isEditing = true
-        notifyDataSetChanged()
-    }
-
-    fun hideEdit() {
-        isEditing = false
-        notifyDataSetChanged()
-    }
-
-    fun select(id: Int) {
-        if (isEditing) {
-            deselectAll(id)
-            widgets.filter { it.id == id }.forEach { it.isSelected = true }
-        }
-    }
-
-    fun deselectAll(ignore: Int = -1) {
-        widgets.filterNot { it.id == ignore }.forEach {
-            val index = widgets.indexOf(it)
-
-            if (it.isSelected) {
-                it.isSelected = false
-                notifyItemChanged(index)
-            }
-        }
-
-        prefs.currentWidgets = widgets
-    }
-
     private fun computeHeight(currentHeight: Int, expand: Int): Int {
-        return when(expand) {
+        return when (expand) {
             SIZE_DEF -> currentHeight
             else -> currentHeight + ((expand + 1) * SIZE_STEP_PX)
         }

@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
+import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 
 class DrawerRecycler : RecyclerView {
     constructor(context: Context) : super(context)
@@ -40,7 +41,7 @@ class DrawerRecycler : RecyclerView {
 
     var allowReorder = false
         set(value) {
-            adapter?.notifyDataSetChanged()
+            (adapter as DrawerAdapter).isEditing = value
             field = value
         }
 

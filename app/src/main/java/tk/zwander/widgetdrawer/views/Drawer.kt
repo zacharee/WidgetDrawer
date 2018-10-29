@@ -9,7 +9,6 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.View
@@ -103,8 +102,6 @@ class Drawer : LinearLayout {
         add_widget.setOnClickListener { pickWidget() }
         close_drawer.setOnClickListener { hideDrawer() }
 
-        adapter.setHasStableIds(true)
-
         widget_grid.onMoveListener = { _, viewHolder, target ->
             val oldPos = viewHolder.adapterPosition
             val newPos = target.adapterPosition
@@ -131,10 +128,8 @@ class Drawer : LinearLayout {
                 .setListener(object : SimpleAnimatorListener() {
                     override fun onAnimationEnd(animation: Animator?) {
                         button_wrapper.visibility = View.GONE
-                        Handler().postDelayed({
-                            widget_grid.allowReorder = true
-                            adapter.showEdit()
-                        }, 50)
+                        widget_grid.allowReorder = true
+                        adapter.isEditing = true
                     }
                 })
                 .start()
@@ -150,44 +145,40 @@ class Drawer : LinearLayout {
                 .setListener(object : SimpleAnimatorListener() {
                     override fun onAnimationEnd(animation: Animator?) {
                         edit_bar.visibility = View.GONE
-                        Handler().postDelayed({
-                            widget_grid.allowReorder = false
-                            adapter.hideEdit()
-                        }, 50)
+                        widget_grid.allowReorder = false
+                        adapter.isEditing = false
                     }
                 })
                 .start()
         }
 
         val listener = OnClickListener { view ->
-            adapter.widgets.filter { it.isSelected }.forEach { widget ->
-                if (widget.isSelected) {
-                    var changed = false
-                    val index = adapter.widgets.indexOf(widget)
+            adapter.selectedWidget?.let { widget ->
+                var changed = false
+                val index = adapter.widgets.indexOf(widget)
 
-                    when (view.id) {
-                        R.id.expand_horiz -> {
-                            changed = widget.isFullWidth != true
-                            widget.isFullWidth = true
-                        }
-                        R.id.collapse_horiz -> {
-                            changed = widget.isFullWidth != false
-                            widget.isFullWidth = false
-                        }
-                        R.id.expand_vert -> if (widget.forcedHeight < DrawerAdapter.SIZE_MAX) {
-                            changed = true
-                            widget.forcedHeight++
-                        }
-                        R.id.collapse_vert -> if (widget.forcedHeight > DrawerAdapter.SIZE_MIN) {
-                            changed = true
-                            widget.forcedHeight--
-                        }
+                when (view.id) {
+                    R.id.expand_horiz -> {
+                        changed = widget.isFullWidth != true
+                        widget.isFullWidth = true
                     }
+                    R.id.collapse_horiz -> {
+                        changed = widget.isFullWidth != false
+                        widget.isFullWidth = false
+                    }
+                    R.id.expand_vert -> if (widget.forcedHeight < DrawerAdapter.SIZE_MAX) {
+                        changed = true
+                        widget.forcedHeight++
+                    }
+                    R.id.collapse_vert -> if (widget.forcedHeight > DrawerAdapter.SIZE_MIN) {
+                        changed = true
+                        widget.forcedHeight--
+                    }
+                }
 
-                    if (changed) {
-                        prefs.currentWidgets = adapter.widgets
-                        adapter.notifyItemChanged(index)
-                    }
+                if (changed) {
+                    prefs.currentWidgets = adapter.widgets
+                    adapter.notifyItemChanged(index)
                 }
             }
         }
