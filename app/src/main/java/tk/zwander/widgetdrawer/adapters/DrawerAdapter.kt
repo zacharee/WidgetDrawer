@@ -45,7 +45,7 @@ class DrawerAdapter(private val manager: AppWidgetManager,
 
         holder.itemView.selection.isChecked = isEditing && widget.isSelected
         holder.itemView.selection.visibility = if (isEditing) View.VISIBLE else View.GONE
-        holder.itemView.selection.setOnClickListener { select(holder.adapterPosition) }
+        holder.itemView.selection.setOnClickListener { select(widget.id) }
         holder.itemView.widget_frame.apply {
             removeAllViews()
 
@@ -58,7 +58,7 @@ class DrawerAdapter(private val manager: AppWidgetManager,
             addView(view)
             view.setOnClickListener {
                 holder.itemView.selection.isChecked = true
-                select(holder.adapterPosition)
+                select(widget.id)
             }
         }
         holder.itemView.apply {
@@ -104,18 +104,18 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         notifyItemRangeChanged(0, widgets.lastIndex)
     }
 
-    fun select(position: Int) {
+    fun select(id: Int) {
         if (isEditing) {
-            deselectAll(position)
-            widgets[position].isSelected = true
+            deselectAll(id)
+            widgets.filter { it.id == id }.forEach { it.isSelected = true }
         }
     }
 
     fun deselectAll(ignore: Int = -1) {
-        widgets.forEach {
+        widgets.filterNot { it.id == ignore }.forEach {
             val index = widgets.indexOf(it)
 
-            if (it.isSelected && index != ignore) {
+            if (it.isSelected) {
                 it.isSelected = false
                 notifyItemChanged(index)
             }

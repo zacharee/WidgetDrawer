@@ -111,8 +111,6 @@ class Drawer : LinearLayout {
             val widget = adapter.widgets.removeAt(oldPos)
             adapter.widgets.add(newPos, widget)
 
-//            Collections.swap(adapter.widgets, oldPos, newPos)
-
             adapter.notifyItemMoved(oldPos, newPos)
 
             true
@@ -134,6 +132,7 @@ class Drawer : LinearLayout {
                     override fun onAnimationRepeat(animation: Animator?) {}
                     override fun onAnimationStart(animation: Animator?) {}
                     override fun onAnimationEnd(animation: Animator?) {
+                        button_wrapper.visibility = View.GONE
                         Handler().postDelayed({
                             widget_grid.allowReorder = true
                             adapter.showEdit()
@@ -144,6 +143,7 @@ class Drawer : LinearLayout {
         }
 
         go_back.setOnClickListener {
+            button_wrapper.visibility = View.VISIBLE
             edit_bar.animate()
                 .scaleX(0f)
                 .scaleY(0f)
