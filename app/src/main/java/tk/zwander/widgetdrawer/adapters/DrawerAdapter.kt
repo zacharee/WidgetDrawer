@@ -1,9 +1,12 @@
 package tk.zwander.widgetdrawer.adapters
 
+import android.animation.Animator
 import android.appwidget.AppWidgetManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnticipateInterpolator
+import android.view.animation.OvershootInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.widget_holder.view.*
@@ -11,6 +14,7 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
 
 class DrawerAdapter(private val manager: AppWidgetManager,
@@ -43,8 +47,39 @@ class DrawerAdapter(private val manager: AppWidgetManager,
         val widget = widgets[holder.adapterPosition]
         val info = manager.getAppWidgetInfo(widget.id)
 
+        holder.itemView.selection.apply {
+            if (isEditing) {
+                visibility = View.VISIBLE
+                animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(500L)
+                    .setInterpolator(OvershootInterpolator())
+                    .setListener(object : SimpleAnimatorListener() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            scaleX = 1f
+                            scaleY = 1f
+                        }
+                    })
+                    .start()
+            } else {
+                animate()
+                    .scaleX(0f)
+                    .scaleY(0f)
+                    .setDuration(500L)
+                    .setInterpolator(AnticipateInterpolator())
+                    .setListener(object : SimpleAnimatorListener() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            visibility = View.GONE
+                            scaleX = 0f
+                            scaleY = 0f
+                        }
+                    })
+                    .start()
+            }
+        }
+
         holder.itemView.selection.isChecked = isEditing && widget.isSelected
-        holder.itemView.selection.visibility = if (isEditing) View.VISIBLE else View.GONE
         holder.itemView.selection.setOnClickListener { select(widget.id) }
         holder.itemView.widget_frame.apply {
             removeAllViews()
@@ -96,12 +131,12 @@ class DrawerAdapter(private val manager: AppWidgetManager,
 
     fun showEdit() {
         isEditing = true
-        notifyItemRangeChanged(0, widgets.lastIndex)
+        notifyDataSetChanged()
     }
 
     fun hideEdit() {
         isEditing = false
-        notifyItemRangeChanged(0, widgets.lastIndex)
+        notifyDataSetChanged()
     }
 
     fun select(id: Int) {

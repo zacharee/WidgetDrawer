@@ -23,6 +23,8 @@
         android:layout_gravity="top|end"
         android:elevation="8dp"
         android:visibility="gone"
+        android:scaleX="0"
+        android:scaleY="0"
         android:buttonTint="?android:colorAccent"
         />
 

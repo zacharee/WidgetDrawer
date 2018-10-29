@@ -31,6 +31,7 @@ import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.screenSize
 import tk.zwander.widgetdrawer.utils.statusBarHeight
 
@@ -127,10 +128,7 @@ class Drawer : LinearLayout {
                 .scaleY(1f)
                 .setInterpolator(OvershootInterpolator())
                 .setDuration(500)
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationCancel(animation: Animator?) {}
-                    override fun onAnimationRepeat(animation: Animator?) {}
-                    override fun onAnimationStart(animation: Animator?) {}
+                .setListener(object : SimpleAnimatorListener() {
                     override fun onAnimationEnd(animation: Animator?) {
                         button_wrapper.visibility = View.GONE
                         Handler().postDelayed({
@@ -149,10 +147,7 @@ class Drawer : LinearLayout {
                 .scaleY(0f)
                 .setInterpolator(AnticipateInterpolator())
                 .setDuration(500L)
-                .setListener(object : Animator.AnimatorListener {
-                    override fun onAnimationCancel(animation: Animator?) {}
-                    override fun onAnimationRepeat(animation: Animator?) {}
-                    override fun onAnimationStart(animation: Animator?) {}
+                .setListener(object : SimpleAnimatorListener() {
                     override fun onAnimationEnd(animation: Animator?) {
                         edit_bar.visibility = View.GONE
                         Handler().postDelayed({
@@ -235,14 +230,10 @@ class Drawer : LinearLayout {
 
         animate()
             .alpha(1.0f)
-            .setListener(object : Animator.AnimatorListener {
+            .setListener(object : SimpleAnimatorListener() {
                 override fun onAnimationEnd(animation: Animator?) {
                     alpha = 1.0f
                 }
-
-                override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationRepeat(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {}
             })
             .start()
     }
@@ -250,17 +241,13 @@ class Drawer : LinearLayout {
     fun hideDrawer() {
         animate()
             .alpha(0.0f)
-            .setListener(object : Animator.AnimatorListener {
+            .setListener(object : SimpleAnimatorListener() {
                 override fun onAnimationEnd(animation: Animator?) {
                     alpha = 0.0f
                     try {
                         wm.removeView(this@Drawer)
                     } catch (e: Exception) {}
                 }
-
-                override fun onAnimationCancel(animation: Animator?) {}
-                override fun onAnimationRepeat(animation: Animator?) {}
-                override fun onAnimationStart(animation: Animator?) {}
             })
             .start()
     }
