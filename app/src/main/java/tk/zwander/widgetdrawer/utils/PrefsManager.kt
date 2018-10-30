@@ -34,10 +34,10 @@ class PrefsManager(private val context: Context) {
             return Gson().fromJson<ArrayList<OverrideWidgetInfo>>(
                 getString(WIDGETS, null) ?: return ArrayList(),
                 object : TypeToken<ArrayList<OverrideWidgetInfo>>() {}.type
-            )
+            ).apply { removeAll { it.id == -1 } }
         }
         set(value) {
-            putString(WIDGETS, Gson().toJson(ArrayList(value)))
+            putString(WIDGETS, Gson().toJson(ArrayList(value).apply { removeAll { it.id == -1 } }))
         }
     var enabled: Boolean
         get() = getBoolean(ENABLED, false)

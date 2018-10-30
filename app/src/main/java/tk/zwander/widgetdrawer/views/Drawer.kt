@@ -114,21 +114,24 @@ class Drawer : LinearLayout {
             val fromPosition = viewHolder.adapterPosition
             val toPosition = target.adapterPosition
 
-            if (fromPosition < toPosition) {
-                for (i in fromPosition until toPosition) {
-                    Collections.swap(adapter.widgets, i, i + 1)
+            if (toPosition == 0 || fromPosition == 0) false
+            else {
+                if (fromPosition < toPosition) {
+                    for (i in fromPosition until toPosition) {
+                        Collections.swap(adapter.widgets, i, i + 1)
+                    }
+                } else {
+                    for (i in fromPosition downTo toPosition + 1) {
+                        Collections.swap(adapter.widgets, i, i - 1)
+                    }
                 }
-            } else {
-                for (i in fromPosition downTo toPosition + 1) {
-                    Collections.swap(adapter.widgets, i, i - 1)
-                }
+
+                adapter.notifyItemMoved(fromPosition, toPosition)
+
+                prefs.currentWidgets = adapter.widgets
+
+                true
             }
-
-            adapter.notifyItemMoved(fromPosition, toPosition)
-
-            prefs.currentWidgets = adapter.widgets
-
-            true
         }
 
         widget_grid.onSwipeListener = { viewHolder, _ ->

@@ -22,13 +22,16 @@ import tk.zwander.widgetdrawer.utils.dpAsPx
 class DrawerAdapter(
     private val manager: AppWidgetManager,
     private val appWidgetHost: DrawerHost
-) : RecyclerView.Adapter<DrawerAdapter.DrawerVH>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         const val SIZE_MIN = -5
         const val SIZE_DEF = -1
         const val SIZE_MAX = 4
 
         const val SIZE_STEP_PX = 100
+
+        const val TYPE_HEADER = 1
+        const val TYPE_WIDGET = 0
     }
 
     var isEditing = false
@@ -47,6 +50,7 @@ class DrawerAdapter(
     private var selectedObservable = BehaviorSubject.create<Int>()
 
     val widgets = ArrayList<OverrideWidgetInfo>()
+        .apply { add(0, OverrideWidgetInfo(-1, Integer.MIN_VALUE, true)) }
 
     val selectedWidget: OverrideWidgetInfo?
         get() = widgets.firstOrNull { it.id == selectedId }
@@ -59,46 +63,55 @@ class DrawerAdapter(
 
     override fun getItemId(position: Int) = widgets[position].id.toLong()
 
+    override fun getItemViewType(position: Int) =
+        if (position == 0) TYPE_HEADER
+        else TYPE_WIDGET
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
+        when(viewType) {
+            TYPE_HEADER -> HeaderVH(LayoutInflater.from(parent.context).inflate(R.layout.header_layout, parent, false))
+            else -> DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
+        }
 
     @SuppressLint("CheckResult")
-    override fun onBindViewHolder(holder: DrawerVH, position: Int) {
-        val widget = widgets[holder.adapterPosition]
-        val info = manager.getAppWidgetInfo(widget.id)
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is DrawerVH) {
+            val widget = widgets[position]
+            val info = manager.getAppWidgetInfo(widget.id)
 
-        updateSelectionCheck(holder, widget)
+            updateSelectionCheck(holder, widget)
 
-        holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
-        holder.itemView.widget_frame.apply {
-            removeAllViews()
+            holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
+            holder.itemView.widget_frame.apply {
+                removeAllViews()
 
-            val view = appWidgetHost.createView(
-                holder.itemView.context,
-                widget.id,
-                info
-            )
+                val view = appWidgetHost.createView(
+                    holder.itemView.context,
+                    widget.id,
+                    info
+                )
 
-            addView(view)
-            view.setOnClickListener {
-                holder.itemView.selection.isChecked = true
-                if (isEditing) selectedId = widget.id
+                addView(view)
+                view.setOnClickListener {
+                    holder.itemView.selection.isChecked = true
+                    if (isEditing) selectedId = widget.id
+                }
             }
-        }
-        holder.apply {
-            editingObservable
-                .subscribe {
-                    updateSelectionVisibility(this)
-                }
+            holder.apply {
+                editingObservable
+                    .subscribe {
+                        updateSelectionVisibility(this)
+                    }
 
-            selectedObservable
-                .subscribe {
-                    if (adapterPosition != -1) updateSelectionCheck(this,
-                        widgets[adapterPosition])
-                }
-        }
+                selectedObservable
+                    .subscribe {
+                        if (adapterPosition != -1) updateSelectionCheck(this,
+                            widgets[adapterPosition])
+                    }
+            }
 
-        updateDimens(holder, info, widget)
+            updateDimens(holder, info, widget)
+        }
     }
 
     private fun updateSelectionCheck(holder: DrawerVH, widget: OverrideWidgetInfo) {
@@ -179,4 +192,9 @@ class DrawerAdapter(
     }
 
     class DrawerVH(view: View) : RecyclerView.ViewHolder(view)
+    class HeaderVH(view: View) : RecyclerView.ViewHolder(view) {
+        init {
+            (view.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
+        }
+    }
 }
