@@ -31,3 +31,8 @@ fun Context.statusBarHeight(): Int {
     val id = Resources.getSystem().getIdentifier("status_bar_height", "dimen", "android")
     return Resources.getSystem().getDimensionPixelSize(id)
 }
+
+fun Context.actionBarHeight(): Int {
+    val value = TypedValue().apply { theme.resolveAttribute(android.R.attr.actionBarSize, this, true) }
+    return TypedValue.complexToDimensionPixelSize(value.data, resources.displayMetrics)
+}

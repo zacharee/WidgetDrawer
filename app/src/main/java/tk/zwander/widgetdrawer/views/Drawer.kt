@@ -14,6 +14,7 @@ import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.View.OnClickListener
+import android.view.WindowInsets
 import android.view.WindowManager
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.OvershootInterpolator
@@ -34,11 +35,7 @@ import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.screenSize
-import tk.zwander.widgetdrawer.utils.statusBarHeight
 import java.util.*
-
-
-
 
 
 class Drawer : LinearLayout {
@@ -68,12 +65,12 @@ class Drawer : LinearLayout {
         get() = WindowManager.LayoutParams().apply {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
-            else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+                    else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_OVERSCAN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-            width = WindowManager.LayoutParams.MATCH_PARENT
+                    WindowManager.LayoutParams.FLAG_FULLSCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+            width = displaySize.x
             height = displaySize.y
             format = PixelFormat.RGBA_8888
             gravity = Gravity.TOP
@@ -205,8 +202,11 @@ class Drawer : LinearLayout {
         expand_vert.setOnClickListener(listener)
         collapse_horiz.setOnClickListener(listener)
         collapse_vert.setOnClickListener(listener)
+    }
 
-        setPadding(0, context.statusBarHeight(), 0, 0)
+    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
+        setPadding(insets.stableInsetLeft, insets.stableInsetTop, insets.stableInsetRight, insets.stableInsetBottom)
+        return super.onApplyWindowInsets(insets)
     }
 
     fun onCreate() {
