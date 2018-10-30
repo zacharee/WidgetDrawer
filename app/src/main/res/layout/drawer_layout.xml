@@ -8,6 +8,15 @@
     android:clickable="true"
     android:focusable="true">
 
+    <tk.zwander.widgetdrawer.views.DrawerRecycler
+        android:id="@+id/widget_grid"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
+        />
+
     <FrameLayout
         android:id="@+id/action_bar_wrapper"
         android:layout_width="match_parent"
@@ -123,14 +132,5 @@
         </LinearLayout>
 
     </FrameLayout>
-
-    <tk.zwander.widgetdrawer.views.DrawerRecycler
-        android:id="@+id/widget_grid"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-        />
 
 </tk.zwander.widgetdrawer.views.Drawer>
