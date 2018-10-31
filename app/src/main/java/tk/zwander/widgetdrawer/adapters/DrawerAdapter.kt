@@ -76,7 +76,7 @@ class DrawerAdapter(
         else TYPE_WIDGET
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-        when(viewType) {
+        when (viewType) {
             TYPE_HEADER -> HeaderVH(LayoutInflater.from(parent.context).inflate(R.layout.header_layout, parent, false))
             else -> DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
         }
@@ -116,8 +116,10 @@ class DrawerAdapter(
 
                 selectedObservable
                     .subscribe {
-                        if (adapterPosition != -1) updateSelectionCheck(this,
-                            widgets[adapterPosition])
+                        if (adapterPosition != -1) updateSelectionCheck(
+                            this,
+                            widgets[adapterPosition]
+                        )
                     }
 
                 transparentObservable
@@ -143,7 +145,10 @@ class DrawerAdapter(
             }
         }.invoke()
 
-        val anim = ValueAnimator.ofArgb(card.cardBackgroundColor.defaultColor, if (transparentWidgets) Color.TRANSPARENT else background)
+        val anim = ValueAnimator.ofArgb(
+            card.cardBackgroundColor.defaultColor,
+            if (transparentWidgets) Color.TRANSPARENT else background
+        )
         anim.duration = 500L
         anim.addUpdateListener {
             card.setBackgroundColor(it.animatedValue.toString().toInt())
