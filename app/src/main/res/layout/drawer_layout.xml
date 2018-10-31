@@ -48,6 +48,13 @@
                 android:orientation="horizontal">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
+                    android:id="@+id/toggle_transparent"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/visibility"
+                    />
+
+                <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/add_widget"
                     android:layout_width="48dp"
                     android:layout_height="match_parent"

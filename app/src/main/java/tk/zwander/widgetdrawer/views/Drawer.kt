@@ -36,7 +36,7 @@ import tk.zwander.widgetdrawer.utils.screenSize
 import java.util.*
 
 
-class Drawer : LinearLayout {
+class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val ACTION_PERM = "PERMISSION"
         const val ACTION_CONFIG = "CONFIGURATION"
@@ -103,6 +103,10 @@ class Drawer : LinearLayout {
 
         add_widget.setOnClickListener { pickWidget() }
         close_drawer.setOnClickListener { hideDrawer() }
+        toggle_transparent.setOnClickListener {
+            prefs.transparentWidgets = !prefs.transparentWidgets
+            adapter.transparentWidgets = prefs.transparentWidgets
+        }
 
         widget_grid.itemAnimator = DefaultItemAnimator()
 
@@ -201,6 +205,8 @@ class Drawer : LinearLayout {
         expand_vert.setOnClickListener(listener)
         collapse_horiz.setOnClickListener(listener)
         collapse_vert.setOnClickListener(listener)
+
+        adapter.transparentWidgets = prefs.transparentWidgets
     }
 
     override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
@@ -228,6 +234,12 @@ class Drawer : LinearLayout {
         return super.onInterceptTouchEvent(ev)
     }
 
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            PrefsManager.TRANSPARENT_WIDGETS -> adapter.transparentWidgets = prefs.transparentWidgets
+        }
+    }
+
     fun onCreate() {
         host.startListening()
         widget_grid.adapter = adapter
@@ -240,6 +252,7 @@ class Drawer : LinearLayout {
         LocalBroadcastManager.getInstance(context).registerReceiver(resultReceiver, IntentFilter(ACTION_RESULT))
 
         adapter.addAll(prefs.currentWidgets)
+        prefs.addPrefListener(this)
     }
 
     fun onDestroy() {
@@ -248,6 +261,7 @@ class Drawer : LinearLayout {
         prefs.currentWidgets = adapter.widgets
 
         LocalBroadcastManager.getInstance(context).unregisterReceiver(resultReceiver)
+        prefs.removePrefListener(this)
     }
 
     fun showDrawer() {

@@ -18,6 +18,7 @@ class PrefsManager(private val context: Context) {
         const val HANDLE_Y = "handle_y"
         const val HANDLE_HEIGHT = "handle_height"
         const val HANDLE_COLOR = "handle_color"
+        const val TRANSPARENT_WIDGETS = "transparent_widgets"
 
         @SuppressLint("RtlHardcoded")
         const val HANDLE_LEFT = Gravity.LEFT
@@ -63,6 +64,11 @@ class PrefsManager(private val context: Context) {
         get() = getInt(HANDLE_COLOR, HANDLE_COLOR_DEF)
         set(value) {
             putInt(HANDLE_COLOR, value)
+        }
+    var transparentWidgets: Boolean
+        get() = getBoolean(TRANSPARENT_WIDGETS, false)
+        set(value) {
+            putBoolean(TRANSPARENT_WIDGETS, value)
         }
 
 

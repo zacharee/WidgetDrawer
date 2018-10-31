@@ -1,9 +1,11 @@
 package tk.zwander.widgetdrawer.adapters
 
 import android.animation.Animator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -45,9 +47,15 @@ class DrawerAdapter(
             field = value
             selectedObservable.onNext(value)
         }
+    var transparentWidgets = false
+        set(value) {
+            field = value
+            transparentObservable.onNext(value)
+        }
 
     private var editingObservable = BehaviorSubject.create<Boolean>()
     private var selectedObservable = BehaviorSubject.create<Int>()
+    private var transparentObservable = BehaviorSubject.create<Boolean>()
 
     val widgets = ArrayList<OverrideWidgetInfo>()
         .apply { add(0, OverrideWidgetInfo(-1, Integer.MIN_VALUE, true)) }
@@ -80,6 +88,7 @@ class DrawerAdapter(
             val info = manager.getAppWidgetInfo(widget.id)
 
             updateSelectionCheck(holder, widget)
+            updateTransparency(holder)
 
             holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
             holder.itemView.widget_frame.apply {
@@ -93,8 +102,10 @@ class DrawerAdapter(
 
                 addView(view)
                 view.setOnClickListener {
-                    holder.itemView.selection.isChecked = true
-                    if (isEditing) selectedId = widget.id
+                    if (isEditing) {
+                        selectedId = widget.id
+                        holder.itemView.selection.isChecked = true
+                    }
                 }
             }
             holder.apply {
@@ -108,10 +119,36 @@ class DrawerAdapter(
                         if (adapterPosition != -1) updateSelectionCheck(this,
                             widgets[adapterPosition])
                     }
+
+                transparentObservable
+                    .subscribe {
+                        updateTransparency(this)
+                    }
             }
 
             updateDimens(holder, info, widget)
         }
+    }
+
+    private fun updateTransparency(holder: DrawerVH) {
+        val card = holder.itemView.widget_frame
+
+        val background = {
+            val attr = intArrayOf(android.R.attr.colorBackground)
+            val array = card.context.obtainStyledAttributes(attr)
+            try {
+                array.getColor(0, 0)
+            } finally {
+                array.recycle()
+            }
+        }.invoke()
+
+        val anim = ValueAnimator.ofArgb(card.cardBackgroundColor.defaultColor, if (transparentWidgets) Color.TRANSPARENT else background)
+        anim.duration = 500L
+        anim.addUpdateListener {
+            card.setBackgroundColor(it.animatedValue.toString().toInt())
+        }
+        anim.start()
     }
 
     private fun updateSelectionCheck(holder: DrawerVH, widget: OverrideWidgetInfo) {
