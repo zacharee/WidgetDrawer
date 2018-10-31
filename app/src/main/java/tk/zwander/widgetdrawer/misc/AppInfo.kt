@@ -1,12 +1,11 @@
 package tk.zwander.widgetdrawer.misc
 
 import android.graphics.drawable.Drawable
-import java.util.*
 
 data class AppInfo(
     var appName: String,
     var appIcon: Drawable,
-    var widgets: TreeSet<WidgetInfo> = TreeSet()
+    var widgets: ArrayList<WidgetInfo> = ArrayList()
 ) : BaseInfo(), Comparable<AppInfo> {
     override fun compareTo(other: AppInfo) =
             appName.compareTo(other.appName)

@@ -6,15 +6,43 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SortedList
 import kotlinx.android.synthetic.main.app_item.view.*
 import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.WidgetInfo
-import java.util.*
 
 class AppListAdapter(private val selectionCallback: (provider: AppWidgetProviderInfo) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
-    private val items = TreeSet<AppInfo>()
+    private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {
+        override fun areItemsTheSame(item1: AppInfo?, item2: AppInfo?): Boolean {
+            return false
+        }
+
+        override fun areContentsTheSame(oldItem: AppInfo?, newItem: AppInfo?): Boolean {
+            return false
+        }
+
+        override fun compare(o1: AppInfo, o2: AppInfo): Int {
+            return o1.compareTo(o2)
+        }
+
+        override fun onMoved(fromPosition: Int, toPosition: Int) {
+            notifyItemMoved(fromPosition, toPosition)
+        }
+
+        override fun onChanged(position: Int, count: Int) {
+            notifyItemRangeChanged(position, count)
+        }
+
+        override fun onInserted(position: Int, count: Int) {
+            notifyItemRangeInserted(position, count)
+        }
+
+        override fun onRemoved(position: Int, count: Int) {
+            notifyItemRangeRemoved(position, count)
+        }
+    })
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AppVH(
@@ -26,15 +54,14 @@ class AppListAdapter(private val selectionCallback: (provider: AppWidgetProvider
         )
 
     override fun onBindViewHolder(holder: AppVH, position: Int) {
-        holder.parseInfo(items.elementAt(holder.adapterPosition))
+        holder.parseInfo(items.get(holder.adapterPosition))
         holder.setIsRecyclable(false)
     }
 
-    override fun getItemCount() = items.size
+    override fun getItemCount() = items.size()
 
     fun addItem(item: AppInfo) {
         items.add(item)
-        notifyDataSetChanged()
     }
 
     fun addItems(items: MutableCollection<AppInfo>) {
@@ -57,7 +84,35 @@ class AppListAdapter(private val selectionCallback: (provider: AppWidgetProvider
     }
 
     class WidgetListAdapter(private val selectionCallback: (provider: AppWidgetProviderInfo) -> Unit) : RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
-        private val widgets = TreeSet<WidgetInfo>()
+        private val widgets = SortedList(WidgetInfo::class.java, object : SortedList.Callback<WidgetInfo>() {
+            override fun areItemsTheSame(item1: WidgetInfo?, item2: WidgetInfo?): Boolean {
+                return false
+            }
+
+            override fun areContentsTheSame(oldItem: WidgetInfo?, newItem: WidgetInfo?): Boolean {
+                return false
+            }
+
+            override fun compare(o1: WidgetInfo, o2: WidgetInfo): Int {
+                return o1.compareTo(o2)
+            }
+
+            override fun onMoved(fromPosition: Int, toPosition: Int) {
+                notifyItemMoved(fromPosition, toPosition)
+            }
+
+            override fun onChanged(position: Int, count: Int) {
+                notifyItemRangeChanged(position, count)
+            }
+
+            override fun onInserted(position: Int, count: Int) {
+                notifyItemRangeInserted(position, count)
+            }
+
+            override fun onRemoved(position: Int, count: Int) {
+                notifyItemRangeRemoved(position, count)
+            }
+        })
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
             WidgetVH(
@@ -69,11 +124,11 @@ class AppListAdapter(private val selectionCallback: (provider: AppWidgetProvider
             )
 
         override fun onBindViewHolder(holder: WidgetVH, position: Int) {
-            holder.itemView.setOnClickListener { selectionCallback.invoke(widgets.elementAt(holder.adapterPosition).component) }
-            holder.parseInfo(widgets.elementAt(holder.adapterPosition))
+            holder.itemView.setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition).component) }
+            holder.parseInfo(widgets.get(holder.adapterPosition))
         }
 
-        override fun getItemCount() = widgets.size
+        override fun getItemCount() = widgets.size()
 
         fun addItem(item: WidgetInfo) {
             widgets.add(item)
