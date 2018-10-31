@@ -242,17 +242,16 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     fun onCreate() {
         host.startListening()
+        LocalBroadcastManager.getInstance(context).registerReceiver(resultReceiver, IntentFilter(ACTION_RESULT))
+        prefs.addPrefListener(this)
+
         widget_grid.adapter = adapter
         widget_grid.isNestedScrollingEnabled = true
         widget_grid.setHasFixedSize(true)
         (widget_grid.layoutManager as StaggeredGridLayoutManager).apply {
             spanCount = 2
         }
-
-        LocalBroadcastManager.getInstance(context).registerReceiver(resultReceiver, IntentFilter(ACTION_RESULT))
-
         adapter.addAll(prefs.currentWidgets)
-        prefs.addPrefListener(this)
     }
 
     fun onDestroy() {

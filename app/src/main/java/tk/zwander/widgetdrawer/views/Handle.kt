@@ -8,7 +8,6 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
 import android.os.Message
-import android.os.Vibrator
 import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.Gravity
@@ -19,6 +18,7 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.utils.screenSize
+import tk.zwander.widgetdrawer.utils.vibrate
 import kotlin.math.absoluteValue
 
 class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
@@ -170,7 +170,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
 
         fun onLongPress() {
-            (context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).vibrate(50)
+            context.vibrate(50)
             setMoveMove(true)
         }
     }

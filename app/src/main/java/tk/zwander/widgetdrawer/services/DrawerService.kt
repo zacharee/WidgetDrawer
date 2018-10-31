@@ -11,6 +11,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.os.Process
+import android.os.Vibrator
 import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -20,6 +21,7 @@ import androidx.core.content.ContextCompat
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.canDrawOverlays
+import tk.zwander.widgetdrawer.utils.vibrate
 import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.Handle
 
@@ -42,6 +44,7 @@ class DrawerService : Service() {
     private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     private val appOpsManager by lazy { getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager }
+    private val vib by lazy { getSystemService(Context.VIBRATOR_SERVICE) as Vibrator }
 
     private val handle by lazy { Handle(this) }
     private val drawer by lazy { LayoutInflater.from(this)
@@ -82,6 +85,7 @@ class DrawerService : Service() {
 
         handle.onOpenListener = {
             if (!drawer.isAttachedToWindow) {
+                vibrate(10)
                 drawer.showDrawer()
             }
         }
