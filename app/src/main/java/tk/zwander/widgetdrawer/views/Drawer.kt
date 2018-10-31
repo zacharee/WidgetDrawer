@@ -184,11 +184,11 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                         changed = widget.isFullWidth != false
                         widget.isFullWidth = false
                     }
-                    R.id.expand_vert -> if (widget.forcedHeight < DrawerAdapter.SIZE_MAX) {
+                    R.id.expand_vert -> {
                         changed = true
                         widget.forcedHeight++
                     }
-                    R.id.collapse_vert -> if (widget.forcedHeight > DrawerAdapter.SIZE_MIN) {
+                    R.id.collapse_vert -> {
                         changed = true
                         widget.forcedHeight--
                     }

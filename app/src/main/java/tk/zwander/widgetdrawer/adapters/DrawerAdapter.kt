@@ -20,6 +20,7 @@ import kotlinx.android.synthetic.main.widget_holder.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
+import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.views.DrawerHostView
@@ -29,9 +30,7 @@ class DrawerAdapter(
     private val appWidgetHost: DrawerHost
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
-        const val SIZE_MIN = -5
         const val SIZE_DEF = -1
-        const val SIZE_MAX = 4
 
         const val SIZE_STEP_PX = 100
 
@@ -245,7 +244,14 @@ class DrawerAdapter(
         holder.itemView.apply {
             layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
                 width = ViewGroup.LayoutParams.MATCH_PARENT
-                height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
+                val h = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
+                if (validLowerHeight(h))
+                    height = h
+                else {
+                    widget.forcedHeight += 1
+                    height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
+                    PrefsManager(context).currentWidgets = widgets
+                }
 
                 isFullSpan = widget.isFullWidth
             }
@@ -274,6 +280,8 @@ class DrawerAdapter(
         notifyItemRemoved(position)
         return removed
     }
+
+    private fun validLowerHeight(currentHeight: Int) = currentHeight > 100
 
     private fun computeHeight(currentHeight: Int, expand: Int): Int {
         return when (expand) {
