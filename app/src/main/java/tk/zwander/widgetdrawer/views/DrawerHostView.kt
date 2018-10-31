@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.widget.ListView
 import androidx.core.view.NestedScrollingChild
+import tk.zwander.widgetdrawer.R
 
 class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrollingChild {
     private val recView by lazy { parent.parent.parent as DrawerRecycler }
@@ -24,6 +25,10 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             return true
         }
     })
+
+    init {
+        id = R.id.drawer_view
+    }
 
     val hasListView by lazy { hasListView(this) }
 
@@ -63,6 +68,10 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             return gestureDetector.onTouchEvent(event)
         }
         return false
+    }
+
+    fun setPadding(paddingPx: Int) {
+        setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
     }
 
     private fun enableNestedScrolling(parent: ViewGroup) {

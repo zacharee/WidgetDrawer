@@ -9,7 +9,9 @@ import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -20,6 +22,7 @@ import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import tk.zwander.widgetdrawer.views.DrawerHostView
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
@@ -87,9 +90,6 @@ class DrawerAdapter(
             val widget = widgets[position]
             val info = manager.getAppWidgetInfo(widget.id)
 
-            updateSelectionCheck(holder, widget)
-            updateTransparency(holder)
-
             holder.itemView.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
             holder.itemView.widget_frame.apply {
                 removeAllViews()
@@ -124,16 +124,19 @@ class DrawerAdapter(
 
                 transparentObservable
                     .subscribe {
-                        updateTransparency(this)
+                        updateTransparency(this, false)
                     }
             }
 
             updateDimens(holder, info, widget)
+            updateTransparency(holder, true)
+            updateSelectionCheck(holder, widget)
         }
     }
 
-    private fun updateTransparency(holder: DrawerVH) {
+    private fun updateTransparency(holder: DrawerVH, forInit: Boolean) {
         val card = holder.itemView.widget_frame
+        val widget = card.getChildAt(0) as DrawerHostView
 
         val background = {
             val attr = intArrayOf(android.R.attr.colorBackground)
@@ -145,15 +148,61 @@ class DrawerAdapter(
             }
         }.invoke()
 
-        val anim = ValueAnimator.ofArgb(
-            card.cardBackgroundColor.defaultColor,
+        val elevation = card.context.resources
+            .getDimensionPixelSize(R.dimen.cardview_default_elevation).toFloat()
+
+        val padding = card.context.dpAsPx(8)
+
+        if (forInit) {
+            card.setCardBackgroundColor(
+                if (transparentWidgets) Color.TRANSPARENT
+                else background
+            )
+
+            card.elevation =
+                    if (transparentWidgets) 0f
+                    else elevation
+
+            widget.setPadding(
+                if (transparentWidgets) 0
+                else padding
+            )
+
+            return
+        }
+
+        val alphaAnim = ValueAnimator.ofArgb(
+            if (transparentWidgets) background else Color.TRANSPARENT,
             if (transparentWidgets) Color.TRANSPARENT else background
         )
-        anim.duration = 500L
-        anim.addUpdateListener {
-            card.setBackgroundColor(it.animatedValue.toString().toInt())
+        alphaAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
+        alphaAnim.duration = 500L
+        alphaAnim.addUpdateListener {
+            card.setCardBackgroundColor(it.animatedValue.toString().toInt())
         }
-        anim.start()
+        alphaAnim.start()
+
+        val elevAnim = ValueAnimator.ofFloat(
+            if (transparentWidgets) elevation else 0f,
+            if (transparentWidgets) 0f else elevation
+        )
+        elevAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
+        elevAnim.duration = 500L
+        elevAnim.addUpdateListener {
+            card.elevation = it.animatedValue.toString().toFloat()
+        }
+        elevAnim.start()
+
+        val padAnim = ValueAnimator.ofInt(
+            if (transparentWidgets) padding else 0,
+            if (transparentWidgets) 0 else padding
+        )
+        padAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
+        padAnim.duration = 500L
+        padAnim.addUpdateListener {
+            widget.setPadding(it.animatedValue.toString().toInt())
+        }
+        padAnim.start()
     }
 
     private fun updateSelectionCheck(holder: DrawerVH, widget: OverrideWidgetInfo) {
