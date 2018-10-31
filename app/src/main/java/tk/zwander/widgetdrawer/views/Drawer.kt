@@ -10,7 +10,6 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.View
 import android.view.View.OnClickListener
@@ -246,7 +245,6 @@ class Drawer : LinearLayout {
     }
 
     fun hideDrawer() {
-        Log.e("WidgetDrawer", "hide")
         animate()
             .alpha(0f)
             .setListener(object : SimpleAnimatorListener() {

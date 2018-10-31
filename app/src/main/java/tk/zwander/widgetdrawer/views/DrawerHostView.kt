@@ -3,7 +3,6 @@ package tk.zwander.widgetdrawer.views
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHostView
 import android.content.Context
-import android.graphics.Point
 import android.graphics.Rect
 import android.view.GestureDetector
 import android.view.MotionEvent
@@ -117,16 +116,6 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
         }
 
         return false
-    }
-
-    private fun getRelativePosition(event: MotionEvent): Point {
-        val location = IntArray(2)
-        getLocationOnScreen(location)
-        val screenX = event.rawX
-        val screenY = event.rawY
-        val viewX = screenX - location[0]
-        val viewY = screenY - location[1]
-        return Point(viewX.toInt(), viewY.toInt())
     }
 
     private fun scaleMotionEvent(event: MotionEvent) {
