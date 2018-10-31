@@ -1,21 +1,20 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.*
-import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
 import android.util.AttributeSet
-import android.view.Gravity
-import android.view.View
+import android.view.*
 import android.view.View.OnClickListener
-import android.view.WindowInsets
-import android.view.WindowManager
+import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
+import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
@@ -65,10 +64,11 @@ class Drawer : LinearLayout {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
                     else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_FULLSCREEN or
+            flags = WindowManager.LayoutParams.FLAG_FULLSCREEN or
                     WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR
+                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
+                    WindowManager.LayoutParams.FLAG_DIM_BEHIND
+            dimAmount = 0.5f
             width = displaySize.x
             height = displaySize.y
             format = PixelFormat.RGBA_8888
@@ -94,7 +94,7 @@ class Drawer : LinearLayout {
     }
 
     init {
-        setBackgroundColor(Color.argb(100, 0, 0, 0))
+//        setBackgroundColor(Color.argb(100, 0, 0, 0))
         orientation = LinearLayout.VERTICAL
     }
 
@@ -208,6 +208,26 @@ class Drawer : LinearLayout {
         return super.onApplyWindowInsets(insets)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        handler?.postDelayed({
+            val anim = ValueAnimator.ofFloat(0f, 1f)
+            anim.interpolator = DecelerateInterpolator()
+            anim.addUpdateListener {
+                alpha = it.animatedValue.toString().toFloat()
+            }
+            anim.start()
+        }, 10)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
+        handler.postDelayed({
+            //maybe handle drawer closing at some point?
+        }, 50)
+        return super.onInterceptTouchEvent(ev)
+    }
+
     fun onCreate() {
         host.startListening()
         widget_grid.adapter = adapter
@@ -234,27 +254,24 @@ class Drawer : LinearLayout {
         try {
             wm.addView(this, params)
         } catch (e: Exception) {}
-
-        animate()
-            .alpha(1f)
-            .setListener(object : SimpleAnimatorListener() {
-                override fun onAnimationEnd(animation: Animator?) {
-                    alpha = 1f
-                }
-            })
     }
 
     fun hideDrawer() {
-        animate()
-            .alpha(0f)
-            .setListener(object : SimpleAnimatorListener() {
-                override fun onAnimationEnd(animation: Animator?) {
-                    alpha = 0f
+        val anim = ValueAnimator.ofFloat(1f, 0f)
+        anim.interpolator = AccelerateInterpolator()
+        anim.addUpdateListener {
+            alpha = it.animatedValue.toString().toFloat()
+        }
+        anim.addListener(object: SimpleAnimatorListener() {
+            override fun onAnimationEnd(animation: Animator?) {
+                handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)
                     } catch (e: Exception) {}
-                }
-            })
+                }, 10)
+            }
+        })
+        anim.start()
     }
 
     private fun getWidgetPermission(id: Int, componentName: ComponentName, options: Bundle? = null) {
