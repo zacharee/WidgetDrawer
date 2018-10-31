@@ -185,7 +185,7 @@ class DrawerAdapter(
             if (transparentWidgets) elevation else 0f,
             if (transparentWidgets) 0f else elevation
         )
-        elevAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
+        elevAnim.interpolator = if (transparentWidgets) AnticipateInterpolator() else OvershootInterpolator()
         elevAnim.duration = 500L
         elevAnim.addUpdateListener {
             card.elevation = it.animatedValue.toString().toFloat()
@@ -196,7 +196,7 @@ class DrawerAdapter(
             if (transparentWidgets) padding else 0,
             if (transparentWidgets) 0 else padding
         )
-        padAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
+        padAnim.interpolator = if (transparentWidgets) AnticipateInterpolator() else OvershootInterpolator()
         padAnim.duration = 500L
         padAnim.addUpdateListener {
             widget.setPadding(it.animatedValue.toString().toInt())
