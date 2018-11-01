@@ -6,6 +6,7 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.*
+import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
@@ -73,6 +74,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             height = displaySize.y
             format = PixelFormat.RGBA_8888
             gravity = Gravity.TOP
+            screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
     private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager

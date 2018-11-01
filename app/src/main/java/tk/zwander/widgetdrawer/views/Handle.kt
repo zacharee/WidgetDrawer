@@ -9,6 +9,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Message
 import android.util.AttributeSet
+import android.util.Log
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -76,6 +77,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
+        Log.e("WidgetDrawer", "touch")
         when (event?.action) {
             MotionEvent.ACTION_DOWN -> {
                 screenWidth = context.screenSize().x
@@ -167,6 +169,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                     true
                 } else false
             } else false
+        }
+
+        override fun onLongPress(e: MotionEvent?) {
+            onLongPress()
         }
 
         fun onLongPress() {

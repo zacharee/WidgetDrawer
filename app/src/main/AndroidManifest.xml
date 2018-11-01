@@ -30,15 +30,18 @@
             android:name=".activities.PermConfigActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.Null" />
+            android:theme="@style/AppTheme.Null"
+            />
         <activity
             android:name=".activities.WidgetSelectActivity"
-            android:excludeFromRecents="true" />
+            android:excludeFromRecents="true"
+            />
 
         <service
             android:name=".services.DrawerService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            />
         <service
             android:name=".services.DrawerToggleTile"
             android:icon="@drawable/grid"

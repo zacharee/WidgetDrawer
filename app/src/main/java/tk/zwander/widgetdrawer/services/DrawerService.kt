@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Process
@@ -100,9 +101,26 @@ class DrawerService : Service() {
         }
     }
 
+    override fun onConfigurationChanged(newConfig: Configuration?) {
+        when (newConfig?.orientation) {
+            Configuration.ORIENTATION_LANDSCAPE -> {
+                remHandle()
+            }
+            Configuration.ORIENTATION_PORTRAIT -> {
+                addHandle()
+            }
+        }
+    }
+
     private fun addHandle() {
         try {
             windowManager.addView(handle, handle.params)
+        } catch (e: Exception) {}
+    }
+
+    private fun remHandle() {
+        try {
+            windowManager.removeView(handle)
         } catch (e: Exception) {}
     }
 
@@ -121,12 +139,10 @@ class DrawerService : Service() {
     }
 
     override fun onDestroy() {
+        remHandle()
+
         drawer.onDestroy()
         handle.onDestroy()
-
-        try {
-            windowManager.removeView(handle)
-        } catch (e: Exception) {}
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)
