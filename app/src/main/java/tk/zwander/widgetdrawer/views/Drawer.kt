@@ -60,18 +60,17 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
+    var hideListener: (() -> Unit)? = null
+
     val params: WindowManager.LayoutParams
         get() = WindowManager.LayoutParams().apply {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
                     else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            flags = WindowManager.LayoutParams.FLAG_FULLSCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                    WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR or
-                    WindowManager.LayoutParams.FLAG_DIM_BEHIND
+            flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
             dimAmount = 0.5f
             width = displaySize.x
-            height = displaySize.y
+            height = WindowManager.LayoutParams.MATCH_PARENT
             format = PixelFormat.RGBA_8888
             gravity = Gravity.TOP
             screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
@@ -83,7 +82,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private val prefs = PrefsManager.getInstance(context)
     private val adapter = DrawerAdapter(manager, host)
 
-    private val resultReceiver = object : BroadcastReceiver() {
+    private val localReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when (intent.action) {
                 ACTION_RESULT -> onActivityResult(
@@ -91,6 +90,16 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                     intent.getIntExtra(Intent.EXTRA_RETURN_RESULT, -1000),
                     intent.getParcelableExtra(EXTRA_DATA)
                 )
+            }
+        }
+    }
+
+    private val globalReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent) {
+            when (intent.action) {
+                Intent.ACTION_CLOSE_SYSTEM_DIALOGS -> {
+                    hideDrawer()
+                }
             }
         }
     }
@@ -211,11 +220,6 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         adapter.transparentWidgets = prefs.transparentWidgets
     }
 
-    override fun onApplyWindowInsets(insets: WindowInsets): WindowInsets {
-        setPadding(insets.stableInsetLeft, insets.stableInsetTop, insets.stableInsetRight, insets.stableInsetBottom)
-        return super.onApplyWindowInsets(insets)
-    }
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
@@ -242,9 +246,23 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
     }
 
+    override fun dispatchKeyEvent(event: KeyEvent?): Boolean {
+        if (event?.keyCode == KeyEvent.KEYCODE_BACK) {
+            hideDrawer()
+            return true
+        }
+
+        return super.dispatchKeyEvent(event)
+    }
+
     fun onCreate() {
         host.startListening()
-        LocalBroadcastManager.getInstance(context).registerReceiver(resultReceiver, IntentFilter(ACTION_RESULT))
+        LocalBroadcastManager.getInstance(context).registerReceiver(localReceiver, IntentFilter().apply {
+            addAction(ACTION_RESULT)
+        })
+        context.registerReceiver(globalReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
+        })
         prefs.addPrefListener(this)
 
         widget_grid.adapter = adapter
@@ -261,7 +279,8 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         host.stopListening()
         prefs.currentWidgets = adapter.widgets
 
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(resultReceiver)
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(localReceiver)
+        context.unregisterReceiver(globalReceiver)
         prefs.removePrefListener(this)
     }
 
@@ -279,6 +298,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
         anim.addListener(object: SimpleAnimatorListener() {
             override fun onAnimationEnd(animation: Animator?) {
+                hideListener?.invoke()
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)

@@ -12,9 +12,11 @@ import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
 import android.os.Process
+import android.os.SystemClock
 import android.os.Vibrator
 import android.provider.Settings
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
@@ -88,7 +90,12 @@ class DrawerService : Service() {
             if (!drawer.isAttachedToWindow) {
                 vibrate(10)
                 drawer.showDrawer()
+                remHandle()
             }
+        }
+
+        drawer.hideListener = {
+            addHandle()
         }
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
