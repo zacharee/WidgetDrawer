@@ -56,9 +56,8 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     val params = WindowManager.LayoutParams().apply {
         type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
                 else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-        flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
-                WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
+        flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = context.dpAsPx(prefs.handleWidthDp)
         height = context.dpAsPx(prefs.handleHeightDp)
         gravity = Gravity.TOP or prefs.handleSide
