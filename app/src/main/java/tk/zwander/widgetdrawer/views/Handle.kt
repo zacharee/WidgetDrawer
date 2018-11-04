@@ -9,7 +9,6 @@ import android.os.Build
 import android.os.Handler
 import android.os.Message
 import android.util.AttributeSet
-import android.util.Log
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -58,7 +57,6 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
                 else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = context.dpAsPx(6)
         height = context.dpAsPx(prefs.handleHeightDp)
@@ -71,14 +69,12 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         setSide()
         setTint(prefs.handleColor)
         isClickable = true
-        isFocusable = true
         prefs.addPrefListener(this)
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        Log.e("WidgetDrawer", "touch")
-        when (event?.action) {
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 screenWidth = context.screenSize().x
                 longClickHandler.sendEmptyMessageAtTime(MSG_LONG_PRESS,
@@ -110,7 +106,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 }
             }
         }
-        return gestureManager.onTouchEvent(event)
+
+        gestureManager.onTouchEvent(event)
+
+        return true
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
