@@ -35,4 +35,5 @@ dependencies {
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
     implementation 'io.reactivex.rxjava2:rxjava:2.2.3'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.1'
+    implementation 'com.jaredrummler:colorpicker-compat:1.0.5'
 }

@@ -80,7 +80,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val host = DrawerHost(context.applicationContext, 1003)
     private val manager = AppWidgetManager.getInstance(context.applicationContext)
-    private val prefs = PrefsManager(context)
+    private val prefs = PrefsManager.getInstance(context)
     private val adapter = DrawerAdapter(manager, host)
 
     private val resultReceiver = object : BroadcastReceiver() {

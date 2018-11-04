@@ -38,8 +38,8 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
-    private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val prefs by lazy { PrefsManager(context) }
+    private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
+    private val prefs = PrefsManager.getInstance(context)
 
     private val handleLeft = resources.getDrawable(R.drawable.handle_left)
     private val handleRight = resources.getDrawable(R.drawable.handle_right)
@@ -58,7 +58,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
-        width = context.dpAsPx(6)
+        width = context.dpAsPx(prefs.handleWidthDp)
         height = context.dpAsPx(prefs.handleHeightDp)
         gravity = Gravity.TOP or prefs.handleSide
         y = prefs.handleYPx.toInt()
@@ -70,7 +70,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         setTint(prefs.handleColor)
         isClickable = true
         prefs.addPrefListener(this)
-        elevation = context.dpAsPx(8).toFloat()
+        elevation = if (prefs.handleShadow) context.dpAsPx(8).toFloat() else 0f
     }
 
     @SuppressLint("ClickableViewAccessibility")
@@ -120,8 +120,17 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 updateLayout()
             }
 
+            PrefsManager.HANDLE_WIDTH -> {
+                params.width = context.dpAsPx(prefs.handleWidthDp)
+                updateLayout()
+            }
+
             PrefsManager.HANDLE_COLOR -> {
                 setTint(prefs.handleColor)
+            }
+
+            PrefsManager.HANDLE_SHADOW -> {
+                elevation = if (prefs.handleShadow) context.dpAsPx(8).toFloat() else 0f
             }
         }
     }

@@ -7,6 +7,12 @@
         android:key="enabled"
         />
 
+    <androidx.preference.SwitchPreferenceCompat
+        android:title="@string/handle_shadow"
+        android:key="handle_shadow"
+        android:defaultValue="true"
+        />
+
     <com.pavelsikun.seekbarpreference.SeekBarPreferenceCompat
         android:title="@string/handle_height"
         android:key="handle_height"
@@ -16,7 +22,16 @@
         app:msbp_measurementUnit="dp"
         />
 
-    <tk.zwander.widgetdrawer.misc.ColorPreferenceCompat
+    <com.pavelsikun.seekbarpreference.SeekBarPreferenceCompat
+        android:title="@string/handle_width"
+        android:key="handle_width"
+        android:defaultValue="6"
+        app:msbp_minValue="1"
+        app:msbp_maxValue="24"
+        app:msbp_measurementUnit="dp"
+        />
+
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
         android:title="@string/handle_color"
         android:key="handle_color"
         android:defaultValue="-1"

@@ -50,7 +50,7 @@ class DrawerService : Service() {
     private val handle by lazy { Handle(this) }
     private val drawer by lazy { LayoutInflater.from(this)
         .inflate(R.layout.drawer_layout, null, false) as Drawer }
-    private val prefs by lazy { PrefsManager(this) }
+    private val prefs by lazy { PrefsManager.getInstance(this) }
     private val overlayListener = AppOpsManager.OnOpChangedListener { op, packageName ->
         if (packageName == this.packageName) {
             when(op) {

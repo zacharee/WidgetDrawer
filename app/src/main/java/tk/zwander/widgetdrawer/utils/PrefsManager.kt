@@ -10,14 +10,16 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 
-class PrefsManager(private val context: Context) {
+class PrefsManager private constructor(private val context: Context) {
     companion object {
         const val WIDGETS = "saved_widgets"
         const val ENABLED = "enabled"
         const val HANDLE_SIDE = "handle_side"
         const val HANDLE_Y = "handle_y"
         const val HANDLE_HEIGHT = "handle_height"
+        const val HANDLE_WIDTH = "handle_width"
         const val HANDLE_COLOR = "handle_color"
+        const val HANDLE_SHADOW = "handle_shadow"
         const val TRANSPARENT_WIDGETS = "transparent_widgets"
 
         @SuppressLint("RtlHardcoded")
@@ -26,6 +28,14 @@ class PrefsManager(private val context: Context) {
         const val HANDLE_RIGHT = Gravity.RIGHT
         const val HANDLE_UNCHANGED = -1
         const val HANDLE_COLOR_DEF = Color.WHITE
+
+        @SuppressLint("StaticFieldLeak")
+        private var instance: PrefsManager? = null
+
+        fun getInstance(context: Context): PrefsManager {
+            if (instance == null) instance = PrefsManager(context.applicationContext)
+            return instance!!
+        }
     }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -60,10 +70,20 @@ class PrefsManager(private val context: Context) {
         set(value) {
             putInt(HANDLE_HEIGHT, value)
         }
+    var handleWidthDp: Int
+        get() = getInt(HANDLE_WIDTH, 6)
+        set(value) {
+            putInt(HANDLE_HEIGHT, value)
+        }
     var handleColor: Int
         get() = getInt(HANDLE_COLOR, HANDLE_COLOR_DEF)
         set(value) {
             putInt(HANDLE_COLOR, value)
+        }
+    var handleShadow: Boolean
+        get() = getBoolean(HANDLE_SHADOW, true)
+        set(value) {
+            putBoolean(HANDLE_SHADOW, value)
         }
     var transparentWidgets: Boolean
         get() = getBoolean(TRANSPARENT_WIDGETS, false)

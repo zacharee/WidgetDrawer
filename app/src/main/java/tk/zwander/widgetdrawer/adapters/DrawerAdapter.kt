@@ -250,7 +250,7 @@ class DrawerAdapter(
                 else {
                     widget.forcedHeight += 1
                     height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
-                    PrefsManager(context).currentWidgets = widgets
+                    PrefsManager.getInstance(context).currentWidgets = widgets
                 }
 
                 isFullSpan = widget.isFullWidth

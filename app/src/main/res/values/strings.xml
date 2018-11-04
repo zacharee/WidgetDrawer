@@ -5,7 +5,9 @@
     <string name="edit_mode">Edit Mode</string>
     <string name="enable">Enable</string>
     <string name="handle_height">Handle Height</string>
+    <string name="handle_width">Handle Width</string>
     <string name="handle_color">Handle Color</string>
+    <string name="handle_shadow">Handle Shadow</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow WidgetDrawer to draw over other apps</string>

@@ -9,7 +9,7 @@ import tk.zwander.widgetdrawer.utils.PrefsManager
 
 @TargetApi(Build.VERSION_CODES.N)
 class DrawerToggleTile : TileService(), SharedPreferences.OnSharedPreferenceChangeListener {
-    private val prefs by lazy { PrefsManager(this) }
+    private val prefs by lazy { PrefsManager.getInstance(this) }
 
     override fun onCreate() {
         super.onCreate()

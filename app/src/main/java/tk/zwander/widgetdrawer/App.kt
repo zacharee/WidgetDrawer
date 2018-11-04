@@ -6,7 +6,7 @@ import tk.zwander.widgetdrawer.services.DrawerService
 import tk.zwander.widgetdrawer.utils.PrefsManager
 
 class App : Application(), SharedPreferences.OnSharedPreferenceChangeListener {
-    val prefs by lazy { PrefsManager(this) }
+    val prefs by lazy { PrefsManager.getInstance(this) }
 
     override fun onCreate() {
         super.onCreate()
