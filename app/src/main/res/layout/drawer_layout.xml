@@ -32,20 +32,19 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp">
 
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/edit"
-                android:layout_width="48dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/edit"
-                android:layout_gravity="start"
-                />
-
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_gravity="end"
                 android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:orientation="horizontal"
+                android:layout_gravity="start">
+
+                <tk.zwander.widgetdrawer.views.ButtonImageView
+                    android:id="@+id/edit"
+                    android:layout_width="48dp"
+                    android:layout_height="match_parent"
+                    android:src="@drawable/edit"
+                    />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/toggle_transparent"
@@ -53,6 +52,15 @@
                     android:layout_height="match_parent"
                     android:src="@drawable/visibility"
                     />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="end"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/add_widget"
