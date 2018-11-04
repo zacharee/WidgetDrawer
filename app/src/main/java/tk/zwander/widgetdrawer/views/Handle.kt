@@ -70,6 +70,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         setTint(prefs.handleColor)
         isClickable = true
         prefs.addPrefListener(this)
+        elevation = context.dpAsPx(8).toFloat()
     }
 
     @SuppressLint("ClickableViewAccessibility")
