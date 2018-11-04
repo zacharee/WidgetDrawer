@@ -8,12 +8,10 @@
     android:layout_margin="4dp"
     android:clickable="false">
 
-    <androidx.cardview.widget.CardView
+    <tk.zwander.widgetdrawer.views.CustomCard
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/widget_frame"
-        app:cardPreventCornerOverlap="false"
-        app:cardUseCompatPadding="false"
         />
 
     <RadioButton

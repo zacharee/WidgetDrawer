@@ -40,6 +40,9 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             height = ViewGroup.LayoutParams.MATCH_PARENT
         }
 
+        setPadding(0, 0, 0, 0)
+        setPaddingRelative(0, 0, 0, 0)
+
         enableNestedScrolling(this)
         isNestedScrollingEnabled = true
     }
@@ -68,10 +71,6 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             return gestureDetector.onTouchEvent(event)
         }
         return false
-    }
-
-    fun setPadding(paddingPx: Int) {
-        setPadding(paddingPx, paddingPx, paddingPx, paddingPx)
     }
 
     private fun enableNestedScrolling(parent: ViewGroup) {

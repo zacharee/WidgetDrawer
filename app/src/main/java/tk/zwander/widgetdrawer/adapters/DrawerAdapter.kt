@@ -23,7 +23,6 @@ import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
-import tk.zwander.widgetdrawer.views.DrawerHostView
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
@@ -80,7 +79,11 @@ class DrawerAdapter(
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         when (viewType) {
             TYPE_HEADER -> HeaderVH(LayoutInflater.from(parent.context).inflate(R.layout.header_layout, parent, false))
-            else -> DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
+            else -> {
+                val vh = DrawerVH(LayoutInflater.from(parent.context).inflate(R.layout.widget_holder, parent, false))
+                updateTransparency(vh, true)
+                vh
+            }
         }
 
     @SuppressLint("CheckResult")
@@ -128,14 +131,12 @@ class DrawerAdapter(
             }
 
             updateDimens(holder, info, widget)
-            updateTransparency(holder, true)
             updateSelectionCheck(holder, widget)
         }
     }
 
     private fun updateTransparency(holder: DrawerVH, forInit: Boolean) {
         val card = holder.itemView.widget_frame
-        val widget = card.getChildAt(0) as DrawerHostView
 
         val background = {
             val attr = intArrayOf(android.R.attr.colorBackground)
@@ -162,7 +163,7 @@ class DrawerAdapter(
                     if (transparentWidgets) 0f
                     else elevation
 
-            widget.setPadding(
+            card.setPadding(
                 if (transparentWidgets) 0
                 else padding
             )
@@ -199,7 +200,7 @@ class DrawerAdapter(
         padAnim.interpolator = if (transparentWidgets) AnticipateInterpolator() else OvershootInterpolator()
         padAnim.duration = 500L
         padAnim.addUpdateListener {
-            widget.setPadding(it.animatedValue.toString().toInt())
+            card.setPadding(it.animatedValue.toString().toInt())
         }
         padAnim.start()
     }
