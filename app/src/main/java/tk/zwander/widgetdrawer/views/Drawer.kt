@@ -1,6 +1,7 @@
 package tk.zwander.widgetdrawer.views
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.appwidget.AppWidgetManager
@@ -32,7 +33,6 @@ import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.screenSize
 import java.util.*
 
@@ -156,7 +156,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 .scaleY(1f)
                 .setInterpolator(OvershootInterpolator())
                 .setDuration(500)
-                .setListener(object : SimpleAnimatorListener() {
+                .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         button_wrapper.visibility = View.GONE
                         widget_grid.allowReorder = true
@@ -172,7 +172,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 .scaleY(0f)
                 .setInterpolator(AnticipateInterpolator())
                 .setDuration(500L)
-                .setListener(object : SimpleAnimatorListener() {
+                .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         edit_bar.visibility = View.GONE
                         widget_grid.allowReorder = false
@@ -295,7 +295,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         anim.addUpdateListener {
             alpha = it.animatedValue.toString().toFloat()
         }
-        anim.addListener(object: SimpleAnimatorListener() {
+        anim.addListener(object: AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 hideListener?.invoke()
                 handler?.postDelayed({

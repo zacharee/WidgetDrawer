@@ -1,6 +1,7 @@
 package tk.zwander.widgetdrawer.adapters
 
 import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
@@ -21,7 +22,6 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import java.util.*
 
@@ -207,7 +207,7 @@ class DrawerAdapter(
                     .scaleY(1f)
                     .setDuration(500L)
                     .setInterpolator(OvershootInterpolator())
-                    .setListener(object : SimpleAnimatorListener() {
+                    .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
                             scaleX = 1f
                             scaleY = 1f
@@ -219,7 +219,7 @@ class DrawerAdapter(
                     .scaleY(0f)
                     .setDuration(500L)
                     .setInterpolator(AnticipateInterpolator())
-                    .setListener(object : SimpleAnimatorListener() {
+                    .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
                             visibility = View.GONE
                             scaleX = 0f
