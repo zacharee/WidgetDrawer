@@ -10,3 +10,4 @@
 /captures
 .externalNativeBuild
 /app/release
+/app/src/main/res/values/lvl_key.xml
