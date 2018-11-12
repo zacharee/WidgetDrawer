@@ -35,6 +35,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     var onOpenListener: (() -> Unit)? = null
 
     private var inMoveMode = false
+    private var calledOpen = false
     private var screenWidth = -1
 
     private val gestureManager = GestureManager()
@@ -55,7 +56,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     val params = WindowManager.LayoutParams().apply {
         type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
-                else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
         flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
                 WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN
         width = context.dpAsPx(prefs.handleWidthDp)
@@ -78,8 +79,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
                 screenWidth = context.screenSize().x
-                longClickHandler.sendEmptyMessageAtTime(MSG_LONG_PRESS,
-                    event.downTime + LONG_PRESS_DELAY)
+                longClickHandler.sendEmptyMessageAtTime(
+                    MSG_LONG_PRESS,
+                    event.downTime + LONG_PRESS_DELAY
+                )
             }
             MotionEvent.ACTION_UP -> {
                 longClickHandler.removeMessages(MSG_LONG_PRESS)
@@ -89,10 +92,10 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             MotionEvent.ACTION_MOVE -> {
                 if (inMoveMode) {
                     val gravity = when {
-                        event.rawX <= 1/3f * screenWidth -> {
+                        event.rawX <= 1 / 3f * screenWidth -> {
                             PrefsManager.HANDLE_LEFT
                         }
-                        event.rawX >= 2/3f * screenWidth -> {
+                        event.rawX >= 2 / 3f * screenWidth -> {
                             PrefsManager.HANDLE_RIGHT
                         }
                         else -> -1
@@ -152,7 +155,7 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     private fun setSide(gravity: Int = prefs.handleSide) {
         background = if (gravity == PrefsManager.HANDLE_RIGHT) handleRight
-                        else handleLeft
+        else handleLeft
     }
 
     private fun setMoveMove(inMoveMode: Boolean) {
@@ -174,15 +177,22 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         private val gestureDetector = GestureDetector(context, this, handler)
 
         fun onTouchEvent(event: MotionEvent?): Boolean {
+            when (event?.action) {
+                MotionEvent.ACTION_UP -> calledOpen = false
+            }
             return gestureDetector.onTouchEvent(event)
         }
 
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
             return if (distanceX.absoluteValue > distanceY.absoluteValue && !inMoveMode) {
                 if ((distanceX > SWIPE_THRESHOLD && prefs.handleSide == PrefsManager.HANDLE_RIGHT)
-                    || distanceX < -SWIPE_THRESHOLD) {
-                    onOpenListener?.invoke()
-                    true
+                    || distanceX < -SWIPE_THRESHOLD
+                ) {
+                    if (!calledOpen) {
+                        calledOpen = true
+                        onOpenListener?.invoke()
+                        true
+                    } else false
                 } else false
             } else false
         }
