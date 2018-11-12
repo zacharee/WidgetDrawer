@@ -184,7 +184,6 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         val listener = OnClickListener { view ->
             adapter.selectedWidget?.let { widget ->
                 var changed = false
-                val index = adapter.widgets.indexOf(widget)
 
                 when (view.id) {
                     R.id.expand_horiz -> {
@@ -207,7 +206,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
                 if (changed) {
                     prefs.currentWidgets = adapter.widgets
-                    adapter.notifyItemChanged(index)
+                    adapter.sizeObservable.onNext(widget.id)
                 }
             }
         }

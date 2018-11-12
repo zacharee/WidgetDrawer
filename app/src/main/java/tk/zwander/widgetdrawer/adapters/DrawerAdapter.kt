@@ -23,6 +23,7 @@ import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.SimpleAnimatorListener
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import java.util.*
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
@@ -54,9 +55,10 @@ class DrawerAdapter(
             transparentObservable.onNext(value)
         }
 
-    private var editingObservable = BehaviorSubject.create<Boolean>()
-    private var selectedObservable = BehaviorSubject.create<Int>()
-    private var transparentObservable = BehaviorSubject.create<Boolean>()
+    private val editingObservable = BehaviorSubject.create<Boolean>()
+    private val selectedObservable = BehaviorSubject.create<Int>()
+    private val transparentObservable = BehaviorSubject.create<Boolean>()
+    val sizeObservable = BehaviorSubject.create<Int>()
 
     val widgets = ArrayList<OverrideWidgetInfo>()
         .apply { add(0, OverrideWidgetInfo(-1, Integer.MIN_VALUE, true)) }
@@ -127,6 +129,11 @@ class DrawerAdapter(
                 transparentObservable
                     .subscribe {
                         updateTransparency(this, false)
+                    }
+
+                sizeObservable
+                    .subscribe {
+                        if (it == widget.id) updateDimens(this, info, widget)
                     }
             }
 
