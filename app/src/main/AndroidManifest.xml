@@ -34,9 +34,6 @@
             android:name=".activities.WidgetSelectActivity"
             android:excludeFromRecents="true"
             android:label="@string/add_widget" />
-        <activity android:name=".activities.LicenseFailedDialog"
-            android:theme="@style/AppTheme.Null"
-            />
 
         <service
             android:name=".services.DrawerService"

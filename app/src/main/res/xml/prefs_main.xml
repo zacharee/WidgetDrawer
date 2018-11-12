@@ -5,6 +5,7 @@
     <androidx.preference.SwitchPreferenceCompat
         android:title="@string/enable"
         android:key="enabled"
+        android:defaultValue="false"
         />
 
     <androidx.preference.SwitchPreferenceCompat
