@@ -40,6 +40,12 @@ class WidgetSelectActivity : AppCompatActivity() {
         Thread { populateAsync() }.start()
     }
 
+    override fun onBackPressed() {
+        Drawer.onResult(this, Activity.RESULT_CANCELED, PICK_CODE, null)
+
+        finish()
+    }
+
     private fun populateAsync() {
         val apps = HashMap<String, AppInfo>()
 

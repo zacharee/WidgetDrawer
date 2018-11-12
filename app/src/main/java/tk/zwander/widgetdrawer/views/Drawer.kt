@@ -354,10 +354,10 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     private fun addNewWidget(id: Int) {
+        showDrawer()
         val info = createSavedWidget(id)
         adapter.addItem(info)
         prefs.currentWidgets = adapter.widgets
-        showDrawer()
     }
 
     private fun createSavedWidget(id: Int): OverrideWidgetInfo {
@@ -382,12 +382,18 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                 }
             }
             CONFIG_CODE -> {
-                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                if (id == -1) return
-                addNewWidget(id)
+                if (resultCode == Activity.RESULT_OK) {
+                    val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
+                    if (id == -1) return
+                    addNewWidget(id)
+                } else
+                    showDrawer()
             }
             PICK_CODE -> {
-                tryBindWidget(data?.getParcelableExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER) ?: return)
+                if (resultCode == Activity.RESULT_OK)
+                    tryBindWidget(data?.getParcelableExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER) ?: return)
+                else
+                    showDrawer()
             }
         }
     }
