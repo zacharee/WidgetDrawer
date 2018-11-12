@@ -6,14 +6,16 @@ apply plugin: 'kotlin-android-extensions'
 
 apply plugin: 'io.fabric'
 
+def version = 1
+
 android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "tk.zwander.widgetdrawer"
         minSdkVersion 21
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode version
+        versionName version.toString()
     }
     buildTypes {
         release {
