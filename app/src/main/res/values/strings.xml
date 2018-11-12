@@ -9,7 +9,9 @@
     <string name="handle_color">Handle Color</string>
     <string name="handle_shadow">Handle Shadow</string>
     <string name="add_widget">Add Widget</string>
+    <string name="unlicensed">Unlicensed App!</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
+    <string name="unlicensed_desc">It seems you have an unlicensed copy of Widget Drawer. If you recently purchased the app, wait a few minutes and try again.</string>
 </resources>
