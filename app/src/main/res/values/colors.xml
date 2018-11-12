@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="cardBackground">#343434</color>
+    <color name="colorAccent">#1ed760</color>
 </resources>
