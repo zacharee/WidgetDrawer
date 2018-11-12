@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">WidgetDrawer</string>
+    <string name="app_name">Widget Drawer</string>
 
     <!-- Titles -->
     <string name="edit_mode">Edit Mode</string>
@@ -11,5 +11,5 @@
     <string name="add_widget">Add Widget</string>
 
     <!-- Messages -->
-    <string name="allow_overlay">Please allow WidgetDrawer to draw over other apps</string>
+    <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
 </resources>
