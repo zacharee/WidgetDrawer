@@ -8,6 +8,7 @@
     <string name="handle_width">Handle Width</string>
     <string name="handle_color">Handle Color</string>
     <string name="handle_shadow">Handle Shadow</string>
+    <string name="add_widget">Add Widget</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow WidgetDrawer to draw over other apps</string>
