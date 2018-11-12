@@ -151,8 +151,6 @@ class DrawerAdapter(
         val elevation = card.context.resources
             .getDimensionPixelSize(R.dimen.cardview_default_elevation).toFloat()
 
-        val padding = card.context.dpAsPx(8)
-
         if (forInit) {
             card.setCardBackgroundColor(
                 if (transparentWidgets) Color.TRANSPARENT
@@ -162,11 +160,6 @@ class DrawerAdapter(
             card.elevation =
                     if (transparentWidgets) 0f
                     else elevation
-
-            card.setPadding(
-                if (transparentWidgets) 0
-                else padding
-            )
 
             return
         }
@@ -192,17 +185,6 @@ class DrawerAdapter(
             card.elevation = it.animatedValue.toString().toFloat()
         }
         elevAnim.start()
-
-        val padAnim = ValueAnimator.ofInt(
-            if (transparentWidgets) padding else 0,
-            if (transparentWidgets) 0 else padding
-        )
-        padAnim.interpolator = if (transparentWidgets) AnticipateInterpolator() else OvershootInterpolator()
-        padAnim.duration = 500L
-        padAnim.addUpdateListener {
-            card.setPadding(it.animatedValue.toString().toInt())
-        }
-        padAnim.start()
     }
 
     private fun updateSelectionCheck(holder: DrawerVH, widget: OverrideWidgetInfo) {
