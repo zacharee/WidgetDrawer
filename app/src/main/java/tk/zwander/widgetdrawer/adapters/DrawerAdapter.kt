@@ -99,7 +99,13 @@ class DrawerAdapter(
                 vh
             }
             TYPE_SHORTCUT -> {
-                val vh = ShortcutVH(LayoutInflater.from(parent.context).inflate(R.layout.shortcut_holder, parent, false)) { motionEvent ->
+                val vh = ShortcutVH(
+                    LayoutInflater.from(parent.context).inflate(
+                        R.layout.shortcut_holder,
+                        parent,
+                        false
+                    )
+                ) { motionEvent ->
                     parent.onTouchEvent(motionEvent)
                 }
                 updateTransparency(vh, true)
@@ -140,7 +146,8 @@ class DrawerAdapter(
                     holder.selection.performClick()
 
                     if (!isEditing) {
-                        val component = ComponentName(widget.activityInfo!!.applicationInfo.packageName, widget.activityInfo!!.name)
+                        val component =
+                            ComponentName(widget.activityInfo!!.applicationInfo.packageName, widget.activityInfo!!.name)
 
                         val intent = Intent(Intent.ACTION_VIEW)
                         intent.component = component
@@ -172,13 +179,24 @@ class DrawerAdapter(
                 sizeObservable
                     .subscribe {
                         if (it == widget.id) {
-                            if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH) updateDimens(holder, info, widget)
-                            else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(holder, widget)
+                            if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH) updateDimens(
+                                holder,
+                                info,
+                                widget
+                            )
+                            else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(
+                                holder,
+                                widget
+                            )
                         }
                     }
             }
 
-            if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH && info != null) updateDimens(holder, info, widget)
+            if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH && info != null) updateDimens(
+                holder,
+                info,
+                widget
+            )
             else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(holder, widget)
             updateSelectionCheck(holder, widget)
         }
@@ -355,19 +373,20 @@ class DrawerAdapter(
             }
 
         private var wasScroll = false
-        private val gestureDetector = GestureDetector(itemView.context, object : GestureDetector.SimpleOnGestureListener() {
-            override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-                val newEvent = MotionEvent.obtain(e2)
+        private val gestureDetector =
+            GestureDetector(itemView.context, object : GestureDetector.SimpleOnGestureListener() {
+                override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+                    val newEvent = MotionEvent.obtain(e2)
 
-                scaleMotionEvent(newEvent)
+                    scaleMotionEvent(newEvent)
 
-                scrollCallback.invoke(newEvent)
+                    scrollCallback.invoke(newEvent)
 
-                newEvent.recycle()
-                wasScroll = true
-                return true
-            }
-        })
+                    newEvent.recycle()
+                    wasScroll = true
+                    return true
+                }
+            })
 
         init {
             itemView.setOnTouchListener { _, event ->
@@ -378,16 +397,20 @@ class DrawerAdapter(
         }
 
         private fun scaleMotionEvent(event: MotionEvent) {
-            event.setLocation(event.x + itemView.left + (itemView.parent as ViewGroup).left,
-                event.y + itemView.top + (itemView.parent as ViewGroup).top)
+            event.setLocation(
+                event.x + itemView.left + (itemView.parent as ViewGroup).left,
+                event.y + itemView.top + (itemView.parent as ViewGroup).top
+            )
         }
     }
+
     open class BaseVH(view: View) : RecyclerView.ViewHolder(view) {
         val selection: RadioButton
             get() = itemView.findViewById(R.id.selection)
         val widgetFrame: CustomCard
             get() = itemView.findViewById(R.id.widget_frame)
     }
+
     class HeaderVH(view: View) : RecyclerView.ViewHolder(view) {
         init {
             (view.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
