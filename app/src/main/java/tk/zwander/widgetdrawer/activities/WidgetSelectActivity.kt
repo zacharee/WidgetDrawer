@@ -3,15 +3,19 @@ package tk.zwander.widgetdrawer.activities
 import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_widget_select.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.adapters.AppListAdapter
 import tk.zwander.widgetdrawer.misc.AppInfo
+import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 import tk.zwander.widgetdrawer.views.Drawer
 
@@ -37,7 +41,7 @@ class WidgetSelectActivity : AppCompatActivity() {
         selection_list.adapter = adapter
         selection_list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
 
-        Thread { populateAsync() }.start()
+        populateAsync()
     }
 
     override fun onBackPressed() {
@@ -46,15 +50,16 @@ class WidgetSelectActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun populateAsync() {
+    private fun populateAsync() = GlobalScope.launch {
         val apps = HashMap<String, AppInfo>()
 
         appWidgetManager.installedProviders.forEach {
             val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
+
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
             val appIcon = packageManager.getApplicationIcon(appInfo)
-            val previewImg = it.loadPreviewImage(this, 0)
+            val previewImg = it.loadPreviewImage(this@WidgetSelectActivity, 0)
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -62,6 +67,39 @@ class WidgetSelectActivity : AppCompatActivity() {
                 app = apps[appInfo.packageName]!!
             }
             app.widgets.add(WidgetInfo(widgetName, previewImg, it))
+        }
+
+        val others = packageManager.queryIntentActivities(
+            Intent(Intent.ACTION_CREATE_SHORTCUT),
+            PackageManager.GET_RESOLVED_FILTER
+        )
+
+        others.forEach {
+            val appInfo = it.activityInfo.applicationInfo
+
+            val appName = packageManager.getApplicationLabel(appInfo)
+            val appIcon = packageManager.getApplicationIcon(appInfo)
+
+            val shortcutName = it.loadLabel(packageManager)
+            val shortcutIcon = it.loadIcon(packageManager)
+
+            var app = apps[appInfo.packageName]
+            if (app == null) {
+                val new = AppInfo(appName.toString(), appIcon)
+                apps[appInfo.packageName] = new
+                app = new
+            }
+            app!!.widgets.add(
+                WidgetInfo(
+                    shortcutName.toString(),
+                    shortcutIcon,
+                    ShortcutData(
+                        shortcutName.toString(),
+                        it.iconResource,
+                        it.activityInfo
+                    )
+                )
+            )
         }
 
         runOnUiThread {

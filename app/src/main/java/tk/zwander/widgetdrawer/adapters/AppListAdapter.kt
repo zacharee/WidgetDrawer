@@ -1,6 +1,6 @@
 package tk.zwander.widgetdrawer.adapters
 
-import android.appwidget.AppWidgetProviderInfo
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,7 +13,7 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 
-class AppListAdapter(private val selectionCallback: (provider: AppWidgetProviderInfo) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
+class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
     private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {
         override fun areItemsTheSame(item1: AppInfo?, item2: AppInfo?): Boolean {
             return false
@@ -68,7 +68,7 @@ class AppListAdapter(private val selectionCallback: (provider: AppWidgetProvider
         items.forEach { addItem(it) }
     }
 
-    class AppVH(view: View, selectionCallback: (provider: AppWidgetProviderInfo) -> Unit) : RecyclerView.ViewHolder(view) {
+    class AppVH(view: View, selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.ViewHolder(view) {
         private val adapter = WidgetListAdapter(selectionCallback)
 
         fun parseInfo(info: AppInfo) {
@@ -83,7 +83,7 @@ class AppListAdapter(private val selectionCallback: (provider: AppWidgetProvider
         }
     }
 
-    class WidgetListAdapter(private val selectionCallback: (provider: AppWidgetProviderInfo) -> Unit) : RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
+    class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
         private val widgets = SortedList(WidgetInfo::class.java, object : SortedList.Callback<WidgetInfo>() {
             override fun areItemsTheSame(item1: WidgetInfo?, item2: WidgetInfo?): Boolean {
                 return false

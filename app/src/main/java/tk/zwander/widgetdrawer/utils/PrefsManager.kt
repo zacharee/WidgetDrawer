@@ -8,7 +8,7 @@ import android.preference.PreferenceManager
 import android.view.Gravity
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
-import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
+import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 
 class PrefsManager private constructor(private val context: Context) {
     companion object {
@@ -21,6 +21,7 @@ class PrefsManager private constructor(private val context: Context) {
         const val HANDLE_COLOR = "handle_color"
         const val HANDLE_SHADOW = "handle_shadow"
         const val TRANSPARENT_WIDGETS = "transparent_widgets"
+        const val CURRENT_SHORTCUT_IDS = "shortcut_ids"
 
         @SuppressLint("RtlHardcoded")
         const val HANDLE_LEFT = Gravity.LEFT
@@ -40,11 +41,11 @@ class PrefsManager private constructor(private val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
 
-    var currentWidgets: List<OverrideWidgetInfo>
+    var currentWidgets: List<BaseWidgetInfo>
         get() {
-            return Gson().fromJson<ArrayList<OverrideWidgetInfo>>(
+            return Gson().fromJson<ArrayList<BaseWidgetInfo>>(
                 getString(WIDGETS, null) ?: return ArrayList(),
-                object : TypeToken<ArrayList<OverrideWidgetInfo>>() {}.type
+                object : TypeToken<ArrayList<BaseWidgetInfo>>() {}.type
             ).apply { removeAll { it.id == -1 } }
         }
         set(value) {
@@ -90,6 +91,11 @@ class PrefsManager private constructor(private val context: Context) {
         set(value) {
             putBoolean(TRANSPARENT_WIDGETS, value)
         }
+    var shortcutIds: Set<String>
+        get() = HashSet(getStringSet(CURRENT_SHORTCUT_IDS, HashSet()))
+        set(value) {
+            putStringSet(CURRENT_SHORTCUT_IDS, value.toSet())
+        }
 
 
     fun getString(key: String, def: String?) = prefs.getString(key, def)
@@ -113,4 +119,12 @@ class PrefsManager private constructor(private val context: Context) {
 
     fun removePrefListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
             prefs.unregisterOnSharedPreferenceChangeListener(listener)
+
+    fun addShortcutId(id: String) {
+        shortcutIds = ArrayList(shortcutIds).apply { add(id) }.toSet()
+    }
+
+    fun removeShortcutId(id: String) {
+        shortcutIds = ArrayList(shortcutIds).apply { remove(id) }.toSet()
+    }
 }

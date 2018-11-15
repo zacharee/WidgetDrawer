@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
+import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.*
 import android.view.View.OnClickListener
@@ -30,8 +31,10 @@ import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.PERM_CODE
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 import tk.zwander.widgetdrawer.misc.DrawerHost
-import tk.zwander.widgetdrawer.misc.OverrideWidgetInfo
+import tk.zwander.widgetdrawer.misc.ShortcutData
+import tk.zwander.widgetdrawer.misc.ShortcutIdManager
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
 import java.util.*
@@ -66,7 +69,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         get() = WindowManager.LayoutParams().apply {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
-                    else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+            else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
             flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
             dimAmount = 0.5f
             width = displaySize.x
@@ -79,6 +82,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val host = DrawerHost(context.applicationContext, 1003)
     private val manager = AppWidgetManager.getInstance(context.applicationContext)
+    private val shortcutIdManager = ShortcutIdManager.getInstance(context)
     private val prefs = PrefsManager.getInstance(context)
     private val adapter = DrawerAdapter(manager, host)
 
@@ -295,13 +299,14 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         anim.addUpdateListener {
             alpha = it.animatedValue.toString().toFloat()
         }
-        anim.addListener(object: AnimatorListenerAdapter() {
+        anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
                 hideListener?.invoke()
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)
-                    } catch (e: Exception) {}
+                    } catch (e: Exception) {
+                    }
                 }, 10)
             }
         })
@@ -353,6 +358,17 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
     }
 
+    private fun tryBindShortcut(info: ShortcutData) {
+        val shortcut = BaseWidgetInfo.shortcut(
+            info.label,
+            info.icon,
+            info.activityInfo,
+            shortcutIdManager.allocateShortcutId()
+        )
+
+        addNewShortcut(shortcut)
+    }
+
     private fun addNewWidget(id: Int) {
         showDrawer()
         val info = createSavedWidget(id)
@@ -360,13 +376,20 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         prefs.currentWidgets = adapter.widgets
     }
 
-    private fun createSavedWidget(id: Int): OverrideWidgetInfo {
-        return OverrideWidgetInfo(id, DrawerAdapter.SIZE_DEF, false)
+    private fun addNewShortcut(info: BaseWidgetInfo) {
+        showDrawer()
+        adapter.addItem(info)
+        prefs.currentWidgets = adapter.widgets
+    }
+
+    private fun createSavedWidget(id: Int): BaseWidgetInfo {
+        return BaseWidgetInfo.widget(id)
     }
 
     private fun removeWidget(position: Int) {
         val info = adapter.removeAt(position)
-        host.deleteAppWidgetId(info.id)
+        if (info.type == BaseWidgetInfo.TYPE_WIDGET) host.deleteAppWidgetId(info.id)
+        else if (info.type == BaseWidgetInfo.TYPE_SHORTCUT) shortcutIdManager.removeShortcutId(info.id)
         prefs.currentWidgets = adapter.widgets
     }
 
@@ -390,9 +413,12 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
                     showDrawer()
             }
             PICK_CODE -> {
-                if (resultCode == Activity.RESULT_OK)
-                    tryBindWidget(data?.getParcelableExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER) ?: return)
-                else
+                if (resultCode == Activity.RESULT_OK) {
+                    val res = data?.getParcelableExtra<Parcelable>(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER)
+
+                    if (res is AppWidgetProviderInfo) tryBindWidget(res)
+                    else if (res is ShortcutData) tryBindShortcut(res)
+                } else
                     showDrawer()
             }
         }

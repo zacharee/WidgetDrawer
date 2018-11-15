@@ -11,7 +11,7 @@ class CustomCard : FrameLayout {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     init {
-        background = resources.getDrawable(R.drawable.card_background)
+        background = context.getDrawable(R.drawable.card_background)
     }
 
     fun setCardBackgroundColor(color: Int) {
