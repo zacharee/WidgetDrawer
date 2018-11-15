@@ -39,6 +39,7 @@
         <activity android:name=".activities.TriggerActivity"
             android:label="@string/open_drawer"
             android:theme="@style/AppTheme.Null"
+            android:exported="true"
             />
 
         <service
