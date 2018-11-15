@@ -10,9 +10,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -101,7 +99,9 @@ class DrawerAdapter(
                 vh
             }
             TYPE_SHORTCUT -> {
-                val vh = ShortcutVH(LayoutInflater.from(parent.context).inflate(R.layout.shortcut_holder, parent, false))
+                val vh = ShortcutVH(LayoutInflater.from(parent.context).inflate(R.layout.shortcut_holder, parent, false)) { motionEvent ->
+                    parent.onTouchEvent(motionEvent)
+                }
                 updateTransparency(vh, true)
                 vh
             }
@@ -341,7 +341,8 @@ class DrawerAdapter(
     }
 
     class WidgetVH(view: View) : BaseVH(view)
-    class ShortcutVH(view: View) : BaseVH(view) {
+
+    class ShortcutVH(view: View, private val scrollCallback: (MotionEvent) -> Unit) : BaseVH(view) {
         var name: String?
             get() = itemView.shortcut_label.text.toString()
             set(value) {
@@ -352,6 +353,34 @@ class DrawerAdapter(
             set(value) {
                 itemView.shortcut_icon.setImageDrawable(value)
             }
+
+        private var wasScroll = false
+        private val gestureDetector = GestureDetector(itemView.context, object : GestureDetector.SimpleOnGestureListener() {
+            override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
+                val newEvent = MotionEvent.obtain(e2)
+
+                scaleMotionEvent(newEvent)
+
+                scrollCallback.invoke(newEvent)
+
+                newEvent.recycle()
+                wasScroll = true
+                return true
+            }
+        })
+
+        init {
+            itemView.setOnTouchListener { _, event ->
+                val scrollCheck = (event.action == MotionEvent.ACTION_UP && wasScroll)
+                if (scrollCheck) wasScroll = false
+                gestureDetector.onTouchEvent(event) || scrollCheck
+            }
+        }
+
+        private fun scaleMotionEvent(event: MotionEvent) {
+            event.setLocation(event.x + itemView.left + (itemView.parent as ViewGroup).left,
+                event.y + itemView.top + (itemView.parent as ViewGroup).top)
+        }
     }
     open class BaseVH(view: View) : RecyclerView.ViewHolder(view) {
         val selection: RadioButton
