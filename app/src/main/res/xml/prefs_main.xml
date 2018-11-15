@@ -37,6 +37,7 @@
         android:key="handle_color"
         android:defaultValue="-1"
         app:cpv_allowCustom="true"
+        app:cpv_showAlphaSlider="true"
         />
 
 </androidx.preference.PreferenceScreen>
