@@ -51,6 +51,8 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         const val EXTRA_DATA = "data"
         const val EXTRA_APPWIDGET_CONFIGURE = "configure"
 
+        const val ANIM_DURATION = 400L
+
         fun onResult(context: Context, result: Int, code: Int, data: Intent?) {
             val intent = Intent(ACTION_RESULT)
             intent.putExtra(Intent.EXTRA_RETURN_RESULT, result)
@@ -154,33 +156,33 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
 
         edit.setOnClickListener {
+            adapter.isEditing = true
             edit_bar.visibility = View.VISIBLE
             edit_bar.animate()
                 .scaleX(1f)
                 .scaleY(1f)
                 .setInterpolator(OvershootInterpolator())
-                .setDuration(500)
+                .setDuration(ANIM_DURATION)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         button_wrapper.visibility = View.GONE
                         widget_grid.allowReorder = true
-                        adapter.isEditing = true
                     }
                 })
         }
 
         go_back.setOnClickListener {
+            adapter.isEditing = false
             button_wrapper.visibility = View.VISIBLE
             edit_bar.animate()
                 .scaleX(0f)
                 .scaleY(0f)
                 .setInterpolator(AnticipateInterpolator())
-                .setDuration(500L)
+                .setDuration(ANIM_DURATION)
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         edit_bar.visibility = View.GONE
                         widget_grid.allowReorder = false
-                        adapter.isEditing = false
                     }
                 })
         }
@@ -229,6 +231,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         handler?.postDelayed({
             val anim = ValueAnimator.ofFloat(0f, 1f)
             anim.interpolator = DecelerateInterpolator()
+            anim.duration = ANIM_DURATION
             anim.addUpdateListener {
                 alpha = it.animatedValue.toString().toFloat()
             }
@@ -296,6 +299,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     fun hideDrawer() {
         val anim = ValueAnimator.ofFloat(1f, 0f)
         anim.interpolator = AccelerateInterpolator()
+        anim.duration = ANIM_DURATION
         anim.addUpdateListener {
             alpha = it.animatedValue.toString().toFloat()
         }

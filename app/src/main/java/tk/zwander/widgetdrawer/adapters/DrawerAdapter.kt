@@ -28,6 +28,7 @@ import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.views.CustomCard
+import tk.zwander.widgetdrawer.views.Drawer
 import java.util.*
 
 class DrawerAdapter(
@@ -217,7 +218,7 @@ class DrawerAdapter(
             if (transparentWidgets) Color.TRANSPARENT else background
         )
         alphaAnim.interpolator = if (transparentWidgets) AccelerateInterpolator() else DecelerateInterpolator()
-        alphaAnim.duration = 500L
+        alphaAnim.duration = Drawer.ANIM_DURATION
         alphaAnim.addUpdateListener {
             card.setCardBackgroundColor(it.animatedValue.toString().toInt())
         }
@@ -228,7 +229,7 @@ class DrawerAdapter(
             if (transparentWidgets) 0f else elevation
         )
         elevAnim.interpolator = if (transparentWidgets) AnticipateInterpolator() else OvershootInterpolator()
-        elevAnim.duration = 500L
+        elevAnim.duration = Drawer.ANIM_DURATION
         elevAnim.addUpdateListener {
             card.elevation = it.animatedValue.toString().toFloat()
         }
@@ -246,7 +247,7 @@ class DrawerAdapter(
                 animate()
                     .scaleX(1f)
                     .scaleY(1f)
-                    .setDuration(500L)
+                    .setDuration(Drawer.ANIM_DURATION)
                     .setInterpolator(OvershootInterpolator())
                     .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
@@ -258,7 +259,7 @@ class DrawerAdapter(
                 animate()
                     .scaleX(0f)
                     .scaleY(0f)
-                    .setDuration(500L)
+                    .setDuration(Drawer.ANIM_DURATION)
                     .setInterpolator(AnticipateInterpolator())
                     .setListener(object : AnimatorListenerAdapter() {
                         override fun onAnimationEnd(animation: Animator?) {
