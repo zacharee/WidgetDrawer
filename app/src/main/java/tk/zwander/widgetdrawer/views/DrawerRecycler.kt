@@ -1,15 +1,26 @@
 package tk.zwander.widgetdrawer.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
+import android.view.GestureDetector
 import android.view.MotionEvent
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import tk.zwander.widgetdrawer.services.DrawerService
+import tk.zwander.widgetdrawer.utils.PrefsManager
 
 class DrawerRecycler : RecyclerView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
+
+    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+        override fun onSingleTapUp(e: MotionEvent?): Boolean {
+            if (PrefsManager.getInstance(context).closeOnEmptyTap) DrawerService.closeDrawer(context)
+            return true
+        }
+    })
 
     private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
@@ -54,5 +65,10 @@ class DrawerRecycler : RecyclerView {
     override fun onInterceptTouchEvent(e: MotionEvent?): Boolean {
         val sup = super.onInterceptTouchEvent(e)
         return if (allowReorder) sup else false
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(e: MotionEvent?): Boolean {
+        return super.onTouchEvent(e) or gestureDetector.onTouchEvent(e)
     }
 }

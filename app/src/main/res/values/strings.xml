@@ -12,6 +12,7 @@
     <string name="unlicensed">Unlicensed App!</string>
     <string name="show_handle">Show Handle</string>
     <string name="open_drawer">Open Drawer</string>
+    <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>

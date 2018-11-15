@@ -26,11 +26,11 @@ import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.Handle
 
 
-
 @SuppressLint("InflateParams")
 class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val ACTION_OPEN_DRAWER = "open_drawer"
+        const val ACTION_CLOSE_DRAWER = "close_drawer"
 
         private const val CHANNEL = "widget_drawer_main"
 
@@ -45,6 +45,10 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         fun openDrawer(context: Context) {
             LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_OPEN_DRAWER))
         }
+
+        fun closeDrawer(context: Context) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_CLOSE_DRAWER))
+        }
     }
 
     private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
@@ -52,14 +56,20 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
     private val appOpsManager by lazy { getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager }
 
     private val handle by lazy { Handle(this) }
-    private val drawer by lazy { LayoutInflater.from(this)
-        .inflate(R.layout.drawer_layout, null, false) as Drawer }
+    private val drawer by lazy {
+        LayoutInflater.from(this)
+            .inflate(R.layout.drawer_layout, null, false) as Drawer
+    }
     private val prefs by lazy { PrefsManager.getInstance(this) }
     private val overlayListener = AppOpsManager.OnOpChangedListener { op, packageName ->
         if (packageName == this.packageName) {
-            when(op) {
+            when (op) {
                 AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW -> {
-                    val allowed = appOpsManager.checkOpNoThrow(op, Process.myUid(), this.packageName) == AppOpsManager.MODE_ALLOWED
+                    val allowed = appOpsManager.checkOpNoThrow(
+                        op,
+                        Process.myUid(),
+                        this.packageName
+                    ) == AppOpsManager.MODE_ALLOWED
                     if (allowed) addHandle()
                     else {
                         stopForeground(true)
@@ -76,6 +86,10 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
                     remHandle()
                     drawer.showDrawer()
                 }
+
+                ACTION_CLOSE_DRAWER -> {
+                    drawer.hideDrawer()
+                }
             }
         }
     }
@@ -85,20 +99,25 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
     override fun onCreate() {
         drawer.onCreate()
         prefs.addPrefListener(this)
-        LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER))
+        LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER).apply {
+            addAction(ACTION_CLOSE_DRAWER)
+        })
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
-            val channel = NotificationChannel(CHANNEL, resources.getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW)
+            val channel =
+                NotificationChannel(CHANNEL, resources.getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW)
             channel.enableVibration(false)
             channel.enableLights(false)
             nm.createNotificationChannel(channel)
         }
 
-        startForeground(100, NotificationCompat.Builder(this, CHANNEL)
-            .setContentTitle(resources.getString(R.string.app_name))
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build())
+        startForeground(
+            100, NotificationCompat.Builder(this, CHANNEL)
+                .setContentTitle(resources.getString(R.string.app_name))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build()
+        )
 
         handle.onOpenListener = {
             if (!drawer.isAttachedToWindow) {
@@ -143,14 +162,16 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         if (prefs.showHandle) {
             try {
                 windowManager.addView(handle, handle.params)
-            } catch (e: Exception) {}
+            } catch (e: Exception) {
+            }
         }
     }
 
     private fun remHandle() {
         try {
             windowManager.removeView(handle)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
     @TargetApi(Build.VERSION_CODES.M)

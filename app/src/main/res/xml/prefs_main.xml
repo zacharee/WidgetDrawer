@@ -8,6 +8,12 @@
         android:defaultValue="false"
         />
 
+    <androidx.preference.SwitchPreference
+        android:title="@string/close_on_empty_tap"
+        android:key="close_on_empty_tap"
+        android:defaultValue="false"
+        />
+
     <androidx.preference.Preference
         android:title="@string/open_drawer"
         android:key="open_drawer"

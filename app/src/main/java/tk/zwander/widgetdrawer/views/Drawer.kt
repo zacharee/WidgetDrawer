@@ -13,8 +13,11 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.view.*
+import android.view.Gravity
+import android.view.KeyEvent
+import android.view.View
 import android.view.View.OnClickListener
+import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.DecelerateInterpolator
@@ -237,13 +240,6 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
             }
             anim.start()
         }, 10)
-    }
-
-    override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
-        handler.postDelayed({
-            //maybe handle drawer closing at some point?
-        }, 50)
-        return super.onInterceptTouchEvent(ev)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
