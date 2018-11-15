@@ -29,16 +29,23 @@
             android:name=".activities.PermConfigActivity"
             android:excludeFromRecents="true"
             android:launchMode="singleInstance"
-            android:theme="@style/AppTheme.Null" />
+            android:theme="@style/AppTheme.Null"
+            />
         <activity
             android:name=".activities.WidgetSelectActivity"
             android:excludeFromRecents="true"
-            android:label="@string/add_widget" />
+            android:label="@string/add_widget"
+            />
+        <activity android:name=".activities.TriggerActivity"
+            android:label="@string/open_drawer"
+            android:theme="@style/AppTheme.Null"
+            />
 
         <service
             android:name=".services.DrawerService"
             android:enabled="true"
-            android:exported="true" />
+            android:exported="true"
+            />
         <service
             android:name=".services.DrawerToggleTile"
             android:enabled="true"
@@ -51,7 +58,10 @@
             </intent-filter>
         </service>
 
-        <meta-data android:name="google_analytics_adid_collection_enabled" android:value="false" />
+        <meta-data
+            android:name="google_analytics_adid_collection_enabled"
+            android:value="false"
+            />
     </application>
 
 </manifest>

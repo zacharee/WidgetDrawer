@@ -6,9 +6,7 @@ import android.app.AppOpsManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
-import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import android.content.*
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -19,6 +17,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.canDrawOverlays
@@ -31,6 +30,8 @@ import tk.zwander.widgetdrawer.views.Handle
 @SuppressLint("InflateParams")
 class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
+        const val ACTION_OPEN_DRAWER = "open_drawer"
+
         private const val CHANNEL = "widget_drawer_main"
 
         fun start(context: Context) {
@@ -39,6 +40,10 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
 
         fun stop(context: Context) {
             context.stopService(Intent(context, DrawerService::class.java))
+        }
+
+        fun openDrawer(context: Context) {
+            LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_OPEN_DRAWER))
         }
     }
 
@@ -64,12 +69,23 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
             }
         }
     }
+    private val openReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                ACTION_OPEN_DRAWER -> {
+                    remHandle()
+                    drawer.showDrawer()
+                }
+            }
+        }
+    }
 
     override fun onBind(intent: Intent) = null
 
     override fun onCreate() {
         drawer.onCreate()
         prefs.addPrefListener(this)
+        LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER))
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             val channel = NotificationChannel(CHANNEL, resources.getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW)
@@ -157,6 +173,7 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         drawer.onDestroy()
         handle.onDestroy()
         prefs.removePrefListener(this)
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(openReceiver)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)

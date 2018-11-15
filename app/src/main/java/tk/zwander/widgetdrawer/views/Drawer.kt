@@ -281,7 +281,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     fun onDestroy() {
-        hideDrawer()
+        hideDrawer(false)
         host.stopListening()
         prefs.currentWidgets = adapter.widgets
 
@@ -296,7 +296,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         } catch (e: Exception) {}
     }
 
-    fun hideDrawer() {
+    fun hideDrawer(callListener: Boolean = true) {
         val anim = ValueAnimator.ofFloat(1f, 0f)
         anim.interpolator = AccelerateInterpolator()
         anim.duration = ANIM_DURATION
@@ -305,7 +305,7 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         }
         anim.addListener(object : AnimatorListenerAdapter() {
             override fun onAnimationEnd(animation: Animator?) {
-                hideListener?.invoke()
+                if (callListener) hideListener?.invoke()
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)

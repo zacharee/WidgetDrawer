@@ -11,6 +11,7 @@
     <string name="add_widget">Add Widget</string>
     <string name="unlicensed">Unlicensed App!</string>
     <string name="show_handle">Show Handle</string>
+    <string name="open_drawer">Open Drawer</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>

@@ -8,10 +8,17 @@
         android:defaultValue="false"
         />
 
+    <androidx.preference.Preference
+        android:title="@string/open_drawer"
+        android:key="open_drawer"
+        android:dependency="enabled"
+        />
+
     <androidx.preference.SwitchPreferenceCompat
         android:title="@string/show_handle"
         android:key="show_handle"
         android:defaultValue="true"
+        android:dependency="enabled"
         />
 
     <androidx.preference.SwitchPreferenceCompat

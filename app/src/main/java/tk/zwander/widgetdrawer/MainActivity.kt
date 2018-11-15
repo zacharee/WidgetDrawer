@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
+import tk.zwander.widgetdrawer.services.DrawerService
 import tk.zwander.widgetdrawer.utils.PrefsManager
 
 class MainActivity : AppCompatActivity() {
@@ -25,6 +26,11 @@ class MainActivity : AppCompatActivity() {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.prefs_main, rootKey)
             preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+
+            findPreference("open_drawer").setOnPreferenceClickListener {
+                DrawerService.openDrawer(context!!)
+                true
+            }
         }
 
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
