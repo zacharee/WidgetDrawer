@@ -10,6 +10,7 @@
     <string name="handle_shadow">Handle Shadow</string>
     <string name="add_widget">Add Widget</string>
     <string name="unlicensed">Unlicensed App!</string>
+    <string name="show_handle">Show Handle</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>

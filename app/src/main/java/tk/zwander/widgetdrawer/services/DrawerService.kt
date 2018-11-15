@@ -8,6 +8,7 @@ import android.app.NotificationManager
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
@@ -28,7 +29,7 @@ import tk.zwander.widgetdrawer.views.Handle
 
 
 @SuppressLint("InflateParams")
-class DrawerService : Service() {
+class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         private const val CHANNEL = "widget_drawer_main"
 
@@ -68,6 +69,7 @@ class DrawerService : Service() {
 
     override fun onCreate() {
         drawer.onCreate()
+        prefs.addPrefListener(this)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             val channel = NotificationChannel(CHANNEL, resources.getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW)
@@ -115,10 +117,18 @@ class DrawerService : Service() {
         }
     }
 
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
+        when (key) {
+            PrefsManager.SHOW_HANDLE -> if (prefs.showHandle) addHandle() else remHandle()
+        }
+    }
+
     private fun addHandle() {
-        try {
-            windowManager.addView(handle, handle.params)
-        } catch (e: Exception) {}
+        if (prefs.showHandle) {
+            try {
+                windowManager.addView(handle, handle.params)
+            } catch (e: Exception) {}
+        }
     }
 
     private fun remHandle() {
@@ -146,6 +156,7 @@ class DrawerService : Service() {
 
         drawer.onDestroy()
         handle.onDestroy()
+        prefs.removePrefListener(this)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)
