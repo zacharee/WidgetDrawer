@@ -22,7 +22,7 @@ import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
-import android.widget.LinearLayout
+import android.widget.FrameLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -43,7 +43,7 @@ import tk.zwander.widgetdrawer.utils.screenSize
 import java.util.*
 
 
-class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener {
+class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     companion object {
         const val ACTION_PERM = "PERMISSION"
         const val ACTION_CONFIG = "CONFIGURATION"
@@ -115,7 +115,6 @@ class Drawer : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
 
     init {
 //        setBackgroundColor(Color.argb(100, 0, 0, 0))
-        orientation = LinearLayout.VERTICAL
     }
 
     override fun onFinishInflate() {

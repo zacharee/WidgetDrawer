@@ -4,148 +4,170 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/AppTheme"
-    android:alpha="0"
-    android:clickable="true"
-    android:focusable="true">
+    android:alpha="0">
 
     <tk.zwander.widgetdrawer.views.DrawerRecycler
         android:id="@+id/widget_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1"
         android:orientation="vertical"
         app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
         />
 
-    <FrameLayout
-        android:id="@+id/action_bar_wrapper"
+    <tk.zwander.widgetdrawer.views.ToolbarAnimHolder
+        android:id="@+id/action_bar_anim_wrapper"
         android:layout_width="match_parent"
-        android:layout_height="?android:actionBarSize">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="bottom"
+        android:translationY="?android:actionBarSize">
+
+        <ImageView
+            android:id="@+id/open_close_toolbar"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_gravity="center"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:tint="@android:color/white"
+            android:src="@drawable/arrow_up"
+            />
 
         <FrameLayout
-            android:id="@+id/button_wrapper"
+            android:id="@+id/action_bar_wrapper"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:colorPrimary"
-            android:elevation="8dp"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp">
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_height="?android:actionBarSize">
 
-            <LinearLayout
-                android:layout_width="wrap_content"
+            <FrameLayout
+                android:id="@+id/button_wrapper"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:gravity="center_vertical"
+                android:background="?android:colorPrimary"
+                android:elevation="8dp"
                 android:orientation="horizontal"
-                android:layout_gravity="start">
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp">
 
-                <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/edit"
-                    android:layout_width="48dp"
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:src="@drawable/edit"
-                    />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:layout_gravity="start">
 
-                <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/toggle_transparent"
-                    android:layout_width="48dp"
+                    <tk.zwander.widgetdrawer.views.ButtonImageView
+                        android:id="@+id/edit"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/edit"
+                        />
+
+                    <tk.zwander.widgetdrawer.views.ButtonImageView
+                        android:id="@+id/toggle_transparent"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/visibility"
+                        />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:src="@drawable/visibility"
-                    />
+                    android:layout_gravity="end"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
-            </LinearLayout>
+                    <tk.zwander.widgetdrawer.views.ButtonImageView
+                        android:id="@+id/add_widget"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:src="@drawable/add_skel"
+                        />
+
+                    <tk.zwander.widgetdrawer.views.ButtonImageView
+                        android:id="@+id/close_drawer"
+                        android:layout_width="48dp"
+                        android:layout_height="match_parent"
+                        android:rotation="45"
+                        android:src="@drawable/add_skel"
+                        />
+
+                </LinearLayout>
+
+            </FrameLayout>
 
             <LinearLayout
-                android:layout_width="wrap_content"
+                android:id="@+id/edit_bar"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_gravity="end"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:background="?android:colorPrimary"
+                android:elevation="12dp"
+                android:orientation="horizontal"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:scaleY="0"
+                android:scaleX="0"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/add_widget"
-                    android:layout_width="48dp"
+                    android:id="@+id/expand_horiz"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:src="@drawable/add_skel"
+                    android:layout_weight="1"
+                    android:src="@drawable/expand_horiz"
                     />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
-                    android:id="@+id/close_drawer"
-                    android:layout_width="48dp"
+                    android:id="@+id/collapse_horiz"
+                    android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:rotation="45"
-                    android:src="@drawable/add_skel"
+                    android:layout_weight="1"
+                    android:src="@drawable/collapse_horiz"
+                    />
+
+                <tk.zwander.widgetdrawer.views.ButtonImageView
+                    android:id="@+id/expand_vert"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:src="@drawable/expand_vert"
+                    />
+
+                <tk.zwander.widgetdrawer.views.ButtonImageView
+                    android:id="@+id/collapse_vert"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:src="@drawable/collapse_vert"
+                    />
+
+                <View
+                    android:layout_width="0.5dp"
+                    android:layout_height="match_parent"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp"
+                    android:background="#fff"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="8dp"
+                    />
+
+                <tk.zwander.widgetdrawer.views.ButtonImageView
+                    android:id="@+id/go_back"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:src="@drawable/back"
                     />
 
             </LinearLayout>
 
         </FrameLayout>
 
-        <LinearLayout
-            android:id="@+id/edit_bar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:colorPrimary"
-            android:elevation="12dp"
-            android:orientation="horizontal"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:scaleY="0"
-            android:scaleX="0"
-            android:visibility="gone">
-
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/expand_horiz"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/expand_horiz"
-                />
-
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/collapse_horiz"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/collapse_horiz"
-                />
-
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/expand_vert"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/expand_vert"
-                />
-
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/collapse_vert"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/collapse_vert"
-                />
-
-            <View
-                android:layout_width="0.5dp"
-                android:layout_height="match_parent"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:background="#fff"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
-                />
-
-            <tk.zwander.widgetdrawer.views.ButtonImageView
-                android:id="@+id/go_back"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:src="@drawable/back"
-                />
-
-        </LinearLayout>
-
-    </FrameLayout>
+    </tk.zwander.widgetdrawer.views.ToolbarAnimHolder>
 
 </tk.zwander.widgetdrawer.views.Drawer>
