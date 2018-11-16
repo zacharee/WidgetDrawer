@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <tk.zwander.widgetdrawer.views.Drawer xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/AppTheme"
-    android:alpha="0">
+    android:alpha="0"
+    android:theme="@style/AppTheme">
 
     <tk.zwander.widgetdrawer.views.DrawerRecycler
         android:id="@+id/widget_grid"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
-        />
+        app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager" />
 
     <tk.zwander.widgetdrawer.views.ToolbarAnimHolder
         android:id="@+id/action_bar_anim_wrapper"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:layout_gravity="bottom"
+        android:orientation="vertical"
         android:translationY="?android:actionBarSize">
 
         <ImageView
             android:id="@+id/open_close_toolbar"
-            android:clickable="true"
-            android:focusable="true"
-            android:layout_gravity="center"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:tint="@android:color/white"
+            android:layout_gravity="center"
+            android:clickable="true"
+            android:focusable="true"
             android:src="@drawable/arrow_up"
-            />
+            android:tint="@android:color/white"
+            tools:ignore="ContentDescription" />
 
         <FrameLayout
             android:id="@+id/action_bar_wrapper"
             android:layout_width="match_parent"
+            android:layout_height="?android:actionBarSize"
             android:clickable="true"
-            android:focusable="true"
-            android:layout_height="?android:actionBarSize">
+            android:focusable="true">
 
             <FrameLayout
                 android:id="@+id/button_wrapper"
@@ -53,23 +53,21 @@
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
+                    android:layout_gravity="start"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:layout_gravity="start">
+                    android:orientation="horizontal">
 
                     <tk.zwander.widgetdrawer.views.ButtonImageView
                         android:id="@+id/edit"
                         android:layout_width="48dp"
                         android:layout_height="match_parent"
-                        android:src="@drawable/edit"
-                        />
+                        android:src="@drawable/edit" />
 
                     <tk.zwander.widgetdrawer.views.ButtonImageView
                         android:id="@+id/toggle_transparent"
                         android:layout_width="48dp"
                         android:layout_height="match_parent"
-                        android:src="@drawable/visibility"
-                        />
+                        android:src="@drawable/visibility" />
 
                 </LinearLayout>
 
@@ -84,16 +82,14 @@
                         android:id="@+id/add_widget"
                         android:layout_width="48dp"
                         android:layout_height="match_parent"
-                        android:src="@drawable/add_skel"
-                        />
+                        android:src="@drawable/add_skel" />
 
                     <tk.zwander.widgetdrawer.views.ButtonImageView
                         android:id="@+id/close_drawer"
                         android:layout_width="48dp"
                         android:layout_height="match_parent"
                         android:rotation="45"
-                        android:src="@drawable/add_skel"
-                        />
+                        android:src="@drawable/add_skel" />
 
                 </LinearLayout>
 
@@ -104,14 +100,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?android:colorPrimary"
+                android:clickable="true"
                 android:elevation="12dp"
+                android:focusable="true"
                 android:orientation="horizontal"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
-                android:scaleY="0"
                 android:scaleX="0"
-                android:clickable="true"
-                android:focusable="true"
+                android:scaleY="0"
                 android:visibility="gone">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
@@ -119,50 +115,44 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:src="@drawable/expand_horiz"
-                    />
+                    android:src="@drawable/expand_horiz" />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/collapse_horiz"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:src="@drawable/collapse_horiz"
-                    />
+                    android:src="@drawable/collapse_horiz" />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/expand_vert"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:src="@drawable/expand_vert"
-                    />
+                    android:src="@drawable/expand_vert" />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/collapse_vert"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:src="@drawable/collapse_vert"
-                    />
+                    android:src="@drawable/collapse_vert" />
 
                 <View
                     android:layout_width="0.5dp"
                     android:layout_height="match_parent"
-                    android:paddingTop="4dp"
-                    android:paddingBottom="4dp"
-                    android:background="#fff"
                     android:layout_marginStart="8dp"
                     android:layout_marginEnd="8dp"
-                    />
+                    android:background="#fff"
+                    android:paddingTop="4dp"
+                    android:paddingBottom="4dp" />
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/go_back"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:src="@drawable/back"
-                    />
+                    android:src="@drawable/back" />
 
             </LinearLayout>
 

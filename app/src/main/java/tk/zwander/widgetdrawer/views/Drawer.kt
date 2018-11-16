@@ -54,7 +54,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         const val EXTRA_DATA = "data"
         const val EXTRA_APPWIDGET_CONFIGURE = "configure"
 
-        const val ANIM_DURATION = 400L
+        const val ANIM_DURATION = 200L
 
         fun onResult(context: Context, result: Int, code: Int, data: Intent?) {
             val intent = Intent(ACTION_RESULT)
