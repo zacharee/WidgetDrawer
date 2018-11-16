@@ -55,6 +55,10 @@ class ToolbarAnimHolder : LinearLayout {
 
                         if (newTranslation > 0 && newTranslation < openTranslation) {
                             translationY -= dist
+                        } else if (newTranslation < 0) {
+                            translationY = 0f
+                        } else if (newTranslation > openTranslation) {
+                            translationY = openTranslation.toFloat()
                         }
 
                         true
@@ -64,7 +68,6 @@ class ToolbarAnimHolder : LinearLayout {
                 MotionEvent.ACTION_UP -> {
                     if (wasDragging) {
                         transition(translationY > (openTranslation / 3f), 100)
-
                     } else {
                         transition()
                         v.performClick()
