@@ -17,8 +17,10 @@ class DrawerRecycler : RecyclerView {
 
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
-            if (PrefsManager.getInstance(context).closeOnEmptyTap) DrawerService.closeDrawer(context)
-            return true
+            return if (PrefsManager.getInstance(context).closeOnEmptyTap && !allowReorder) {
+                DrawerService.closeDrawer(context)
+                true
+            } else false
         }
     })
 
