@@ -127,8 +127,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             adapter.transparentWidgets = prefs.transparentWidgets
         }
 
-        widget_grid.itemAnimator = DefaultItemAnimator()
-
         widget_grid.onMoveListener = { _, viewHolder, target ->
             val fromPosition = viewHolder.adapterPosition
             val toPosition = target.adapterPosition
