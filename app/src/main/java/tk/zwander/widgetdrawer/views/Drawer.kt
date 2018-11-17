@@ -83,12 +83,12 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-    private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
-    private val host = DrawerHost(context.applicationContext, 1003)
-    private val manager = AppWidgetManager.getInstance(context.applicationContext)
-    private val shortcutIdManager = ShortcutIdManager.getInstance(context)
-    private val prefs = PrefsManager.getInstance(context)
-    private val adapter = DrawerAdapter(manager, host)
+    private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
+    private val host by lazy { DrawerHost(context.applicationContext, 1003) }
+    private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
+    private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context) }
+    private val prefs by lazy { PrefsManager.getInstance(context) }
+    private val adapter by lazy { DrawerAdapter(manager, host) }
 
     private val localReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -119,109 +119,111 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        add_widget.setOnClickListener { pickWidget() }
-        close_drawer.setOnClickListener { hideDrawer() }
-        toggle_transparent.setOnClickListener {
-            prefs.transparentWidgets = !prefs.transparentWidgets
+        if (!isInEditMode) {
+            add_widget.setOnClickListener { pickWidget() }
+            close_drawer.setOnClickListener { hideDrawer() }
+            toggle_transparent.setOnClickListener {
+                prefs.transparentWidgets = !prefs.transparentWidgets
+                adapter.transparentWidgets = prefs.transparentWidgets
+            }
+
+            widget_grid.onMoveListener = { _, viewHolder, target ->
+                val fromPosition = viewHolder.adapterPosition
+                val toPosition = target.adapterPosition
+
+                if (toPosition == 0 || fromPosition == 0) false
+                else {
+                    if (fromPosition < toPosition) {
+                        for (i in fromPosition until toPosition) {
+                            Collections.swap(adapter.widgets, i, i + 1)
+                        }
+                    } else {
+                        for (i in fromPosition downTo toPosition + 1) {
+                            Collections.swap(adapter.widgets, i, i - 1)
+                        }
+                    }
+
+                    adapter.notifyItemMoved(fromPosition, toPosition)
+
+                    prefs.currentWidgets = adapter.widgets
+
+                    true
+                }
+            }
+
+            widget_grid.onSwipeListener = { viewHolder, _ ->
+                removeWidget(viewHolder.adapterPosition)
+            }
+
+            edit.setOnClickListener {
+                adapter.isEditing = true
+                edit_bar.visibility = View.VISIBLE
+                edit_bar.animate()
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setInterpolator(OvershootInterpolator())
+                    .setDuration(ANIM_DURATION)
+                    .setListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            button_wrapper.visibility = View.GONE
+                            widget_grid.allowReorder = true
+                        }
+                    })
+            }
+
+            go_back.setOnClickListener {
+                adapter.isEditing = false
+                button_wrapper.visibility = View.VISIBLE
+                edit_bar.animate()
+                    .scaleX(0f)
+                    .scaleY(0f)
+                    .setInterpolator(AnticipateInterpolator())
+                    .setDuration(ANIM_DURATION)
+                    .setListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator?) {
+                            edit_bar.visibility = View.GONE
+                            widget_grid.allowReorder = false
+                        }
+                    })
+            }
+
+            val listener = OnClickListener { view ->
+                adapter.selectedWidget?.let { widget ->
+                    var changed = false
+
+                    when (view.id) {
+                        R.id.expand_horiz -> {
+                            changed = widget.isFullWidth != true
+                            widget.isFullWidth = true
+                        }
+                        R.id.collapse_horiz -> {
+                            changed = widget.isFullWidth != false
+                            widget.isFullWidth = false
+                        }
+                        R.id.expand_vert -> {
+                            changed = true
+                            widget.forcedHeight++
+                        }
+                        R.id.collapse_vert -> {
+                            changed = true
+                            widget.forcedHeight--
+                        }
+                    }
+
+                    if (changed) {
+                        prefs.currentWidgets = adapter.widgets
+                        adapter.sizeObservable.onNext(widget.id)
+                    }
+                }
+            }
+
+            expand_horiz.setOnClickListener(listener)
+            expand_vert.setOnClickListener(listener)
+            collapse_horiz.setOnClickListener(listener)
+            collapse_vert.setOnClickListener(listener)
+
             adapter.transparentWidgets = prefs.transparentWidgets
         }
-
-        widget_grid.onMoveListener = { _, viewHolder, target ->
-            val fromPosition = viewHolder.adapterPosition
-            val toPosition = target.adapterPosition
-
-            if (toPosition == 0 || fromPosition == 0) false
-            else {
-                if (fromPosition < toPosition) {
-                    for (i in fromPosition until toPosition) {
-                        Collections.swap(adapter.widgets, i, i + 1)
-                    }
-                } else {
-                    for (i in fromPosition downTo toPosition + 1) {
-                        Collections.swap(adapter.widgets, i, i - 1)
-                    }
-                }
-
-                adapter.notifyItemMoved(fromPosition, toPosition)
-
-                prefs.currentWidgets = adapter.widgets
-
-                true
-            }
-        }
-
-        widget_grid.onSwipeListener = { viewHolder, _ ->
-            removeWidget(viewHolder.adapterPosition)
-        }
-
-        edit.setOnClickListener {
-            adapter.isEditing = true
-            edit_bar.visibility = View.VISIBLE
-            edit_bar.animate()
-                .scaleX(1f)
-                .scaleY(1f)
-                .setInterpolator(OvershootInterpolator())
-                .setDuration(ANIM_DURATION)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        button_wrapper.visibility = View.GONE
-                        widget_grid.allowReorder = true
-                    }
-                })
-        }
-
-        go_back.setOnClickListener {
-            adapter.isEditing = false
-            button_wrapper.visibility = View.VISIBLE
-            edit_bar.animate()
-                .scaleX(0f)
-                .scaleY(0f)
-                .setInterpolator(AnticipateInterpolator())
-                .setDuration(ANIM_DURATION)
-                .setListener(object : AnimatorListenerAdapter() {
-                    override fun onAnimationEnd(animation: Animator?) {
-                        edit_bar.visibility = View.GONE
-                        widget_grid.allowReorder = false
-                    }
-                })
-        }
-
-        val listener = OnClickListener { view ->
-            adapter.selectedWidget?.let { widget ->
-                var changed = false
-
-                when (view.id) {
-                    R.id.expand_horiz -> {
-                        changed = widget.isFullWidth != true
-                        widget.isFullWidth = true
-                    }
-                    R.id.collapse_horiz -> {
-                        changed = widget.isFullWidth != false
-                        widget.isFullWidth = false
-                    }
-                    R.id.expand_vert -> {
-                        changed = true
-                        widget.forcedHeight++
-                    }
-                    R.id.collapse_vert -> {
-                        changed = true
-                        widget.forcedHeight--
-                    }
-                }
-
-                if (changed) {
-                    prefs.currentWidgets = adapter.widgets
-                    adapter.sizeObservable.onNext(widget.id)
-                }
-            }
-        }
-
-        expand_horiz.setOnClickListener(listener)
-        expand_vert.setOnClickListener(listener)
-        collapse_horiz.setOnClickListener(listener)
-        collapse_vert.setOnClickListener(listener)
-
-        adapter.transparentWidgets = prefs.transparentWidgets
     }
 
     override fun onAttachedToWindow() {
