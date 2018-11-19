@@ -7,20 +7,20 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.ViewConfiguration
-import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
-import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import kotlinx.android.synthetic.main.drawer_layout.view.*
+import tk.zwander.widgetdrawer.utils.dpAsPx
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super (context, attributeSet)
 
-    private val openTranslation: Int
+    private val closedTranslation: Int
         get() = action_bar_wrapper.height
+    private val openedTranslation = -context.dpAsPx(16)
 
     private var wasDragging = false
     private var isOpen = false
@@ -53,12 +53,10 @@ class ToolbarAnimHolder : LinearLayout {
                         wasDragging = true
                         val newTranslation = translationY - dist
 
-                        if (newTranslation > 0 && newTranslation < openTranslation) {
+                        if (newTranslation < closedTranslation) {
                             translationY -= dist
-                        } else if (newTranslation < 0) {
-                            translationY = 0f
-                        } else if (newTranslation > openTranslation) {
-                            translationY = openTranslation.toFloat()
+                        } else if (newTranslation > closedTranslation) {
+                            translationY = closedTranslation.toFloat()
                         }
 
                         true
@@ -66,8 +64,10 @@ class ToolbarAnimHolder : LinearLayout {
                 }
 
                 MotionEvent.ACTION_UP -> {
-                    if (wasDragging) {
-                        transition(translationY > (openTranslation / 3f), 100)
+                    if (wasDragging && translationY >= openedTranslation) {
+                        transition(translationY > (closedTranslation / 3f), 100)
+                    } else if (translationY < openedTranslation) {
+                        transition(isOpen)
                     } else {
                         transition()
                         v.performClick()
@@ -85,12 +85,12 @@ class ToolbarAnimHolder : LinearLayout {
         if (!currentlyTransitioning) {
             currentlyTransitioning = true
 
-            val newTranslation = if (isOpen) openTranslation else 0
+            val newTranslation = if (isOpen) closedTranslation else openedTranslation
 
             animate()
                 .translationY(newTranslation.toFloat())
                 .setDuration(duration)
-                .setInterpolator(if (isOpen) AccelerateInterpolator() as TimeInterpolator else DecelerateInterpolator())
+                .setInterpolator(if (isOpen) AnticipateInterpolator() as TimeInterpolator else OvershootInterpolator())
                 .setListener(object : AnimatorListenerAdapter() {
                     override fun onAnimationEnd(animation: Animator?) {
                         currentlyTransitioning = false
