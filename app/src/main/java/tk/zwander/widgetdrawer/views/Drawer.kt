@@ -15,13 +15,12 @@ import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.KeyEvent
-import android.view.View
 import android.view.View.OnClickListener
 import android.view.WindowManager
 import android.view.animation.AccelerateInterpolator
-import android.view.animation.AnticipateInterpolator
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
@@ -155,36 +154,35 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 removeWidget(viewHolder.adapterPosition)
             }
 
+            val inAnim = AlphaAnimation(0f, 1f).apply {
+                duration = ANIM_DURATION
+                interpolator = DecelerateInterpolator()
+            }
+            val outAnim = AlphaAnimation(1f, 0f).apply {
+                duration = ANIM_DURATION
+                interpolator = AccelerateInterpolator()
+            }
+
+            action_bar_wrapper.inAnimation = inAnim
+            action_bar_wrapper.outAnimation = outAnim
+
+            action_bar_wrapper.layoutAnimationListener = object : Animation.AnimationListener {
+                override fun onAnimationEnd(animation: Animation?) {
+                    widget_grid.allowReorder = adapter.isEditing
+                }
+
+                override fun onAnimationRepeat(animation: Animation?) {}
+                override fun onAnimationStart(animation: Animation?) {}
+            }
+
             edit.setOnClickListener {
                 adapter.isEditing = true
-                edit_bar.visibility = View.VISIBLE
-                edit_bar.animate()
-                    .scaleX(1f)
-                    .scaleY(1f)
-                    .setInterpolator(OvershootInterpolator())
-                    .setDuration(ANIM_DURATION)
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            button_wrapper.visibility = View.GONE
-                            widget_grid.allowReorder = true
-                        }
-                    })
+                action_bar_wrapper.showNext()
             }
 
             go_back.setOnClickListener {
                 adapter.isEditing = false
-                button_wrapper.visibility = View.VISIBLE
-                edit_bar.animate()
-                    .scaleX(0f)
-                    .scaleY(0f)
-                    .setInterpolator(AnticipateInterpolator())
-                    .setDuration(ANIM_DURATION)
-                    .setListener(object : AnimatorListenerAdapter() {
-                        override fun onAnimationEnd(animation: Animator?) {
-                            edit_bar.visibility = View.GONE
-                            widget_grid.allowReorder = false
-                        }
-                    })
+                action_bar_wrapper.showPrevious()
             }
 
             val listener = OnClickListener { view ->
