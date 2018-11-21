@@ -17,4 +17,5 @@
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
     <string name="unlicensed_desc">It seems you have an unlicensed copy of Widget Drawer. If you recently purchased the app, wait a few minutes and try again.</string>
+    <string name="open_widget_drawer">Open Widget Drawer</string>
 </resources>
