@@ -118,7 +118,7 @@ class DrawerAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is BaseVH) {
             val widget = widgets[position]
-            val info = manager.getAppWidgetInfo(widget.id)
+            val info: AppWidgetProviderInfo? = manager.getAppWidgetInfo(widget.id)
 
             holder.selection.setOnClickListener { if (isEditing) selectedId = widget.id }
             if (holder is WidgetVH) {
@@ -290,7 +290,8 @@ class DrawerAdapter(
         }
     }
 
-    private fun updateDimens(holder: WidgetVH, info: AppWidgetProviderInfo, widget: BaseWidgetInfo) {
+    private fun updateDimens(holder: WidgetVH, info: AppWidgetProviderInfo?, widget: BaseWidgetInfo) {
+        if (info == null) return
         holder.itemView.apply {
             layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
                 width = ViewGroup.LayoutParams.MATCH_PARENT
