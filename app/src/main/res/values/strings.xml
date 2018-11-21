@@ -2,7 +2,6 @@
     <string name="app_name">Widget Drawer</string>
 
     <!-- Titles -->
-    <string name="edit_mode">Edit Mode</string>
     <string name="enable">Enable</string>
     <string name="handle_height">Handle Height</string>
     <string name="handle_width">Handle Width</string>
@@ -17,5 +16,16 @@
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
     <string name="unlicensed_desc">It seems you have an unlicensed copy of Widget Drawer. If you recently purchased the app, wait a few minutes and try again.</string>
+
+    <!-- Content Descriptions -->
+    <string name="edit_mode">Edit Mode</string>
     <string name="open_widget_drawer">Open Widget Drawer</string>
+    <string name="toggle_opacity">Toggle Opaque Backgrounds</string>
+    <string name="close_drawer">Close Drawer</string>
+    <string name="open_close_toolbar">Open/Close Toolbar</string>
+    <string name="expand_vertically">Expand Widget Vertically</string>
+    <string name="expand_horizontally">Expand Widget Horizontally</string>
+    <string name="collapse_vertically">Collapse Widget Vertically</string>
+    <string name="collapse_horizontally">Collapse Widget Horizontally</string>
+    <string name="back">Back</string>
 </resources>
