@@ -163,17 +163,21 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 interpolator = AccelerateInterpolator()
             }
 
+            val animListener = object : Animation.AnimationListener {
+                override fun onAnimationRepeat(animation: Animation?) {}
+                override fun onAnimationStart(animation: Animation?) {}
+                override fun onAnimationEnd(animation: Animation?) {
+                 widget_grid.allowReorder = adapter.isEditing
+                }
+            }
+
+            inAnim.setAnimationListener(animListener)
+            outAnim.setAnimationListener(animListener)
+
             action_bar_wrapper.inAnimation = inAnim
             action_bar_wrapper.outAnimation = outAnim
 
-            action_bar_wrapper.layoutAnimationListener = object : Animation.AnimationListener {
-                override fun onAnimationEnd(animation: Animation?) {
-                    widget_grid.allowReorder = adapter.isEditing
-                }
-
-                override fun onAnimationRepeat(animation: Animation?) {}
-                override fun onAnimationStart(animation: Animation?) {}
-            }
+            action_bar_wrapper.layoutAnimationListener
 
             edit.setOnClickListener {
                 adapter.isEditing = true

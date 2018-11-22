@@ -50,7 +50,7 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return if (recView.allowReorder) {
             performClick()
-            true
+            false
         } else {
             onTouchEvent(ev)
         }
@@ -60,17 +60,18 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        super.onTouchEvent(event)
+        val ret = super.onTouchEvent(event)
+        return if (!recView.allowReorder) {
+            when (event?.action) {
+                MotionEvent.ACTION_DOWN -> notList = notAListView(event)
+                MotionEvent.ACTION_UP -> notList = false
+            }
 
-        when (event?.action) {
-            MotionEvent.ACTION_DOWN -> notList = notAListView(event)
-            MotionEvent.ACTION_UP -> notList = false
-        }
-
-        if (!hasListView || notList) {
-            return gestureDetector.onTouchEvent(event)
-        }
-        return false
+            if (!hasListView || notList) {
+                return gestureDetector.onTouchEvent(event)
+            }
+            false
+        } else ret
     }
 
     private fun enableNestedScrolling(parent: ViewGroup) {
