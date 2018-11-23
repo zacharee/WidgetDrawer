@@ -49,8 +49,8 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
         return if (recView.allowReorder) {
-            performClick()
-            false
+            callOnClick()
+            true
         } else {
             onTouchEvent(ev)
         }
