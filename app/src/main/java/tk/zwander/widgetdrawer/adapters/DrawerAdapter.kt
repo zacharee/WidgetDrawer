@@ -18,11 +18,14 @@ import android.view.animation.OvershootInterpolator
 import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import io.reactivex.subjects.BehaviorSubject
 import kotlinx.android.synthetic.main.shortcut_holder.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 import tk.zwander.widgetdrawer.misc.DrawerHost
+import tk.zwander.widgetdrawer.observables.EditingObservable
+import tk.zwander.widgetdrawer.observables.SelectionObservable
+import tk.zwander.widgetdrawer.observables.SizeObservable
+import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.views.CustomCard
@@ -47,23 +50,23 @@ class DrawerAdapter(
         set(value) {
             field = value
             if (!value) selectedId = -1
-            editingObservable.onNext(value)
+            editingObservable.setEditing(value)
         }
     var selectedId = -1
         set(value) {
             field = value
-            selectedObservable.onNext(value)
+            selectedObservable.setSelection(value)
         }
     var transparentWidgets = false
         set(value) {
             field = value
-            transparentObservable.onNext(value)
+            transparentObservable.setTransparent(value)
         }
 
-    private val editingObservable = BehaviorSubject.create<Boolean>()
-    private val selectedObservable = BehaviorSubject.create<Int>()
-    private val transparentObservable = BehaviorSubject.create<Boolean>()
-    val sizeObservable = BehaviorSubject.create<Int>()
+    private val editingObservable = EditingObservable()
+    private val selectedObservable = SelectionObservable()
+    private val transparentObservable = TransparentObservable()
+    val sizeObservable = SizeObservable()
 
     val widgets = ArrayList<BaseWidgetInfo>()
         .apply { add(0, BaseWidgetInfo.header()) }
@@ -158,38 +161,34 @@ class DrawerAdapter(
                 }
             }
             holder.apply {
-                editingObservable
-                    .subscribe {
-                        updateSelectionVisibility(this)
-                    }
+                editingObservable.addObserver { _, _ ->
+                    updateSelectionVisibility(this)
+                }
 
-                selectedObservable
-                    .subscribe {
-                        if (adapterPosition != -1) updateSelectionCheck(
-                            this,
-                            widgets[adapterPosition]
+                selectedObservable.addObserver { _, _ ->
+                    if (adapterPosition != -1) updateSelectionCheck(
+                        this,
+                        widgets[adapterPosition]
+                    )
+                }
+
+                transparentObservable.addObserver { _, _ ->
+                    updateTransparency(this, false)
+                }
+
+                sizeObservable.addObserver { _, arg ->
+                    if (arg == widget.id) {
+                        if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH) updateDimens(
+                            holder,
+                            info,
+                            widget
+                        )
+                        else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(
+                            holder,
+                            widget
                         )
                     }
-
-                transparentObservable
-                    .subscribe {
-                        updateTransparency(this, false)
-                    }
-
-                sizeObservable
-                    .subscribe {
-                        if (it == widget.id) {
-                            if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH) updateDimens(
-                                holder,
-                                info,
-                                widget
-                            )
-                            else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(
-                                holder,
-                                widget
-                            )
-                        }
-                    }
+                }
             }
 
             if (widget.type == BaseWidgetInfo.TYPE_WIDGET && holder is WidgetVH && info != null) updateDimens(

@@ -214,7 +214,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
                     if (changed) {
                         prefs.currentWidgets = adapter.widgets
-                        adapter.sizeObservable.onNext(widget.id)
+                        adapter.sizeObservable.setSize(widget.id)
                     }
                 }
             }
