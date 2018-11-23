@@ -216,7 +216,7 @@ class DrawerAdapter(
         }.invoke()
 
         val elevation = card.context.resources
-            .getDimensionPixelSize(R.dimen.cardview_default_elevation).toFloat()
+            .getDimensionPixelSize(R.dimen.elevation).toFloat()
 
         if (forInit) {
             card.setCardBackgroundColor(
