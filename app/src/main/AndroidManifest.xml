@@ -33,6 +33,7 @@
             />
         <activity
             android:name=".activities.WidgetSelectActivity"
+            android:configChanges="orientation|screenLayout|screenSize|keyboard|keyboardHidden"
             android:excludeFromRecents="true"
             android:label="@string/add_widget"
             />

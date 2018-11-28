@@ -6,7 +6,7 @@ import android.content.SharedPreferences
 import android.graphics.Color
 import android.preference.PreferenceManager
 import android.view.Gravity
-import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 
@@ -45,13 +45,15 @@ class PrefsManager private constructor(private val context: Context) {
 
     var currentWidgets: List<BaseWidgetInfo>
         get() {
-            return Gson().fromJson<ArrayList<BaseWidgetInfo>>(
+            return GsonBuilder().apply { addDeserializationExclusionStrategy(SuperclassExclusionStrategy()) }
+                .create().fromJson<ArrayList<BaseWidgetInfo>>(
                 getString(WIDGETS, null) ?: return ArrayList(),
                 object : TypeToken<ArrayList<BaseWidgetInfo>>() {}.type
             ).apply { removeAll { it.id == -1 } }
         }
         set(value) {
-            putString(WIDGETS, Gson().toJson(ArrayList(value).apply { removeAll { it.id == -1 } }))
+            putString(WIDGETS, GsonBuilder().apply { addSerializationExclusionStrategy(SuperclassExclusionStrategy()) }
+                .create().toJson(ArrayList(value).apply { removeAll { it.id == -1 } }))
         }
     var enabled: Boolean
         get() = getBoolean(ENABLED, false)

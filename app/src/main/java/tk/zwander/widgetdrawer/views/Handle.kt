@@ -150,7 +150,9 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
-        wm.updateViewLayout(this, params)
+        try {
+            wm.updateViewLayout(this, params)
+        } catch (e: Exception) {}
     }
 
     private fun setSide(gravity: Int = prefs.handleSide) {
