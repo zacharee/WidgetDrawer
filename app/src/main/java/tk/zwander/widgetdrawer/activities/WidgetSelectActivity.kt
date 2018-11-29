@@ -61,16 +61,18 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
             val appIcon = packageManager.getApplicationIcon(appInfo)
-            var previewImg = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.previewImage)
+            var previewImg: Bitmap? = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.previewImage)
 
-            if (previewImg.width > 512) {
-                val height = (512f / previewImg.width) * previewImg.height
-                previewImg = Bitmap.createScaledBitmap(previewImg, previewImg.width, height.toInt(), false)
-            }
+            if (previewImg != null) {
+                if (previewImg.width > 512) {
+                    val height = (512f / previewImg.width) * previewImg.height
+                    previewImg = Bitmap.createScaledBitmap(previewImg, 512, height.toInt(), false)!!
+                }
 
-            if (previewImg.height > 512) {
-                val width = (512f / previewImg.height) * previewImg.width
-                previewImg = Bitmap.createScaledBitmap(previewImg, width.toInt(), previewImg.height, false)
+                if (previewImg.height > 512) {
+                    val width = (512f / previewImg.height) * previewImg.width
+                    previewImg = Bitmap.createScaledBitmap(previewImg, width.toInt(), 512, false)
+                }
             }
 
             var app = apps[appInfo.packageName]
