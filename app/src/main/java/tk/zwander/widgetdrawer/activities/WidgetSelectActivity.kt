@@ -4,6 +4,8 @@ import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
@@ -59,7 +61,17 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
             val appIcon = packageManager.getApplicationIcon(appInfo)
-            val previewImg = it.loadPreviewImage(this@WidgetSelectActivity, 0)
+            var previewImg = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.previewImage)
+
+            if (previewImg.width > 512) {
+                val height = (512f / previewImg.width) * previewImg.height
+                previewImg = Bitmap.createScaledBitmap(previewImg, previewImg.width, height.toInt(), false)
+            }
+
+            if (previewImg.height > 512) {
+                val width = (512f / previewImg.height) * previewImg.width
+                previewImg = Bitmap.createScaledBitmap(previewImg, width.toInt(), previewImg.height, false)
+            }
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -81,7 +93,7 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appIcon = packageManager.getApplicationIcon(appInfo)
 
             val shortcutName = it.loadLabel(packageManager)
-            val shortcutIcon = it.loadIcon(packageManager)
+            val shortcutIcon = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.activityInfo.iconResource)
 
             var app = apps[appInfo.packageName]
             if (app == null) {

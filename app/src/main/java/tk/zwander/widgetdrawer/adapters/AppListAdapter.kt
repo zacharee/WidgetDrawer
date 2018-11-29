@@ -138,7 +138,7 @@ class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Un
         class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
             fun parseInfo(info: WidgetInfo) {
                 itemView.widget_name.text = info.widgetName
-                itemView.widget_image.setImageDrawable(info.previewImg)
+                itemView.widget_image.setImageBitmap(info.previewImg)
             }
         }
     }

@@ -1,11 +1,11 @@
 package tk.zwander.widgetdrawer.misc
 
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 import android.os.Parcelable
 
 data class WidgetInfo(
     var widgetName: String,
-    var previewImg: Drawable?,
+    var previewImg: Bitmap?,
     var component: Parcelable
 ) : BaseInfo(), Comparable<WidgetInfo> {
     override fun compareTo(other: WidgetInfo) =
