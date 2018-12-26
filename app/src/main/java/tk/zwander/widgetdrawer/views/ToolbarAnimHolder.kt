@@ -19,12 +19,19 @@ import tk.zwander.widgetdrawer.utils.vibrate
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {
+    companion object {
+        const val PREVIOUSLY_LT_THRESH = -1
+        const val PREVIOUSLY_GT_THRESH = 1
+    }
+
     constructor(context: Context) : super(context)
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     private val closedTranslation: Int
         get() = action_bar_wrapper.height
     private val openedTranslation = -context.dpAsPx(16)
+    private val threshold: Float
+        get() = (openedTranslation + closedTranslation) / 2f
     private val touchListener = TouchListener()
 
     private val openAnim by lazy {
@@ -57,17 +64,17 @@ class ToolbarAnimHolder : LinearLayout {
 
     private fun transition(isOpen: Boolean = this.isOpen) {
         if (!currentlyTransitioning) {
+            var hasCalledAnim = false
+
             currentlyTransitioning = true
 
             (if (isOpen) closeAnim else openAnim).apply {
                 addEndListener { _, _, _, _ ->
                     currentlyTransitioning = false
-
-                    open_close_toolbar.animate()
-                        .scaleY(if (isOpen) 1f else -1f)
-                        .setDuration(Drawer.ANIM_DURATION)
-                        .setInterpolator(if (isOpen) AnticipateInterpolator() as TimeInterpolator else OvershootInterpolator())
-                        .start()
+                    hasCalledAnim = false
+                }
+                addUpdateListener { _, _, _ ->
+                    if (!hasCalledAnim && updateArrowForNewY()) hasCalledAnim = true
                 }
             }.start()
 
@@ -75,9 +82,35 @@ class ToolbarAnimHolder : LinearLayout {
         }
     }
 
+    private fun updateArrowForNewY(): Boolean {
+        val y = translationY
+
+        return if (y < threshold) {
+            animateArrowTo(true)
+        } else {
+            animateArrowTo(false)
+        }
+    }
+
+    private fun animateArrowTo(isOpen: Boolean): Boolean {
+        val dest = if (isOpen) -1f else 1f
+
+        return if (open_close_toolbar.scaleY == dest) false
+        else {
+            open_close_toolbar.animate()
+                .scaleY(dest)
+                .setDuration(Drawer.ANIM_DURATION)
+                .setInterpolator(if (isOpen) AnticipateInterpolator() as TimeInterpolator else OvershootInterpolator())
+                .start()
+            true
+        }
+    }
+
     private inner class TouchListener : OnTouchListener {
         private var prevY = -1f
         private var downY = -1f
+        private var hasCalledAnim = false
+        private var previously = 0
 
         override fun onTouch(v: View, event: MotionEvent?): Boolean {
             v.onTouchEvent(event)
@@ -108,13 +141,25 @@ class ToolbarAnimHolder : LinearLayout {
                             translationY -= dist / 2f //TODO make this an actual deceleration
                         }
 
+                        if (translationY < threshold && previously != PREVIOUSLY_LT_THRESH) {
+                            hasCalledAnim = false
+                            previously = PREVIOUSLY_LT_THRESH
+                        } else if (translationY >= threshold && previously != PREVIOUSLY_GT_THRESH) {
+                            hasCalledAnim = false
+                            previously = PREVIOUSLY_GT_THRESH
+                        }
+
+                        if (!hasCalledAnim && updateArrowForNewY()) {
+                            hasCalledAnim = true
+                        }
+
                         true
                     } else false
                 }
 
                 MotionEvent.ACTION_UP -> {
                     if (wasDragging && translationY >= openedTranslation) {
-                        transition(translationY > (closedTranslation / 3f))
+                        transition(translationY >= threshold)
                     } else if (translationY < openedTranslation) {
                         transition(isOpen)
                     } else if (v.id != R.id.action_bar_wrapper) {
@@ -123,6 +168,7 @@ class ToolbarAnimHolder : LinearLayout {
                     }
 
                     wasDragging = false
+                    hasCalledAnim = false
                     true
                 }
                 else -> false
