@@ -33,11 +33,17 @@ class DrawerRecycler : RecyclerView {
             viewHolder: ViewHolder,
             target: ViewHolder
         ): Boolean {
-            return allowReorder && onMoveListener?.invoke(recyclerView, viewHolder, target) == true
+            return allowReorder
+                    && onMoveListener?.invoke(recyclerView, viewHolder, target) == true
         }
 
         override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
             if (allowReorder) onSwipeListener?.invoke(viewHolder, direction)
+        }
+
+        override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: ViewHolder): Int {
+            return if (viewHolder !is DrawerAdapter.HeaderVH) super.getMovementFlags(recyclerView, viewHolder)
+            else 0
         }
 
         override fun isItemViewSwipeEnabled() = allowReorder
@@ -45,12 +51,16 @@ class DrawerRecycler : RecyclerView {
     })
 
 
-    var onMoveListener: ((recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder) -> Boolean)? = null
+    var onMoveListener: ((
+        recyclerView: RecyclerView,
+        viewHolder: RecyclerView.ViewHolder,
+        target: RecyclerView.ViewHolder
+    ) -> Boolean)? = null
 
-    var onSwipeListener: ((viewHolder: RecyclerView.ViewHolder,
-                           direction: Int) -> Unit)? = null
+    var onSwipeListener: ((
+        viewHolder: RecyclerView.ViewHolder,
+        direction: Int
+    ) -> Unit)? = null
 
     var allowReorder = false
         set(value) {

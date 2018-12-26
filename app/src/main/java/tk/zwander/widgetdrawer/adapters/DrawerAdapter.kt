@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.adapters
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
+import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
@@ -119,7 +120,7 @@ class DrawerAdapter(
 
     @SuppressLint("CheckResult")
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is BaseVH) {
+        if (holder is BaseItemVH) {
             val widget = widgets[position]
             val info: AppWidgetProviderInfo? = manager.getAppWidgetInfo(widget.id)
 
@@ -198,10 +199,31 @@ class DrawerAdapter(
             )
             else if (widget.type == BaseWidgetInfo.TYPE_SHORTCUT && holder is ShortcutVH) updateDimens(holder, widget)
             updateSelectionCheck(holder, widget)
+        } else if (holder is HeaderVH) {
+            holder.apply {
+                editingObservable.addObserver { _, _ ->
+                    val height = itemView.context.dpAsPx(20)
+
+                    ValueAnimator.ofInt(itemView.height, if (isEditing) height else 0)
+                        .apply {
+                            interpolator = if (isEditing) DecelerateInterpolator() as TimeInterpolator
+                            else AccelerateInterpolator()
+
+                            addUpdateListener {
+                                itemView.layoutParams.apply {
+                                    this.height = it.animatedValue.toString().toInt()
+
+                                    itemView.layoutParams = this
+                                }
+                            }
+                        }
+                        .start()
+                }
+            }
         }
     }
 
-    private fun updateTransparency(holder: BaseVH, forInit: Boolean) {
+    private fun updateTransparency(holder: BaseItemVH, forInit: Boolean) {
         val card = holder.widgetFrame
 
         val background = {
@@ -253,11 +275,11 @@ class DrawerAdapter(
         elevAnim.start()
     }
 
-    private fun updateSelectionCheck(holder: BaseVH, widget: BaseWidgetInfo) {
+    private fun updateSelectionCheck(holder: BaseItemVH, widget: BaseWidgetInfo) {
         holder.selection.isChecked = widget.id == selectedId
     }
 
-    private fun updateSelectionVisibility(holder: BaseVH) {
+    private fun updateSelectionVisibility(holder: BaseItemVH) {
         holder.selection.apply {
             if (isEditing) {
                 visibility = View.VISIBLE
@@ -358,9 +380,9 @@ class DrawerAdapter(
         }
     }
 
-    class WidgetVH(view: View) : BaseVH(view)
+    class WidgetVH(view: View) : BaseItemVH(view)
 
-    class ShortcutVH(view: View, private val scrollCallback: (MotionEvent) -> Unit) : BaseVH(view) {
+    class ShortcutVH(view: View, private val scrollCallback: (MotionEvent) -> Unit) : BaseItemVH(view) {
         var name: String?
             get() = itemView.shortcut_label.text.toString()
             set(value) {
@@ -404,7 +426,7 @@ class DrawerAdapter(
         }
     }
 
-    open class BaseVH(view: View) : RecyclerView.ViewHolder(view) {
+    open class BaseItemVH(view: View) : RecyclerView.ViewHolder(view) {
         val selection: RadioButton
             get() = itemView.findViewById(R.id.selection)
         val widgetFrame: CustomCard

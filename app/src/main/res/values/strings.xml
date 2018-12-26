@@ -16,6 +16,7 @@
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
     <string name="unlicensed_desc">It seems you have an unlicensed copy of Widget Drawer. If you recently purchased the app, wait a few minutes and try again.</string>
+    <string name="remove_instruction">Swipe a widget left or right to remove it.</string>
 
     <!-- Content Descriptions -->
     <string name="edit_mode">Edit Mode</string>
