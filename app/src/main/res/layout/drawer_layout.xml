@@ -112,13 +112,14 @@
                 android:clickable="true"
                 android:focusable="true"
                 android:orientation="horizontal"
+                android:gravity="center"
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp">
 
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/expand_horiz"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:src="@drawable/expand_horiz"
                     android:contentDescription="@string/expand_horizontally"
@@ -127,7 +128,7 @@
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/collapse_horiz"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:src="@drawable/collapse_horiz"
                     android:contentDescription="@string/collapse_horizontally"
@@ -136,7 +137,7 @@
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/expand_vert"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:src="@drawable/expand_vert"
                     android:contentDescription="@string/expand_vertically"
@@ -145,7 +146,7 @@
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/collapse_vert"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:src="@drawable/collapse_vert"
                     android:contentDescription="@string/collapse_vertically"
@@ -164,7 +165,7 @@
                 <tk.zwander.widgetdrawer.views.ButtonImageView
                     android:id="@+id/go_back"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="48dp"
                     android:layout_weight="1"
                     android:src="@drawable/back"
                     android:contentDescription="@string/back"
