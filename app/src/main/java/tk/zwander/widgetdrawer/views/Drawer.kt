@@ -419,7 +419,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         snackbar.setAllowUserInput(true)
         snackbar.setSwipeToDismiss(true)
         snackbar.setIsIndeterminate(false)
-        snackbar.setProgressMax(2750)
+        snackbar.setProgressMax(UNDO_DURATION.toInt())
 
         snackbar.setAction(resources.getString(R.string.undo), object : SnackProgressBar.OnActionClickListener {
             override fun onActionClick() {
