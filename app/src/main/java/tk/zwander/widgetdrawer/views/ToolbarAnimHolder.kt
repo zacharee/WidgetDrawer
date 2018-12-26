@@ -15,6 +15,7 @@ import androidx.dynamicanimation.animation.SpringForce
 import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import tk.zwander.widgetdrawer.utils.vibrate
 import kotlin.math.absoluteValue
 
 class ToolbarAnimHolder : LinearLayout {
@@ -85,6 +86,9 @@ class ToolbarAnimHolder : LinearLayout {
                 MotionEvent.ACTION_DOWN -> {
                     prevY = event.rawY
                     downY = event.rawY
+
+                    if (!isOpen) context.vibrate(1)
+
                     true
                 }
 
