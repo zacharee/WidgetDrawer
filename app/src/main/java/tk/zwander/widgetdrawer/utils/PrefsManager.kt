@@ -46,7 +46,7 @@ class PrefsManager private constructor(private val context: Context) {
     var currentWidgets: List<BaseWidgetInfo>
         get() {
             return GsonBuilder()
-                .setExclusionStrategies(DuplicateFieldExclusionStrategy())
+                .setExclusionStrategies(CrashFixExclusionStrategy())
                 .create()
                 .fromJson<ArrayList<BaseWidgetInfo>>(
                     getString(WIDGETS, null) ?: return ArrayList(),
@@ -56,7 +56,7 @@ class PrefsManager private constructor(private val context: Context) {
         set(value) {
             putString(
                 WIDGETS, GsonBuilder()
-                    .setExclusionStrategies(DuplicateFieldExclusionStrategy())
+                    .setExclusionStrategies(CrashFixExclusionStrategy())
                     .create()
                     .toJson(ArrayList(value)
                         .apply { removeAll { it.id == -1 } })

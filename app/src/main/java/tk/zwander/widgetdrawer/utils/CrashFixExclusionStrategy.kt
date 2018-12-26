@@ -4,8 +4,11 @@ import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
 
 
-class DuplicateFieldExclusionStrategy : ExclusionStrategy {
-    private val fields = HashSet<String>()
+class CrashFixExclusionStrategy : ExclusionStrategy {
+    private val fieldsToAvoid = setOf(
+        "IS_ELASTIC_ENABLED",
+        "isElasticEnabled"
+    )
 
     override fun shouldSkipClass(clazz: Class<*>?): Boolean {
         return false
@@ -14,10 +17,6 @@ class DuplicateFieldExclusionStrategy : ExclusionStrategy {
     override fun shouldSkipField(fieldAttributes: FieldAttributes): Boolean {
         val fieldName = fieldAttributes.name
 
-        return if (fields.contains(fieldName)) true
-        else {
-            fields.add(fieldName)
-            false
-        }
+        return fieldsToAvoid.contains(fieldName)
     }
 }
