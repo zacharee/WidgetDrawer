@@ -43,12 +43,14 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.firebase:firebase-core:16.0.6'
     implementation 'com.crashlytics.sdk.android:crashlytics:2.9.8'
+    implementation 'com.google.android.material:material:1.1.0-alpha02'
 
     //Other
     implementation 'com.github.zacharee:MaterialSeekbarPreference:c8cfa39078'
     implementation 'com.jaredrummler:colorpicker:1.0.5'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.1'
     implementation 'com.jaredrummler:colorpicker-compat:1.0.5'
+    implementation 'com.github.tingyik90:snackprogressbar:5.0'
 }
 
 apply plugin: 'com.google.gms.google-services'

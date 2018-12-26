@@ -356,6 +356,11 @@ class DrawerAdapter(
         notifyItemInserted(widgets.lastIndex)
     }
 
+    fun addAt(index: Int, widget: BaseWidgetInfo) {
+        widgets.add(index, widget)
+        notifyItemInserted(index)
+    }
+
     fun addAll(widgets: List<BaseWidgetInfo>) {
         widgets.forEach {
             addItem(it)

@@ -11,6 +11,7 @@ import android.content.pm.ActivityInfo
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.Gravity
@@ -24,6 +25,8 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.tingyik90.snackprogressbar.SnackProgressBar
+import com.tingyik90.snackprogressbar.SnackProgressBarManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
@@ -53,6 +56,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         const val EXTRA_APPWIDGET_CONFIGURE = "configure"
 
         const val ANIM_DURATION = 200L
+        const val UNDO_DURATION = 3000L
 
         fun onResult(context: Context, result: Int, code: Int, data: Intent?) {
             val intent = Intent(ACTION_RESULT)
@@ -81,6 +85,10 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             gravity = Gravity.TOP
             screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
+
+    val snackbarManager = SnackProgressBarManager(this).apply {
+
+    }
 
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val host by lazy { DrawerHost(context.applicationContext, 1003) }
@@ -388,9 +396,40 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private fun removeWidget(position: Int) {
         val info = adapter.removeAt(position)
-        if (info.type == BaseWidgetInfo.TYPE_WIDGET) host.deleteAppWidgetId(info.id)
-        else if (info.type == BaseWidgetInfo.TYPE_SHORTCUT) shortcutIdManager.removeShortcutId(info.id)
-        prefs.currentWidgets = adapter.widgets
+
+        val timer = object : CountDownTimer(UNDO_DURATION, 1) {
+            override fun onFinish() {
+                snackbarManager.dismiss()
+
+                if (info.type == BaseWidgetInfo.TYPE_WIDGET) host.deleteAppWidgetId(info.id)
+                else if (info.type == BaseWidgetInfo.TYPE_SHORTCUT) shortcutIdManager.removeShortcutId(info.id)
+                prefs.currentWidgets = adapter.widgets
+            }
+
+            override fun onTick(millisUntilFinished: Long) {
+                snackbarManager.setProgress((UNDO_DURATION - millisUntilFinished).toInt())
+            }
+        }
+
+        val snackbar = SnackProgressBar(
+            SnackProgressBar.TYPE_HORIZONTAL,
+            resources.getString(R.string.widget_removed)
+        )
+
+        snackbar.setAllowUserInput(true)
+        snackbar.setSwipeToDismiss(true)
+        snackbar.setIsIndeterminate(false)
+        snackbar.setProgressMax(2750)
+
+        snackbar.setAction(resources.getString(R.string.undo), object : SnackProgressBar.OnActionClickListener {
+            override fun onActionClick() {
+                adapter.addAt(position, info)
+                timer.cancel()
+            }
+        })
+
+        snackbarManager.show(snackbar, SnackProgressBarManager.LENGTH_INDEFINITE, 100)
+        timer.start()
     }
 
     private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
