@@ -45,15 +45,22 @@ class PrefsManager private constructor(private val context: Context) {
 
     var currentWidgets: List<BaseWidgetInfo>
         get() {
-            return GsonBuilder().apply { addDeserializationExclusionStrategy(SuperclassExclusionStrategy()) }
-                .create().fromJson<ArrayList<BaseWidgetInfo>>(
-                getString(WIDGETS, null) ?: return ArrayList(),
-                object : TypeToken<ArrayList<BaseWidgetInfo>>() {}.type
-            ).apply { removeAll { it.id == -1 } }
+            return GsonBuilder()
+                .setExclusionStrategies(DuplicateFieldExclusionStrategy())
+                .create()
+                .fromJson<ArrayList<BaseWidgetInfo>>(
+                    getString(WIDGETS, null) ?: return ArrayList(),
+                    object : TypeToken<ArrayList<BaseWidgetInfo>>() {}.type
+                ).apply { removeAll { it.id == -1 } }
         }
         set(value) {
-            putString(WIDGETS, GsonBuilder().apply { addSerializationExclusionStrategy(SuperclassExclusionStrategy()) }
-                .create().toJson(ArrayList(value).apply { removeAll { it.id == -1 } }))
+            putString(
+                WIDGETS, GsonBuilder()
+                    .setExclusionStrategies(DuplicateFieldExclusionStrategy())
+                    .create()
+                    .toJson(ArrayList(value)
+                        .apply { removeAll { it.id == -1 } })
+            )
         }
     var enabled: Boolean
         get() = getBoolean(ENABLED, false)
@@ -129,10 +136,10 @@ class PrefsManager private constructor(private val context: Context) {
     fun remove(key: String) = prefs.edit().remove(key).commit()
 
     fun addPrefListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
-            prefs.registerOnSharedPreferenceChangeListener(listener)
+        prefs.registerOnSharedPreferenceChangeListener(listener)
 
     fun removePrefListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) =
-            prefs.unregisterOnSharedPreferenceChangeListener(listener)
+        prefs.unregisterOnSharedPreferenceChangeListener(listener)
 
     fun addShortcutId(id: String) {
         shortcutIds = ArrayList(shortcutIds).apply { add(id) }.toSet()
