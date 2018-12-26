@@ -19,6 +19,7 @@ import android.view.animation.OvershootInterpolator
 import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import kotlinx.android.synthetic.main.header_layout.view.*
 import kotlinx.android.synthetic.main.shortcut_holder.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
@@ -202,7 +203,9 @@ class DrawerAdapter(
         } else if (holder is HeaderVH) {
             holder.apply {
                 editingObservable.addObserver { _, _ ->
-                    val height = itemView.context.dpAsPx(20)
+                    val height = itemView.edit_instructions
+                        .apply { measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT) }
+                        .measuredHeight
 
                     ValueAnimator.ofInt(itemView.height, if (isEditing) height else 0)
                         .apply {
