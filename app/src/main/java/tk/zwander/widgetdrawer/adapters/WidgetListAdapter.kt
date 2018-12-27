@@ -10,7 +10,10 @@ import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 
-class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
+
+
+class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) :
+    RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
     private val widgets = SortedList(WidgetInfo::class.java, object : SortedList.Callback<WidgetInfo>() {
         override fun areItemsTheSame(item1: WidgetInfo?, item2: WidgetInfo?): Boolean {
             return false
@@ -51,7 +54,8 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
         )
 
     override fun onBindViewHolder(holder: WidgetVH, position: Int) {
-        holder.itemView.setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition).component) }
+        holder.itemView
+            .setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition).component) }
         holder.parseInfo(widgets.get(holder.adapterPosition))
     }
 

@@ -41,7 +41,6 @@ class WidgetSelectActivity : AppCompatActivity() {
         setContentView(R.layout.activity_widget_select)
 
         selection_list.adapter = adapter
-        selection_list.addItemDecoration(DividerItemDecoration(this, RecyclerView.VERTICAL))
 
         populateAsync()
     }

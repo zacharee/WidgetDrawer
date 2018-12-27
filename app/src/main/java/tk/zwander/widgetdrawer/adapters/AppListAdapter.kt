@@ -4,12 +4,12 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import kotlinx.android.synthetic.main.app_item.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.AppInfo
+import tk.zwander.widgetdrawer.misc.DividerItemDecoration
 
 class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
     private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {
