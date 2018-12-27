@@ -61,19 +61,24 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
             val appIcon = packageManager.getApplicationIcon(appInfo)
-            var previewImg: Bitmap? = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.previewImage)
+            val previewImg: Bitmap? =
+                BitmapFactory.Options().run {
+                    inJustDecodeBounds = true
+                    BitmapFactory.decodeResource(
+                        packageManager.getResourcesForApplication(appInfo),
+                        it.previewImage,
+                        this
+                    )
 
-            if (previewImg != null) {
-                if (previewImg.width > 512) {
-                    val height = (512f / previewImg.width) * previewImg.height
-                    previewImg = Bitmap.createScaledBitmap(previewImg, 512, height.toInt(), false)!!
-                }
+                    inSampleSize = getProperSampleSize(this, 512, 512)
 
-                if (previewImg.height > 512) {
-                    val width = (512f / previewImg.height) * previewImg.width
-                    previewImg = Bitmap.createScaledBitmap(previewImg, width.toInt(), 512, false)
+                    inJustDecodeBounds = false
+                    BitmapFactory.decodeResource(
+                        packageManager.getResourcesForApplication(appInfo),
+                        it.previewImage,
+                        this
+                    )
                 }
-            }
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -95,7 +100,10 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appIcon = packageManager.getApplicationIcon(appInfo)
 
             val shortcutName = it.loadLabel(packageManager)
-            val shortcutIcon = BitmapFactory.decodeResource(packageManager.getResourcesForApplication(appInfo), it.activityInfo.iconResource)
+            val shortcutIcon = BitmapFactory.decodeResource(
+                packageManager.getResourcesForApplication(appInfo),
+                it.activityInfo.iconResource
+            )
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -121,5 +129,21 @@ class WidgetSelectActivity : AppCompatActivity() {
             progress.visibility = View.GONE
             selection_list.visibility = View.VISIBLE
         }
+    }
+
+    private fun getProperSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
+        val (height: Int, width: Int) = options.run { outHeight to outWidth }
+        var inSample = 1
+
+        if (height > reqHeight || width > reqWidth) {
+            val halfHeight = height / 2
+            val halfWidth = width / 2
+
+            while (halfHeight / inSample >= reqHeight && halfWidth / inSample >= reqWidth) {
+                inSample *= 2
+            }
+        }
+
+        return inSample
     }
 }
