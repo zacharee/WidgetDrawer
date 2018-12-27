@@ -9,8 +9,6 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.RecyclerView
 import kotlinx.android.synthetic.main.activity_widget_select.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,6 +17,7 @@ import tk.zwander.widgetdrawer.adapters.AppListAdapter
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.WidgetInfo
+import tk.zwander.widgetdrawer.utils.toBitmap
 import tk.zwander.widgetdrawer.views.Drawer
 
 
@@ -77,7 +76,7 @@ class WidgetSelectActivity : AppCompatActivity() {
                         it.previewImage,
                         this
                     )
-                }
+                } ?: appIcon.toBitmap()
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -102,7 +101,7 @@ class WidgetSelectActivity : AppCompatActivity() {
             val shortcutIcon = BitmapFactory.decodeResource(
                 packageManager.getResourcesForApplication(appInfo),
                 it.activityInfo.iconResource
-            )
+            ) ?: appIcon.toBitmap()
 
             var app = apps[appInfo.packageName]
             if (app == null) {
