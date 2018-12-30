@@ -115,7 +115,7 @@ class WidgetSelectActivity : AppCompatActivity() {
                     shortcutIcon,
                     ShortcutData(
                         shortcutName.toString(),
-                        it.iconResource,
+                        it.loadIcon(packageManager).toBitmap(),
                         it.activityInfo
                     )
                 )

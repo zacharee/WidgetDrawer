@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.*
 import android.content.pm.ActivityInfo
+import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Bundle
@@ -32,6 +33,7 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.PERM_CODE
+import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.SHORTCUT_CODE
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
@@ -41,6 +43,7 @@ import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.ShortcutIdManager
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
+import tk.zwander.widgetdrawer.utils.toBitmap
 import java.util.*
 
 
@@ -53,6 +56,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
         const val EXTRA_CODE = "code"
         const val EXTRA_DATA = "data"
+        const val EXTRA_SHORTCUT_DATA = "shortcut_data"
         const val EXTRA_APPWIDGET_CONFIGURE = "configure"
 
         const val ANIM_DURATION = 200L
@@ -175,7 +179,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 override fun onAnimationRepeat(animation: Animation?) {}
                 override fun onAnimationStart(animation: Animation?) {}
                 override fun onAnimationEnd(animation: Animation?) {
-                 widget_grid.allowReorder = adapter.isEditing
+                    widget_grid.allowReorder = adapter.isEditing
                 }
             }
 
@@ -297,7 +301,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     fun showDrawer() {
         try {
             wm.addView(this, params)
-        } catch (e: Exception) {}
+        } catch (e: Exception) {
+        }
     }
 
     fun hideDrawer(callListener: Boolean = true) {
@@ -367,14 +372,12 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     private fun tryBindShortcut(info: ShortcutData) {
-        val shortcut = BaseWidgetInfo.shortcut(
-            info.label,
-            info.icon,
-            info.activityInfo,
-            shortcutIdManager.allocateShortcutId()
-        )
+        val intent = Intent(context, PermConfigActivity::class.java)
+        intent.action = Intent.ACTION_CREATE_SHORTCUT
+        intent.putExtra(EXTRA_SHORTCUT_DATA, info)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-        addNewShortcut(shortcut)
+        context.startActivity(intent)
     }
 
     private fun addNewWidget(id: Int) {
@@ -459,6 +462,40 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                     else if (res is ShortcutData) tryBindShortcut(res)
                 } else
                     showDrawer()
+            }
+            SHORTCUT_CODE -> {
+                val intent = data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
+
+                if (intent != null) {
+                    val info = data.getParcelableExtra<ShortcutData>(EXTRA_SHORTCUT_DATA)
+                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
+                    val iconRes =
+                        data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
+                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
+
+                    val finalBmp = if (iconRes == null) iconBmp
+                    else {
+                        context.packageManager.getResourcesForApplication(iconRes.packageName).run {
+                            getDrawable(
+                                getIdentifier(
+                                    iconRes.resourceName,
+                                    "drawable",
+                                    iconRes.packageName
+                                )
+                            )?.toBitmap()
+                        }
+                    }
+
+                    val shortcut = BaseWidgetInfo.shortcut(
+                        name ?: info?.label,
+                        finalBmp ?: info?.icon,
+                        info?.activityInfo,
+                        shortcutIdManager.allocateShortcutId(),
+                        intent
+                    )
+
+                    addNewShortcut(shortcut)
+                }
             }
         }
     }

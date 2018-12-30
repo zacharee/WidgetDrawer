@@ -28,7 +28,7 @@
         <activity
             android:name=".activities.PermConfigActivity"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTop"
             android:theme="@style/AppTheme.Null"
             />
         <activity

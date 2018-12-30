@@ -7,10 +7,8 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
-import android.content.ComponentName
-import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.Drawable
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
@@ -30,6 +28,7 @@ import tk.zwander.widgetdrawer.observables.SizeObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.dpAsPx
+import tk.zwander.widgetdrawer.utils.toBitmap
 import tk.zwander.widgetdrawer.views.CustomCard
 import tk.zwander.widgetdrawer.views.Drawer
 import java.util.*
@@ -146,19 +145,12 @@ class DrawerAdapter(
                 }
             } else if (holder is ShortcutVH) {
                 holder.name = widget.label
-                holder.icon = widget.activityInfo?.loadIcon(holder.itemView.context.packageManager)
+                holder.icon = widget.iconBmp
                 holder.itemView.setOnClickListener {
                     holder.selection.performClick()
 
                     if (!isEditing) {
-                        val component =
-                            ComponentName(widget.activityInfo!!.applicationInfo.packageName, widget.activityInfo!!.name)
-
-                        val intent = Intent(Intent.ACTION_VIEW)
-                        intent.component = component
-                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-
-                        holder.itemView.context.startActivity(intent)
+                        holder.itemView.context.startActivity(widget.shortcutIntent ?: return@setOnClickListener)
                     }
                 }
             }
@@ -396,10 +388,10 @@ class DrawerAdapter(
             set(value) {
                 itemView.shortcut_label.text = value
             }
-        var icon: Drawable?
-            get() = itemView.shortcut_icon.drawable
+        var icon: Bitmap?
+            get() = itemView.shortcut_icon.drawable?.toBitmap()
             set(value) {
-                itemView.shortcut_icon.setImageDrawable(value)
+                itemView.shortcut_icon.setImageBitmap(value)
             }
 
         private var wasScroll = false

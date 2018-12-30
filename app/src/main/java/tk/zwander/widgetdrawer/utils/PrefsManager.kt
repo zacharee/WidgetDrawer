@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.SharedPreferences
 import android.graphics.Color
+import android.net.Uri
 import android.preference.PreferenceManager
 import android.view.Gravity
 import com.google.gson.GsonBuilder
@@ -47,6 +48,7 @@ class PrefsManager private constructor(private val context: Context) {
         get() {
             return GsonBuilder()
                 .setExclusionStrategies(CrashFixExclusionStrategy())
+                .registerTypeAdapter(Uri::class.java, UriDeserializer())
                 .create()
                 .fromJson<ArrayList<BaseWidgetInfo>>(
                     getString(WIDGETS, null) ?: return ArrayList(),
@@ -57,6 +59,7 @@ class PrefsManager private constructor(private val context: Context) {
             putString(
                 WIDGETS, GsonBuilder()
                     .setExclusionStrategies(CrashFixExclusionStrategy())
+                    .registerTypeAdapter(Uri::class.java, UriSerializer())
                     .create()
                     .toJson(ArrayList(value)
                         .apply { removeAll { it.id == -1 } })
