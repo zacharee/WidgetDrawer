@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.utils
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.graphics.Color
 import android.net.Uri
@@ -48,7 +49,8 @@ class PrefsManager private constructor(private val context: Context) {
         get() {
             return GsonBuilder()
                 .setExclusionStrategies(CrashFixExclusionStrategy())
-                .registerTypeAdapter(Uri::class.java, UriDeserializer())
+                .registerTypeAdapter(Uri::class.java, GsonUriHandler())
+                .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
                 .create()
                 .fromJson<ArrayList<BaseWidgetInfo>>(
                     getString(WIDGETS, null) ?: return ArrayList(),
@@ -59,7 +61,8 @@ class PrefsManager private constructor(private val context: Context) {
             putString(
                 WIDGETS, GsonBuilder()
                     .setExclusionStrategies(CrashFixExclusionStrategy())
-                    .registerTypeAdapter(Uri::class.java, UriSerializer())
+                    .registerTypeAdapter(Uri::class.java, GsonUriHandler())
+                    .registerTypeAdapter(Intent::class.java, GsonIntentHandler())
                     .create()
                     .toJson(ArrayList(value)
                         .apply { removeAll { it.id == -1 } })
