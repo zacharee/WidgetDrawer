@@ -34,23 +34,23 @@
         android:dependency="show_handle"
         />
 
-    <com.pavelsikun.seekbarpreference.SeekBarPreferenceCompat
+    <tk.zwander.seekbarpreference.SeekBarPreference
         android:title="@string/handle_height"
         android:key="handle_height"
         android:defaultValue="140"
-        app:msbp_minValue="64"
-        app:msbp_maxValue="500"
-        app:msbp_measurementUnit="dp"
+        app:minValue="64"
+        app:maxValue="500"
+        app:units="dp"
         android:dependency="show_handle"
         />
 
-    <com.pavelsikun.seekbarpreference.SeekBarPreferenceCompat
+    <tk.zwander.seekbarpreference.SeekBarPreference
         android:title="@string/handle_width"
         android:key="handle_width"
         android:defaultValue="6"
-        app:msbp_minValue="1"
-        app:msbp_maxValue="24"
-        app:msbp_measurementUnit="dp"
+        app:minValue="1"
+        app:maxValue="24"
+        app:units="dp"
         android:dependency="show_handle"
         />
 
