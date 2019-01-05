@@ -12,12 +12,12 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_widget_select.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.adapters.AppListAdapter
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.WidgetInfo
-import tk.zwander.widgetdrawer.utils.toBitmap
 import tk.zwander.widgetdrawer.views.Drawer
 
 

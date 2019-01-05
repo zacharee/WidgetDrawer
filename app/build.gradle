@@ -47,6 +47,7 @@ dependencies {
 
     //Other
     implementation 'com.github.zacharee:SeekBarPreference:da20a11584'
+    implementation 'com.github.zacharee:HelperLib:78362ab972'
     implementation 'com.jaredrummler:colorpicker:1.0.5'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.1'
     implementation 'com.jaredrummler:colorpicker-compat:1.0.5'

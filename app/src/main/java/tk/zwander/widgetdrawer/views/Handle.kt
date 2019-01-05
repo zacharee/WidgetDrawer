@@ -14,9 +14,9 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.LinearLayout
+import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.dpAsPx
 import tk.zwander.widgetdrawer.utils.screenSize
 import tk.zwander.widgetdrawer.utils.vibrate
 import kotlin.math.absoluteValue

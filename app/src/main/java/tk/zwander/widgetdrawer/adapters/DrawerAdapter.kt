@@ -19,6 +19,8 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.header_layout.view.*
 import kotlinx.android.synthetic.main.shortcut_holder.view.*
+import tk.zwander.helperlib.dpAsPx
+import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 import tk.zwander.widgetdrawer.misc.DrawerHost
@@ -27,8 +29,6 @@ import tk.zwander.widgetdrawer.observables.SelectionObservable
 import tk.zwander.widgetdrawer.observables.SizeObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.dpAsPx
-import tk.zwander.widgetdrawer.utils.toBitmap
 import tk.zwander.widgetdrawer.views.CustomCard
 import tk.zwander.widgetdrawer.views.Drawer
 import java.util.*

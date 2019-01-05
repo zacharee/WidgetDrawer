@@ -10,6 +10,7 @@ import android.preference.PreferenceManager
 import android.view.Gravity
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 
 class PrefsManager private constructor(private val context: Context) {
@@ -79,7 +80,7 @@ class PrefsManager private constructor(private val context: Context) {
             putInt(HANDLE_SIDE, value)
         }
     var handleYPx: Float
-        get() = getFloat(HANDLE_Y, context.pxAsDp(64))
+        get() = getFloat(HANDLE_Y, context.dpAsPx(64).toFloat())
         set(value) {
             putFloat(HANDLE_Y, value)
         }
