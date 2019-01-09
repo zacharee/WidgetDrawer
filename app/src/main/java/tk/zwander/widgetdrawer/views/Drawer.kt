@@ -489,7 +489,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                     val shortcut = BaseWidgetInfo.shortcut(
                         name ?: info?.label,
                         finalBmp ?: info?.icon,
-                        info?.activityInfo,
                         shortcutIdManager.allocateShortcutId(),
                         intent
                     )
