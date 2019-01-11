@@ -7,6 +7,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.view.*
@@ -150,7 +151,10 @@ class DrawerAdapter(
                     holder.selection.performClick()
 
                     if (!isEditing) {
-                        holder.itemView.context.startActivity(widget.shortcutIntent ?: return@setOnClickListener)
+                        holder.itemView.context.startActivity(
+                            widget.shortcutIntent
+                                ?.also { intent -> intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
+                                ?: return@setOnClickListener)
                     }
                 }
             }
