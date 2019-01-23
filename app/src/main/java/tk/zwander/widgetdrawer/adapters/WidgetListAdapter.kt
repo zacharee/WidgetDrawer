@@ -1,15 +1,18 @@
 package tk.zwander.widgetdrawer.adapters
 
+import android.content.ContentResolver
+import android.net.Uri
 import android.os.Parcelable
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.WidgetInfo
-
 
 
 class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) :
@@ -69,7 +72,17 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
         fun parseInfo(info: WidgetInfo) {
             itemView.widget_name.text = info.widgetName
-            itemView.widget_image.setImageBitmap(info.previewImg)
+
+            Picasso.Builder(itemView.context)
+                .build()
+                .load(Uri.parse(
+                    "${ContentResolver.SCHEME_ANDROID_RESOURCE}://" +
+                            "${info.appInfo.packageName}/" +
+                            "${itemView.context.packageManager.getResourcesForApplication(info.appInfo.packageName)
+                                .getResourceTypeName(info.previewImg)}/" +
+                            "${info.previewImg}"))
+                .error(info.appInfo.loadIcon(itemView.context.packageManager))
+                .into(itemView.widget_image)
         }
     }
 }

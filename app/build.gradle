@@ -56,6 +56,7 @@ dependencies {
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.1'
     implementation 'com.jaredrummler:colorpicker-compat:1.0.5'
     implementation 'com.github.tingyik90:snackprogressbar:5.0'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }
 
 apply plugin: 'com.google.gms.google-services'

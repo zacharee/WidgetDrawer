@@ -7,8 +7,10 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.activity_widget_select.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -59,31 +61,16 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
             val appIcon = packageManager.getApplicationIcon(appInfo)
-            val previewImg: Bitmap? =
-                BitmapFactory.Options().run {
-                    inJustDecodeBounds = true
-                    BitmapFactory.decodeResource(
-                        packageManager.getResourcesForApplication(appInfo),
-                        it.previewImage,
-                        this
-                    )
-
-                    inSampleSize = getProperSampleSize(this, 512, 512)
-
-                    inJustDecodeBounds = false
-                    BitmapFactory.decodeResource(
-                        packageManager.getResourcesForApplication(appInfo),
-                        it.previewImage,
-                        this
-                    )
-                } ?: appIcon.toBitmap()
 
             var app = apps[appInfo.packageName]
             if (app == null) {
                 apps[appInfo.packageName] = AppInfo(appName.toString(), appIcon)
                 app = apps[appInfo.packageName]!!
             }
-            app.widgets.add(WidgetInfo(widgetName, previewImg, it))
+
+            app.widgets.add(WidgetInfo(widgetName,
+                it.previewImage.run { if (this != 0) this else appInfo.icon },
+                it, appInfo))
         }
 
         val others = packageManager.queryIntentActivities(
@@ -94,14 +81,9 @@ class WidgetSelectActivity : AppCompatActivity() {
         others.forEach {
             val appInfo = it.activityInfo.applicationInfo
 
-            val appName = packageManager.getApplicationLabel(appInfo)
-            val appIcon = packageManager.getApplicationIcon(appInfo)
-
+            val appName = appInfo.loadLabel(packageManager)
+            val appIcon = appInfo.loadIcon(packageManager)
             val shortcutName = it.loadLabel(packageManager)
-            val shortcutIcon = BitmapFactory.decodeResource(
-                packageManager.getResourcesForApplication(appInfo),
-                it.activityInfo.iconResource
-            ) ?: appIcon.toBitmap()
 
             var app = apps[appInfo.packageName]
             if (app == null) {
@@ -109,15 +91,17 @@ class WidgetSelectActivity : AppCompatActivity() {
                 apps[appInfo.packageName] = new
                 app = new
             }
+
             app!!.widgets.add(
                 WidgetInfo(
                     shortcutName.toString(),
-                    shortcutIcon,
+                    it.activityInfo.iconResource,
                     ShortcutData(
                         shortcutName.toString(),
                         it.loadIcon(packageManager).toBitmap(),
                         it.activityInfo
-                    )
+                    ),
+                    appInfo
                 )
             )
         }
@@ -127,21 +111,5 @@ class WidgetSelectActivity : AppCompatActivity() {
             progress.visibility = View.GONE
             selection_list.visibility = View.VISIBLE
         }
-    }
-
-    private fun getProperSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int {
-        val (height: Int, width: Int) = options.run { outHeight to outWidth }
-        var inSample = 1
-
-        if (height > reqHeight || width > reqWidth) {
-            val halfHeight = height / 2
-            val halfWidth = width / 2
-
-            while (halfHeight / inSample >= reqHeight && halfWidth / inSample >= reqWidth) {
-                inSample *= 2
-            }
-        }
-
-        return inSample
     }
 }

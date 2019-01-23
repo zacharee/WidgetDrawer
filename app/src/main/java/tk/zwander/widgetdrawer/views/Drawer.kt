@@ -24,6 +24,7 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
+import android.widget.Toast
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
@@ -341,13 +342,18 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         id: Int,
         configure: ComponentName
     ) {
-        val intent = Intent(ACTION_CONFIG)
-        intent.putExtra(EXTRA_APPWIDGET_CONFIGURE, configure)
-        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-        intent.component = ComponentName(context, PermConfigActivity::class.java)
-        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        if (context.packageManager.getActivityInfo(configure, 0).exported) {
+            val intent = Intent(ACTION_CONFIG)
+            intent.putExtra(EXTRA_APPWIDGET_CONFIGURE, configure)
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+            intent.component = ComponentName(context, PermConfigActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-        context.startActivity(intent)
+            context.startActivity(intent)
+        } else {
+            Toast.makeText(context, R.string.unable_to_configure_widget, Toast.LENGTH_SHORT).show()
+            addNewWidget(id)
+        }
     }
 
     private fun pickWidget() {
