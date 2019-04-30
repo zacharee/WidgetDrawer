@@ -6,7 +6,6 @@ import android.appwidget.AppWidgetHostView
 import android.content.Context
 import android.content.Intent
 import android.graphics.Rect
-import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
