@@ -96,7 +96,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val host by lazy { DrawerHost(context.applicationContext, 1003) }
+    private val host by lazy { DrawerHost(context.applicationContext, 1003, this) }
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context) }
     private val prefs by lazy { PrefsManager.getInstance(context) }
@@ -441,7 +441,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         timer.start()
     }
 
-    private fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         when (requestCode) {
             PERM_CODE -> {
                 if (resultCode == Activity.RESULT_OK) {

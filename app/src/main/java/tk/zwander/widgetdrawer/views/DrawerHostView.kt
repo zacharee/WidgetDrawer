@@ -1,17 +1,23 @@
 package tk.zwander.widgetdrawer.views
 
 import android.annotation.SuppressLint
+import android.app.PendingIntent
 import android.appwidget.AppWidgetHostView
 import android.content.Context
+import android.content.Intent
 import android.graphics.Rect
+import android.util.Log
 import android.view.GestureDetector
 import android.view.MotionEvent
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
+import android.widget.RemoteViews
 import androidx.core.view.NestedScrollingChild
 import tk.zwander.widgetdrawer.R
 
-class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrollingChild {
+@SuppressLint("ViewConstructor")
+class DrawerHostView(context: Context, drawer: Drawer) : AppWidgetHostView(context, InnerOnClickHandler(drawer)), NestedScrollingChild {
     private val recView by lazy { parent.parent.parent as DrawerRecycler }
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
@@ -54,6 +60,10 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
         } else {
             onTouchEvent(ev)
         }
+    }
+
+    override fun setOnClickHandler(handler: RemoteViews.OnClickHandler?) {
+        //No-op
     }
 
     private var notList = false
@@ -130,5 +140,20 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
     private fun scaleMotionEvent(event: MotionEvent) {
         event.setLocation(event.x + left + (parent as ViewGroup).left + (parent.parent as ViewGroup).left,
             event.y + top + (parent as ViewGroup).top + (parent.parent as ViewGroup).top)
+    }
+
+    class InnerOnClickHandler(private val drawer: Drawer) : RemoteViews.OnClickHandler() {
+        override fun onClickHandler(
+            view: View,
+            pendingIntent: PendingIntent,
+            fillInIntent: Intent,
+            windowingMode: Int
+        ): Boolean {
+            if (pendingIntent.isActivity) {
+                drawer.hideDrawer()
+            }
+
+            return super.onClickHandler(view, pendingIntent, fillInIntent, windowingMode)
+        }
     }
 }
