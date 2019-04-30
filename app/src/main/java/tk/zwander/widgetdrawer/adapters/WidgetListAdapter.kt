@@ -3,7 +3,6 @@ package tk.zwander.widgetdrawer.adapters
 import android.content.ContentResolver
 import android.net.Uri
 import android.os.Parcelable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -73,6 +72,8 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
         fun parseInfo(info: WidgetInfo) {
             itemView.widget_name.text = info.widgetName
 
+            val img = itemView.widget_image
+
             Picasso.Builder(itemView.context)
                 .build()
                 .load(Uri.parse(
@@ -81,8 +82,11 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
                             "${itemView.context.packageManager.getResourcesForApplication(info.appInfo.packageName)
                                 .getResourceTypeName(info.previewImg)}/" +
                             "${info.previewImg}"))
+                .resize(img.maxWidth, img.maxHeight)
+                .onlyScaleDown()
+                .centerInside()
                 .error(info.appInfo.loadIcon(itemView.context.packageManager))
-                .into(itemView.widget_image)
+                .into(img)
         }
     }
 }
