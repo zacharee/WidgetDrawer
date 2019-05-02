@@ -13,6 +13,20 @@ val Context.canDrawOverlays
     get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M
             || Settings.canDrawOverlays(this)
 
+val Context.canUseHiddenApis: Boolean
+    get() {
+        val underP = Build.VERSION.SDK_INT < Build.VERSION_CODES.P
+        val underQ = Build.VERSION.SDK_INT < 29
+
+        val pPolicy = Settings.Global.getString(contentResolver, "hidden_api_policy_p_apps")
+        val qPolicy = Settings.Global.getString(contentResolver, "hidden_api_policy")
+
+        val pAllowed = pPolicy == "0" || pPolicy == "1"
+        val qAllowed = qPolicy == "0" || qPolicy == "0"
+
+        return underP || if (underQ) pAllowed else qAllowed
+    }
+
 fun Context.screenSize(): Point {
     val display = (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay
     return Point().apply { display.getRealSize(this) }
