@@ -37,14 +37,14 @@ import java.lang.reflect.Method
  * Proxy.newProxyInstance(
  * RemoteViews.OnClickHandler::class.java.classLoader,
  * arrayOf(RemoteViews.OnClickHandler::class.java),
- * DrawerHostView.InnerOnClickHandlerQ(DrawerHostView.OnClickHandlerDelegate(drawer))
+ * DrawerHostView.InnerOnClickHandlerQ(drawer)
  * ) as RemoteViews.OnClickHandler
  */
 class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
     context,
     id,
     if (RemoteViews.OnClickHandler::class.java.isInterface) null
-    else InnerOnClickHandlerPie(OnClickHandlerDelegate(drawer)),
+    else InnerOnClickHandlerPie(drawer),
     Looper.getMainLooper()
 ) {
     override fun onCreateView(
@@ -55,7 +55,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
         return DrawerHostView(context)
     }
 
-    class InnerOnClickHandlerPie(private val delegate: OnClickHandlerDelegate) : RemoteViews.OnClickHandler() {
+    class InnerOnClickHandlerPie(private val drawer: Drawer) : RemoteViews.OnClickHandler() {
         private var enterAnimationId: Int = 0
 
         override fun onClickHandler(
@@ -71,42 +71,6 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             pendingIntent: PendingIntent,
             fillInIntent: Intent,
             windowingMode: Int
-        ): Boolean {
-            return delegate.handleClick(view, pendingIntent, fillInIntent, windowingMode, enterAnimationId)
-        }
-
-        override fun setEnterAnimationId(enterAnimationId: Int) {
-            this.enterAnimationId = enterAnimationId
-        }
-    }
-
-    class InnerOnClickHandlerQ(private val delegate: OnClickHandlerDelegate) : InvocationHandler {
-        override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
-            val view = args[0] as View
-            val pi = args[1] as PendingIntent
-            val response = args[2]
-
-            return delegate.handleClick(view, pi, response)
-        }
-    }
-
-    class OnClickHandlerDelegate(private val drawer: Drawer) {
-        fun handleClick(
-            view: View,
-            pendingIntent: PendingIntent,
-            response: Any
-        ): Boolean {
-            val remoteResponseClass = Class.forName("android.widget.RemoteViews\$RemoteResponse")
-
-            return false
-        }
-
-        fun handleClick(
-            view: View,
-            pendingIntent: PendingIntent,
-            fillInIntent: Intent,
-            windowingMode: Int,
-            enterAnimationId: Int
         ): Boolean {
             if (pendingIntent.isActivity) {
                 drawer.hideDrawer()
@@ -131,6 +95,20 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             }
 
             return true
+        }
+
+        override fun setEnterAnimationId(enterAnimationId: Int) {
+            this.enterAnimationId = enterAnimationId
+        }
+    }
+
+    class InnerOnClickHandlerQ(private val drawer: Drawer) : InvocationHandler {
+        override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
+            val view = args[0] as View
+            val pi = args[1] as PendingIntent
+            val response = args[2]
+
+            return false
         }
     }
 }
