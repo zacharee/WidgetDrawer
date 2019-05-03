@@ -78,7 +78,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             fillInIntent: Intent,
             windowingMode: Int
         ): Boolean {
-            if (pendingIntent.isActivity || fillInIntent.resolveActivity(view.context.packageManager) != null) {
+            if (pendingIntent.isActivity) {
                 drawer.hideDrawer()
             }
 
@@ -122,7 +122,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
 
             val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
 
-            if (pi.isActivity || launchOptions.first.resolveActivity(view.context.packageManager) != null) drawer.hideDrawer()
+            if (pi.isActivity) drawer.hideDrawer()
 
             return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
         }
