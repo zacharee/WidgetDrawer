@@ -15,6 +15,7 @@ import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.DrawerHostView
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
+import java.lang.reflect.Proxy
 
 /**
  * The super constructor here is technically a hidden API, but for whatever reason,
@@ -37,13 +38,18 @@ import java.lang.reflect.Method
  * Proxy.newProxyInstance(
  * RemoteViews.OnClickHandler::class.java.classLoader,
  * arrayOf(RemoteViews.OnClickHandler::class.java),
- * DrawerHostView.InnerOnClickHandlerQ(drawer)
+ * InnerOnClickHandlerQ(drawer)
  * ) as RemoteViews.OnClickHandler
  */
 class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
     context,
     id,
-    if (RemoteViews.OnClickHandler::class.java.isInterface) null
+    if (RemoteViews.OnClickHandler::class.java.isInterface)
+    Proxy.newProxyInstance(
+        RemoteViews.OnClickHandler::class.java.classLoader,
+        arrayOf(RemoteViews.OnClickHandler::class.java),
+        InnerOnClickHandlerQ(drawer)
+    ) as RemoteViews.OnClickHandler
     else InnerOnClickHandlerPie(drawer),
     Looper.getMainLooper()
 ) {
@@ -72,7 +78,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             fillInIntent: Intent,
             windowingMode: Int
         ): Boolean {
-            if (pendingIntent.isActivity) {
+            if (pendingIntent.isActivity || fillInIntent.resolveActivity(view.context.packageManager) != null) {
                 drawer.hideDrawer()
             }
 
@@ -108,7 +114,17 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             val pi = args[1] as PendingIntent
             val response = args[2]
 
-            return false
+            val responseClass = Class.forName("android.widget.RemoteViews\$RemoteResponse")
+
+            val getLaunchOptions = responseClass.getDeclaredMethod("getLaunchOptions", View::class.java)
+            val startPendingIntent = RemoteViews::class.java.getDeclaredMethod(
+                "startPendingIntent", View::class.java, PendingIntent::class.java, android.util.Pair::class.java)
+
+            val launchOptions = getLaunchOptions.invoke(response, view) as android.util.Pair<Intent, ActivityOptions>
+
+            if (pi.isActivity || launchOptions.first.resolveActivity(view.context.packageManager) != null) drawer.hideDrawer()
+
+            return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
         }
     }
 }
