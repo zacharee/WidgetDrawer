@@ -2,12 +2,12 @@ package tk.zwander.widgetdrawer.misc
 
 import android.app.ActivityOptions
 import android.app.PendingIntent
+import android.app.WindowConfiguration
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.content.IntentSender
 import android.os.Looper
 import android.view.View
 import android.widget.RemoteViews
@@ -69,7 +69,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            return onClickHandler(view, pendingIntent, fillInIntent, 0)
+            return onClickHandler(view, pendingIntent, fillInIntent, WindowConfiguration.WINDOWING_MODE_UNDEFINED)
         }
 
         override fun onClickHandler(
@@ -82,25 +82,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
                 drawer.hideDrawer()
             }
 
-            try {
-                val context = view.context
-                val opts = ActivityOptions.makeCustomAnimation(context, enterAnimationId, 0)
-
-                if (windowingMode != 0) {
-                    opts.launchWindowingMode = windowingMode
-                }
-                context.startIntentSender(
-                    pendingIntent.intentSender, fillInIntent,
-                    Intent.FLAG_ACTIVITY_NEW_TASK,
-                    Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle()
-                )
-            } catch (e: IntentSender.SendIntentException) {
-                return false
-            } catch (e: Exception) {
-                return false
-            }
-
-            return true
+            return super.onClickHandler(view, pendingIntent, fillInIntent, windowingMode)
         }
 
         override fun setEnterAnimationId(enterAnimationId: Int) {
