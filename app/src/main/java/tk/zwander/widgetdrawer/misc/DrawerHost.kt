@@ -1,5 +1,6 @@
 package tk.zwander.widgetdrawer.misc
 
+import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.PendingIntent
 import android.app.WindowConfiguration
@@ -8,6 +9,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Looper
 import android.view.View
 import android.widget.RemoteViews
@@ -69,7 +71,17 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            return onClickHandler(view, pendingIntent, fillInIntent, WindowConfiguration.WINDOWING_MODE_UNDEFINED)
+            return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                onClickHandler(view, pendingIntent, fillInIntent,
+                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) WindowConfiguration.WINDOWING_MODE_UNDEFINED
+                    else ActivityManager.StackId.INVALID_STACK_ID)
+            } else {
+                if (pendingIntent.isActivity) {
+                    drawer.hideDrawer()
+                }
+
+                super.onClickHandler(view, pendingIntent, fillInIntent)
+            }
         }
 
         override fun onClickHandler(
