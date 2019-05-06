@@ -42,6 +42,15 @@
             android:theme="@style/AppTheme.Null"
             android:exported="true"
             />
+        <activity-alias
+            android:name=".activities.LaunchDrawer"
+            android:targetActivity=".activities.TriggerActivity"
+            android:exported="true"
+            android:label="@string/open_widget_drawer">
+            <intent-filter>
+                <action android:name="android.intent.action.CREATE_SHORTCUT" />
+            </intent-filter>
+        </activity-alias>
 
         <service
             android:name=".services.DrawerService"
