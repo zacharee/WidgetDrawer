@@ -48,9 +48,9 @@ dependencies {
 
     //Google
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.google.firebase:firebase-core:16.0.9'
-    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.0'
-    implementation 'com.google.android.material:material:1.1.0-alpha06'
+    implementation 'com.google.firebase:firebase-core:17.0.0'
+    implementation 'com.crashlytics.sdk.android:crashlytics:2.10.1'
+    implementation 'com.google.android.material:material:1.1.0-alpha07'
 
     //Other
     implementation 'com.github.zacharee:SeekBarPreference:c33ebf66c8'
