@@ -1,6 +1,6 @@
 package tk.zwander.widgetdrawer.adapters
 
-import android.content.ContentResolver
+import android.content.Context
 import android.net.Uri
 import android.os.Parcelable
 import android.view.LayoutInflater
@@ -8,8 +8,12 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
+import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
+import com.squareup.picasso.Request
+import com.squareup.picasso.RequestHandler
 import kotlinx.android.synthetic.main.widget_item.view.*
+import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 
@@ -74,19 +78,73 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
 
             val img = itemView.widget_image
 
+            val remRes = itemView.context.packageManager.getResourcesForApplication(info.appInfo)
+
+            val entryName = try {
+                remRes.getResourceEntryName(info.previewImg)
+            } catch (e: Exception) {
+                null
+            }
+
+            val typeName = try {
+                remRes.getResourceTypeName(info.previewImg)
+            } catch (e: Exception) {
+                null
+            }
+
+            val launcherEntryName = try {
+                remRes.getResourceEntryName(info.appInfo.icon)
+            } catch (e: Exception) {
+                null
+            }
+
+            val launcherTypeName = try {
+                remRes.getResourceTypeName(info.appInfo.icon)
+            } catch (e: Exception) {
+                null
+            }
+
             Picasso.Builder(itemView.context)
                 .build()
-                .load(Uri.parse(
-                    "${ContentResolver.SCHEME_ANDROID_RESOURCE}://" +
-                            "${info.appInfo.packageName}/" +
-                            "${itemView.context.packageManager.getResourcesForApplication(info.appInfo.packageName)
-                                .getResourceTypeName(info.previewImg)}/" +
-                            "${info.previewImg}"))
+                .load("android.resource://${info.appInfo.packageName}/$typeName/$entryName")
                 .resize(img.maxWidth, img.maxHeight)
                 .onlyScaleDown()
                 .centerInside()
-                .error(info.appInfo.loadIcon(itemView.context.packageManager))
-                .into(img)
+                .into(img, object : Callback {
+                    override fun onError(e: Exception?) {
+                        Picasso.Builder(itemView.context)
+                            .addRequestHandler(AppIconRequestHandler(itemView.context))
+                            .build()
+                            .load(Uri.parse("${AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
+                            .resize(img.maxWidth, img.maxHeight)
+                            .onlyScaleDown()
+                            .centerInside()
+                            .into(img)
+                    }
+
+                    override fun onSuccess() {}
+                })
+        }
+    }
+
+
+    class AppIconRequestHandler(private val context: Context) : RequestHandler() {
+        companion object {
+            const val SCHEME = "package"
+        }
+
+        private val pm = context.packageManager
+
+        override fun canHandleRequest(data: Request): Boolean {
+            return (data.uri != null && data.uri.scheme == SCHEME)
+        }
+
+        override fun load(request: Request, networkPolicy: Int): Result? {
+            val pName = request.uri.schemeSpecificPart
+
+            val img = pm.getApplicationIcon(pName).toBitmap() ?: return null
+
+            return Result(img, Picasso.LoadedFrom.DISK)
         }
     }
 }
