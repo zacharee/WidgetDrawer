@@ -1,10 +1,10 @@
 package tk.zwander.widgetdrawer.misc
 
-import android.graphics.drawable.Drawable
+import android.content.pm.ApplicationInfo
 
 data class AppInfo(
     var appName: String,
-    var appIcon: Drawable,
+    var appInfo: ApplicationInfo,
     var widgets: ArrayList<WidgetInfo> = ArrayList()
 ) : BaseInfo(), Comparable<AppInfo> {
     override fun compareTo(other: AppInfo) =

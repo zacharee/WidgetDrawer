@@ -18,7 +18,7 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 
 
-class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) :
+class WidgetListAdapter(private val picasso: Picasso, private val selectionCallback: (provider: Parcelable) -> Unit) :
     RecyclerView.Adapter<WidgetListAdapter.WidgetVH>() {
     private val widgets = SortedList(WidgetInfo::class.java, object : SortedList.Callback<WidgetInfo>() {
         override fun areItemsTheSame(item1: WidgetInfo?, item2: WidgetInfo?): Boolean {
@@ -62,7 +62,7 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
     override fun onBindViewHolder(holder: WidgetVH, position: Int) {
         holder.itemView
             .setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition).component) }
-        holder.parseInfo(widgets.get(holder.adapterPosition))
+        holder.parseInfo(widgets.get(holder.adapterPosition), picasso)
     }
 
     override fun getItemCount() = widgets.size()
@@ -73,7 +73,7 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
     }
 
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
-        fun parseInfo(info: WidgetInfo) {
+        fun parseInfo(info: WidgetInfo, picasso: Picasso) {
             itemView.widget_name.text = info.widgetName
 
             val img = itemView.widget_image
@@ -92,29 +92,14 @@ class WidgetListAdapter(private val selectionCallback: (provider: Parcelable) ->
                 null
             }
 
-            val launcherEntryName = try {
-                remRes.getResourceEntryName(info.appInfo.icon)
-            } catch (e: Exception) {
-                null
-            }
-
-            val launcherTypeName = try {
-                remRes.getResourceTypeName(info.appInfo.icon)
-            } catch (e: Exception) {
-                null
-            }
-
-            Picasso.Builder(itemView.context)
-                .build()
+            picasso
                 .load("android.resource://${info.appInfo.packageName}/$typeName/$entryName")
                 .resize(img.maxWidth, img.maxHeight)
                 .onlyScaleDown()
                 .centerInside()
                 .into(img, object : Callback {
                     override fun onError(e: Exception?) {
-                        Picasso.Builder(itemView.context)
-                            .addRequestHandler(AppIconRequestHandler(itemView.context))
-                            .build()
+                        picasso
                             .load(Uri.parse("${AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                             .resize(img.maxWidth, img.maxHeight)
                             .onlyScaleDown()

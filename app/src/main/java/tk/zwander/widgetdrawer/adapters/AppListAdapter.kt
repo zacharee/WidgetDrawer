@@ -1,17 +1,20 @@
 package tk.zwander.widgetdrawer.adapters
 
+import android.content.Context
+import android.net.Uri
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
+import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.app_item.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.DividerItemDecoration
 
-class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
+class AppListAdapter(private val context: Context, private val selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.Adapter<AppListAdapter.AppVH>() {
     private val items = SortedList(AppInfo::class.java, object : SortedList.Callback<AppInfo>() {
         override fun areItemsTheSame(item1: AppInfo?, item2: AppInfo?): Boolean {
             return false
@@ -42,13 +45,19 @@ class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Un
         }
     })
 
+    private val picasso = Picasso.Builder(context)
+        .addRequestHandler(WidgetListAdapter.AppIconRequestHandler(context))
+        .build()
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         AppVH(
             LayoutInflater.from(parent.context).inflate(
                 R.layout.app_item,
                 parent,
                 false
-            ), selectionCallback
+            ),
+            picasso,
+            selectionCallback
         )
 
     override fun onBindViewHolder(holder: AppVH, position: Int) {
@@ -66,18 +75,21 @@ class AppListAdapter(private val selectionCallback: (provider: Parcelable) -> Un
         items.forEach { addItem(it) }
     }
 
-    class AppVH(view: View, selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.ViewHolder(view) {
-        private val adapter = WidgetListAdapter(selectionCallback)
+    class AppVH(view: View, private val picasso: Picasso, selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.ViewHolder(view) {
+        private val adapter = WidgetListAdapter(picasso, selectionCallback)
 
         fun parseInfo(info: AppInfo) {
             itemView.widget_holder.adapter = adapter
             itemView.widget_holder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
 
             itemView.app_name.text = info.appName
-            itemView.app_icon.setImageDrawable(info.appIcon)
             info.widgets.forEach {
                 adapter.addItem(it)
             }
+
+            picasso
+                .load(Uri.parse("${WidgetListAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
+                .into(itemView.app_icon)
         }
     }
 }

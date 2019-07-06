@@ -25,12 +25,14 @@ class WidgetSelectActivity : AppCompatActivity() {
     }
 
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
-    private val adapter = AppListAdapter {
-        Drawer.onResult(this, Activity.RESULT_OK, PICK_CODE, Intent().apply {
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, it)
-        })
+    private val adapter by lazy {
+        AppListAdapter(this) {
+            Drawer.onResult(this, Activity.RESULT_OK, PICK_CODE, Intent().apply {
+                putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, it)
+            })
 
-        finish()
+            finish()
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,11 +58,10 @@ class WidgetSelectActivity : AppCompatActivity() {
 
             val appName = packageManager.getApplicationLabel(appInfo)
             val widgetName = it.loadLabel(packageManager)
-            val appIcon = packageManager.getApplicationIcon(appInfo)
 
             var app = apps[appInfo.packageName]
             if (app == null) {
-                apps[appInfo.packageName] = AppInfo(appName.toString(), appIcon)
+                apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
                 app = apps[appInfo.packageName]!!
             }
 
@@ -78,12 +79,11 @@ class WidgetSelectActivity : AppCompatActivity() {
             val appInfo = it.activityInfo.applicationInfo
 
             val appName = appInfo.loadLabel(packageManager)
-            val appIcon = appInfo.loadIcon(packageManager)
             val shortcutName = it.loadLabel(packageManager)
 
             var app = apps[appInfo.packageName]
             if (app == null) {
-                val new = AppInfo(appName.toString(), appIcon)
+                val new = AppInfo(appName.toString(), appInfo)
                 apps[appInfo.packageName] = new
                 app = new
             }
