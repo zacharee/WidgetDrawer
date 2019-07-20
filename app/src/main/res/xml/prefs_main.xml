@@ -20,6 +20,12 @@
         android:dependency="enabled"
         />
 
+    <androidx.preference.SwitchPreference
+        android:title="@string/open_drawer_tile"
+        android:key="open_drawer_tile"
+        android:defaultValue="false"
+        />
+
     <androidx.preference.SwitchPreferenceCompat
         android:title="@string/show_handle"
         android:key="show_handle"

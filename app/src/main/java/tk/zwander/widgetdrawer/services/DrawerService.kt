@@ -34,8 +34,12 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
 
         private const val CHANNEL = "widget_drawer_main"
 
-        fun start(context: Context) {
-            ContextCompat.startForegroundService(context, Intent(context, DrawerService::class.java))
+        fun start(context: Context, openDrawer: Boolean = false) {
+            val serviceIntent = Intent(context, DrawerService::class.java)
+            if(openDrawer) {
+                serviceIntent.action = ACTION_OPEN_DRAWER
+            }
+            ContextCompat.startForegroundService(context, serviceIntent)
         }
 
         fun stop(context: Context) {
@@ -185,6 +189,9 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if(intent != null && intent.action == ACTION_OPEN_DRAWER) {
+            openDrawer(this)
+        }
         return START_STICKY
     }
 
