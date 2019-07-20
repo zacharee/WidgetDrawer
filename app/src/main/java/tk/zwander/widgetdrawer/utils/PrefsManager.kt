@@ -27,6 +27,7 @@ class PrefsManager private constructor(private val context: Context) {
         const val CURRENT_SHORTCUT_IDS = "shortcut_ids"
         const val SHOW_HANDLE = "show_handle"
         const val CLOSE_ON_EMPTY_TAP = "close_on_empty_tap"
+        const val OPEN_DRAWER_WITH_TILE = "open_drawer_tile"
 
         @SuppressLint("RtlHardcoded")
         const val HANDLE_LEFT = Gravity.LEFT
@@ -123,6 +124,11 @@ class PrefsManager private constructor(private val context: Context) {
         get() = getBoolean(CLOSE_ON_EMPTY_TAP, false)
         set(value) {
             putBoolean(CLOSE_ON_EMPTY_TAP, value)
+        }
+    var openDrawerWithTile: Boolean
+        get() = getBoolean(OPEN_DRAWER_WITH_TILE, false)
+        set(value) {
+            putBoolean(OPEN_DRAWER_WITH_TILE, value)
         }
 
 

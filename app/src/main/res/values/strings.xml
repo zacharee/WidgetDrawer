@@ -11,6 +11,7 @@
     <string name="unlicensed">Unlicensed App!</string>
     <string name="show_handle">Show Handle</string>
     <string name="open_drawer">Open Drawer</string>
+    <string name="open_drawer_tile">Open Drawer with tile</string>
     <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
     <string name="undo">Undo</string>
 

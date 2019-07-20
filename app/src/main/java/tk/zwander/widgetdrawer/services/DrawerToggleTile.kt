@@ -25,7 +25,7 @@ class DrawerToggleTile : TileService(), SharedPreferences.OnSharedPreferenceChan
         prefs.enabled = newState
         setState(newState)
 
-        if (newState) DrawerService.start(this)
+        if (newState) DrawerService.start(this, PrefsManager.getInstance(this).openDrawerWithTile)
         else DrawerService.stop(this)
     }
 
