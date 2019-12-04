@@ -89,6 +89,8 @@ class AppListAdapter(private val context: Context, private val selectionCallback
 
             picasso
                 .load(Uri.parse("${WidgetListAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
+                .resize(itemView.app_icon.maxWidth, itemView.app_icon.maxHeight)
+                .fit()
                 .into(itemView.app_icon)
         }
     }

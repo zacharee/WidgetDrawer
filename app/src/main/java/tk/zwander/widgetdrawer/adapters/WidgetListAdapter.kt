@@ -99,6 +99,7 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
             picasso
                 .load("android.resource://${info.appInfo.packageName}/$typeName/$entryName")
                 .resize(img.maxWidth, img.maxHeight)
+                .fit()
                 .onlyScaleDown()
                 .centerInside()
                 .into(img, object : Callback {

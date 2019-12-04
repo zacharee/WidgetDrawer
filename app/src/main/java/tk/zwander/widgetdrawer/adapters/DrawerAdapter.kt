@@ -395,7 +395,10 @@ class DrawerAdapter(
         var icon: Bitmap?
             get() = itemView.shortcut_icon.drawable?.toBitmap()
             set(value) {
-                itemView.shortcut_icon.setImageBitmap(value)
+                val scaled = if (value != null) {
+                    Bitmap.createScaledBitmap(value, itemView.shortcut_icon.maxWidth, itemView.shortcut_icon.maxHeight, false)
+                } else null
+                itemView.shortcut_icon.setImageBitmap(scaled)
             }
 
         private var wasScroll = false
