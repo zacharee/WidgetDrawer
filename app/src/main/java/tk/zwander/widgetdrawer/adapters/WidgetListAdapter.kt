@@ -78,16 +78,20 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
 
             val img = itemView.widget_image
 
-            val remRes = itemView.context.packageManager.getResourcesForApplication(info.appInfo)
+            val remRes = try {
+                itemView.context.packageManager.getResourcesForApplication(info.appInfo)
+            } catch (e: Exception) {
+                null
+            }
 
             val entryName = try {
-                remRes.getResourceEntryName(info.previewImg)
+                remRes?.getResourceEntryName(info.previewImg)
             } catch (e: Exception) {
                 null
             }
 
             val typeName = try {
-                remRes.getResourceTypeName(info.previewImg)
+                remRes?.getResourceTypeName(info.previewImg)
             } catch (e: Exception) {
                 null
             }

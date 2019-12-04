@@ -8,8 +8,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_widget_select.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.adapters.AppListAdapter
@@ -19,7 +18,7 @@ import tk.zwander.widgetdrawer.misc.WidgetInfo
 import tk.zwander.widgetdrawer.views.Drawer
 
 
-class WidgetSelectActivity : AppCompatActivity() {
+class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() {
     companion object {
         const val PICK_CODE = 104
     }
@@ -50,62 +49,64 @@ class WidgetSelectActivity : AppCompatActivity() {
         finish()
     }
 
-    private fun populateAsync() = GlobalScope.launch {
-        val apps = HashMap<String, AppInfo>()
+    private fun populateAsync() = launch {
+        val apps = withContext(Dispatchers.Main) {
+            val apps = HashMap<String, AppInfo>()
 
-        appWidgetManager.installedProviders.forEach {
-            val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
+            appWidgetManager.installedProviders.forEach {
+                val appInfo = packageManager.getApplicationInfo(it.provider.packageName, 0)
 
-            val appName = packageManager.getApplicationLabel(appInfo)
-            val widgetName = it.loadLabel(packageManager)
+                val appName = packageManager.getApplicationLabel(appInfo)
+                val widgetName = it.loadLabel(packageManager)
 
-            var app = apps[appInfo.packageName]
-            if (app == null) {
-                apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
-                app = apps[appInfo.packageName]!!
+                var app = apps[appInfo.packageName]
+                if (app == null) {
+                    apps[appInfo.packageName] = AppInfo(appName.toString(), appInfo)
+                    app = apps[appInfo.packageName]!!
+                }
+
+                app.widgets.add(WidgetInfo(widgetName,
+                    it.previewImage.run { if (this != 0) this else appInfo.icon },
+                    it, appInfo))
             }
 
-            app.widgets.add(WidgetInfo(widgetName,
-                it.previewImage.run { if (this != 0) this else appInfo.icon },
-                it, appInfo))
-        }
-
-        val others = packageManager.queryIntentActivities(
-            Intent(Intent.ACTION_CREATE_SHORTCUT),
-            PackageManager.GET_RESOLVED_FILTER
-        )
-
-        others.forEach {
-            val appInfo = it.activityInfo.applicationInfo
-
-            val appName = appInfo.loadLabel(packageManager)
-            val shortcutName = it.loadLabel(packageManager)
-
-            var app = apps[appInfo.packageName]
-            if (app == null) {
-                val new = AppInfo(appName.toString(), appInfo)
-                apps[appInfo.packageName] = new
-                app = new
-            }
-
-            app!!.widgets.add(
-                WidgetInfo(
-                    shortcutName.toString(),
-                    it.activityInfo.iconResource,
-                    ShortcutData(
-                        shortcutName.toString(),
-                        it.loadIcon(packageManager).toBitmap(),
-                        it.activityInfo
-                    ),
-                    appInfo
-                )
+            val others = packageManager.queryIntentActivities(
+                Intent(Intent.ACTION_CREATE_SHORTCUT),
+                PackageManager.GET_RESOLVED_FILTER
             )
+
+            others.forEach {
+                val appInfo = it.activityInfo.applicationInfo
+
+                val appName = appInfo.loadLabel(packageManager)
+                val shortcutName = it.loadLabel(packageManager)
+
+                var app = apps[appInfo.packageName]
+                if (app == null) {
+                    val new = AppInfo(appName.toString(), appInfo)
+                    apps[appInfo.packageName] = new
+                    app = new
+                }
+
+                app!!.widgets.add(
+                    WidgetInfo(
+                        shortcutName.toString(),
+                        it.activityInfo.iconResource,
+                        ShortcutData(
+                            shortcutName.toString(),
+                            it.loadIcon(packageManager).toBitmap(),
+                            it.activityInfo
+                        ),
+                        appInfo
+                    )
+                )
+            }
+
+            apps
         }
 
-        runOnUiThread {
-            adapter.addItems(apps.values)
-            progress.visibility = View.GONE
-            selection_list.visibility = View.VISIBLE
-        }
+        adapter.addItems(apps.values)
+        progress.visibility = View.GONE
+        selection_list.visibility = View.VISIBLE
     }
 }
