@@ -3,6 +3,8 @@
     <style name="AppTheme" parent="Theme.MaterialComponents">
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:colorAccent">@color/colorAccent</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="android:colorPrimary">@color/colorPrimary</item>
     </style>
 
     <style name="AppTheme.Transparent" parent="AppTheme">

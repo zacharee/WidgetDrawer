@@ -2,4 +2,5 @@
 <resources>
     <color name="cardBackground">#343434</color>
     <color name="colorAccent">#1ed760</color>
+    <color name="colorPrimary">#343434</color>
 </resources>
