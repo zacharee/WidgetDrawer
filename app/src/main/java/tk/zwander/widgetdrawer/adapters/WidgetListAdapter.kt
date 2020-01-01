@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Callback
@@ -77,6 +78,7 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
             itemView.widget_name.text = info.widgetName
 
             val img = itemView.widget_image
+            itemView.shortcut_indicator.isVisible = info.isShortcut
 
             val remRes = try {
                 itemView.context.packageManager.getResourcesForApplication(info.appInfo)

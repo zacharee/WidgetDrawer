@@ -13,6 +13,7 @@
     <string name="open_drawer">Open Drawer</string>
     <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
     <string name="undo">Undo</string>
+    <string name="shortcut">Shortcut</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>

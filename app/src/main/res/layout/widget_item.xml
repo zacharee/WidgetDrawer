@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="200dp"
     android:layout_height="200dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?android:selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
@@ -20,7 +21,7 @@
         tools:text="Some Random Widget" />
 
     <FrameLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <ImageView
@@ -31,8 +32,29 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:src="@android:drawable/bottom_bar"
+            tools:src="@mipmap/ic_launcher"
             />
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:minWidth="75dp"
+            android:layout_gravity="bottom|center_horizontal"
+            app:cardCornerRadius="8dp"
+            app:cardBackgroundColor="@color/colorAccent">
+
+            <TextView
+                android:id="@+id/shortcut_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:visibility="gone"
+                android:layout_gravity="center"
+                android:text="@string/shortcut"
+                android:textColor="?android:textColorPrimaryInverse"
+                tools:visibility="visible"
+                />
+
+        </com.google.android.material.card.MaterialCardView>
 
     </FrameLayout>
 

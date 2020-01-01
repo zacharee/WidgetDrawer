@@ -9,6 +9,9 @@ data class WidgetInfo(
     var component: Parcelable,
     var appInfo: ApplicationInfo
 ) : BaseInfo(), Comparable<WidgetInfo> {
+    val isShortcut: Boolean
+        get() = component is ShortcutData
+
     override fun compareTo(other: WidgetInfo) =
         widgetName.compareTo(other.widgetName)
 }

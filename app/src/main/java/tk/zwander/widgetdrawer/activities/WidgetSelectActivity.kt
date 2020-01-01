@@ -69,12 +69,12 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                     it, appInfo))
             }
 
-            val others = packageManager.queryIntentActivities(
+            val shortcuts = packageManager.queryIntentActivities(
                 Intent(Intent.ACTION_CREATE_SHORTCUT),
                 PackageManager.GET_RESOLVED_FILTER
             )
 
-            others.forEach {
+            shortcuts.forEach {
                 val appInfo = it.activityInfo.applicationInfo
 
                 val appName = appInfo.loadLabel(packageManager)
