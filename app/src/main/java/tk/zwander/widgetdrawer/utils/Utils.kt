@@ -1,7 +1,12 @@
 package tk.zwander.widgetdrawer.utils
 
 import android.content.Context
+import android.content.Intent
+import android.content.res.Resources
+import android.graphics.Bitmap
 import android.graphics.Point
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
@@ -26,5 +31,20 @@ fun Context.vibrate(len: Long) {
         vib.vibrate(effect)
     } else {
         vib.vibrate(len)
+    }
+}
+
+fun Bitmap?.toBitmapDrawable(resources: Resources): BitmapDrawable? {
+    return if (this != null) BitmapDrawable(resources, this) else null
+}
+
+fun Intent.ShortcutIconResource?.loadToDrawable(context: Context): Drawable? {
+    return if (this != null) {
+        context.packageManager.getResourcesForApplication(packageName)
+            .run {
+                getDrawable(getIdentifier(resourceName, "drawable", packageName))
+            }
+    } else {
+        null
     }
 }

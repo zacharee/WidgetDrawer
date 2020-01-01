@@ -8,8 +8,8 @@ import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
@@ -21,7 +21,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import kotlinx.android.synthetic.main.header_layout.view.*
 import kotlinx.android.synthetic.main.shortcut_holder.view.*
 import tk.zwander.helperlib.dpAsPx
-import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 import tk.zwander.widgetdrawer.misc.DrawerHost
@@ -30,6 +29,8 @@ import tk.zwander.widgetdrawer.observables.SelectionObservable
 import tk.zwander.widgetdrawer.observables.SizeObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.loadToDrawable
+import tk.zwander.widgetdrawer.utils.toBitmapDrawable
 import tk.zwander.widgetdrawer.views.CustomCard
 import tk.zwander.widgetdrawer.views.Drawer
 import java.util.*
@@ -146,7 +147,7 @@ class DrawerAdapter(
                 }
             } else if (holder is ShortcutVH) {
                 holder.name = widget.label
-                holder.icon = widget.iconBmp
+                holder.icon = widget.iconBmp?.toBitmapDrawable(holder.itemView.resources) ?: widget.iconRes?.loadToDrawable(holder.itemView.context)
                 holder.itemView.setOnClickListener {
                     holder.selection.performClick()
 
@@ -392,13 +393,10 @@ class DrawerAdapter(
             set(value) {
                 itemView.shortcut_label.text = value
             }
-        var icon: Bitmap?
-            get() = itemView.shortcut_icon.drawable?.toBitmap()
+        var icon: Drawable?
+            get() = itemView.shortcut_icon.drawable
             set(value) {
-                val scaled = if (value != null) {
-                    Bitmap.createScaledBitmap(value, itemView.shortcut_icon.maxWidth, itemView.shortcut_icon.maxHeight, false)
-                } else null
-                itemView.shortcut_icon.setImageBitmap(scaled)
+                itemView.shortcut_icon.setImageDrawable(value)
             }
 
         private var wasScroll = false

@@ -17,9 +17,9 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         supportFragmentManager
-            ?.beginTransaction()
-            ?.replace(R.id.root, Prefs())
-            ?.commit()
+            .beginTransaction()
+            .replace(R.id.root, Prefs())
+            .commit()
     }
 
     class Prefs : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             setPreferencesFromResource(R.xml.prefs_main, rootKey)
             preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
-            findPreference("open_drawer").setOnPreferenceClickListener {
+            findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
                 DrawerService.openDrawer(context!!)
                 true
             }
@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
             when (key) {
                 PrefsManager.ENABLED ->
-                    (findPreference(PrefsManager.ENABLED) as SwitchPreferenceCompat).isChecked =
+                    (findPreference<Preference>(PrefsManager.ENABLED) as SwitchPreferenceCompat).isChecked =
                             preferenceManager.sharedPreferences.getBoolean(PrefsManager.ENABLED, false)
             }
         }

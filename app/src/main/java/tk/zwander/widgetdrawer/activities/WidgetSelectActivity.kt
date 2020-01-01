@@ -9,7 +9,6 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_widget_select.*
 import kotlinx.coroutines.*
-import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.adapters.AppListAdapter
 import tk.zwander.widgetdrawer.misc.AppInfo
@@ -94,7 +93,12 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                         it.activityInfo.iconResource,
                         ShortcutData(
                             shortcutName.toString(),
-                            it.loadIcon(packageManager).toBitmap(),
+                            Intent.ShortcutIconResource()
+                                .apply {
+                                    packageName = appInfo.packageName
+                                    resourceName = packageManager.getResourcesForApplication(appInfo)
+                                        .getResourceName(it.iconResource)
+                                },
                             it.activityInfo
                         ),
                         appInfo

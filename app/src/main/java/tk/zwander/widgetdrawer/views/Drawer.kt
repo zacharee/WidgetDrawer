@@ -30,7 +30,6 @@ import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
 import com.tingyik90.snackprogressbar.SnackProgressBarManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
-import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
@@ -479,22 +478,10 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                         data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
                     val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
 
-                    val finalBmp = if (iconRes == null) iconBmp
-                    else {
-                        context.packageManager.getResourcesForApplication(iconRes.packageName).run {
-                            getDrawable(
-                                getIdentifier(
-                                    iconRes.resourceName,
-                                    "drawable",
-                                    iconRes.packageName
-                                )
-                            )?.toBitmap()
-                        }
-                    }
-
                     val shortcut = BaseWidgetInfo.shortcut(
                         name ?: info?.label,
-                        finalBmp ?: info?.icon,
+                        iconBmp,
+                        iconRes ?: info?.iconRes,
                         shortcutIdManager.allocateShortcutId(),
                         intent
                     )

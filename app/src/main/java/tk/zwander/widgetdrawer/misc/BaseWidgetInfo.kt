@@ -11,6 +11,7 @@ data class BaseWidgetInfo(
     var type: Int,
     var label: String? = null,
     var iconBmp: Bitmap? = null,
+    var iconRes: Intent.ShortcutIconResource? = null,
     var id: Int,
     var forcedHeight: Int = DrawerAdapter.SIZE_DEF,
     var isFullWidth: Boolean = false,
@@ -20,6 +21,7 @@ data class BaseWidgetInfo(
         fun shortcut(
             label: String?,
             icon: Bitmap?,
+            iconRes: Intent.ShortcutIconResource?,
             id: Int,
             intent: Intent?
         ): BaseWidgetInfo {
@@ -27,6 +29,7 @@ data class BaseWidgetInfo(
                 TYPE_SHORTCUT,
                 label,
                 icon,
+                iconRes,
                 id,
                 DrawerAdapter.SIZE_DEF,
                 false,
@@ -43,6 +46,7 @@ data class BaseWidgetInfo(
                 TYPE_WIDGET,
                 null,
                 null,
+                null,
                 id,
                 forcedHeight,
                 isFullWidth
@@ -52,6 +56,7 @@ data class BaseWidgetInfo(
         fun header() =
             BaseWidgetInfo(
                 TYPE_HEADER,
+                null,
                 null,
                 null,
                 -1,
