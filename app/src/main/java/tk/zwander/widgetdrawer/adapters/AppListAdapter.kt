@@ -47,6 +47,7 @@ class AppListAdapter(private val context: Context, private val selectionCallback
 
     private val picasso = Picasso.Builder(context)
         .addRequestHandler(WidgetListAdapter.AppIconRequestHandler(context))
+        .addRequestHandler(WidgetListAdapter.RemoteResourcesIconHandler(context))
         .build()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =

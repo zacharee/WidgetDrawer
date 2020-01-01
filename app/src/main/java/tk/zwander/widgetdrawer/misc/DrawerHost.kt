@@ -1,5 +1,6 @@
 package tk.zwander.widgetdrawer.misc
 
+import android.annotation.SuppressLint
 import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.PendingIntent
@@ -103,6 +104,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
     }
 
     class InnerOnClickHandlerQ(private val drawer: Drawer) : InvocationHandler {
+        @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {
             val view = args[0] as View
             val pi = args[1] as PendingIntent

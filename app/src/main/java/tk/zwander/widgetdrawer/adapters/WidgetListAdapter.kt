@@ -86,20 +86,8 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
                 null
             }
 
-            val entryName = try {
-                remRes?.getResourceEntryName(info.previewImg)
-            } catch (e: Exception) {
-                null
-            }
-
-            val typeName = try {
-                remRes?.getResourceTypeName(info.previewImg)
-            } catch (e: Exception) {
-                null
-            }
-
             picasso
-                .load("android.resource://${info.appInfo.packageName}/$typeName/$entryName")
+                .load("${RemoteResourcesIconHandler.SCHEME}://${info.appInfo.packageName}/${info.previewImg}")
                 .resize(img.maxWidth, img.maxHeight)
                 .onlyScaleDown()
                 .centerInside()
@@ -109,7 +97,6 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
                             .load(Uri.parse("${AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                             .resize(img.maxWidth, img.maxHeight)
                             .onlyScaleDown()
-                            .centerInside()
                             .into(img)
                     }
 
@@ -117,7 +104,6 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
                 })
         }
     }
-
 
     class AppIconRequestHandler(context: Context) : RequestHandler() {
         companion object {
@@ -134,6 +120,29 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
             val pName = request.uri.schemeSpecificPart
 
             val img = pm.getApplicationIcon(pName).toBitmap() ?: return null
+
+            return Result(img, Picasso.LoadedFrom.DISK)
+        }
+    }
+
+    class RemoteResourcesIconHandler(context: Context) : RequestHandler() {
+        companion object {
+            const val SCHEME = "remote_res_widget"
+        }
+
+        private val pm = context.packageManager
+
+        override fun canHandleRequest(data: Request): Boolean {
+            return (data.uri != null && data.uri.scheme == SCHEME)
+        }
+
+        override fun load(request: Request, networkPolicy: Int): Result? {
+            val pathSegments = request.uri.pathSegments
+
+            val pName = request.uri.host
+            val id = pathSegments[0].toInt()
+
+            val img = pm.getResourcesForApplication(pName).getDrawable(id).toBitmap() ?: return null
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }

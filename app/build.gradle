@@ -29,6 +29,14 @@ android {
     lintOptions {
         abortOnError = false
     }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
+    }
 }
 
 androidExtensions {
@@ -59,7 +67,7 @@ dependencies {
 
     //Other
     implementation 'com.github.zacharee:SeekBarPreference:c33ebf66c8'
-    implementation 'com.github.zacharee:HelperLib:c6da2f5d33'
+    implementation 'com.github.zacharee:HelperLib:0317cbd35b'
     implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4'
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
