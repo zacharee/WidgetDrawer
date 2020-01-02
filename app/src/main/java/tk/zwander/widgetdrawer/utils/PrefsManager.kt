@@ -8,9 +8,11 @@ import android.graphics.Color
 import android.net.Uri
 import android.preference.PreferenceManager
 import android.view.Gravity
+import androidx.core.content.ContextCompat
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import tk.zwander.helperlib.dpAsPx
+import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 
 class PrefsManager private constructor(private val context: Context) {
@@ -34,6 +36,8 @@ class PrefsManager private constructor(private val context: Context) {
         const val HANDLE_RIGHT = Gravity.RIGHT
         const val HANDLE_UNCHANGED = -1
         const val HANDLE_COLOR_DEF = Color.WHITE
+
+        const val DRAWER_BACKGROUND_COLOR = "drawer_background_color"
 
         @SuppressLint("StaticFieldLeak")
         private var instance: PrefsManager? = null
@@ -124,7 +128,11 @@ class PrefsManager private constructor(private val context: Context) {
         set(value) {
             putBoolean(CLOSE_ON_EMPTY_TAP, value)
         }
-
+    var drawerBg: Int
+        get() = getInt(DRAWER_BACKGROUND_COLOR, ContextCompat.getColor(context, R.color.drawerBackgroundDefault))
+        set(value) {
+            putInt(DRAWER_BACKGROUND_COLOR, value)
+        }
 
     fun getString(key: String, def: String?) = prefs.getString(key, def)
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)

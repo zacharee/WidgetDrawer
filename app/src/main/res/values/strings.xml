@@ -14,6 +14,7 @@
     <string name="close_on_empty_tap">Tap Empty Space to Close Drawer</string>
     <string name="undo">Undo</string>
     <string name="shortcut">Shortcut</string>
+    <string name="drawer_background_color">Drawer Background Color</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>

@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View.OnClickListener
@@ -83,8 +82,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
             else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-            flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
-            dimAmount = 0.5f
+//            flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
+//            dimAmount = 0.5f
             width = displaySize.x
             height = WindowManager.LayoutParams.MATCH_PARENT
             format = PixelFormat.RGBA_8888
@@ -123,10 +122,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 }
             }
         }
-    }
-
-    init {
-//        setBackgroundColor(Color.argb(100, 0, 0, 0))
     }
 
     override fun onFinishInflate() {
@@ -254,6 +249,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             }
             anim.start()
         }, 10)
+
+        setBackgroundColor(prefs.drawerBg)
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
@@ -487,8 +484,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                         shortcutIdManager.allocateShortcutId(),
                         intent
                     )
-
-                    Log.e("WidgetDrawer", "$iconRes, $iconBmp")
 
                     addNewShortcut(shortcut)
                 }

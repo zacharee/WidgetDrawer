@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.preference.SwitchPreferenceCompat
+    <SwitchPreference
         android:title="@string/enable"
         android:key="enabled"
         android:defaultValue="false"
         />
 
-    <androidx.preference.SwitchPreference
+    <SwitchPreference
         android:title="@string/close_on_empty_tap"
         android:key="close_on_empty_tap"
         android:defaultValue="false"
         />
 
-    <androidx.preference.Preference
+    <Preference
         android:title="@string/open_drawer"
         android:key="open_drawer"
         android:dependency="enabled"
         />
 
-    <androidx.preference.SwitchPreferenceCompat
+    <SwitchPreference
         android:title="@string/show_handle"
         android:key="show_handle"
         android:defaultValue="true"
         android:dependency="enabled"
         />
 
-    <androidx.preference.SwitchPreferenceCompat
+    <SwitchPreference
         android:title="@string/handle_shadow"
         android:key="handle_shadow"
         android:defaultValue="true"
@@ -63,4 +63,12 @@
         android:dependency="show_handle"
         />
 
-</androidx.preference.PreferenceScreen>
+    <com.jaredrummler.android.colorpicker.ColorPreferenceCompat
+        android:title="@string/drawer_background_color"
+        android:key="drawer_background_color"
+        android:defaultValue="@color/drawerBackgroundDefault"
+        app:cpv_allowCustom="true"
+        app:cpv_showAlphaSlider="true"
+        />
+
+</PreferenceScreen>
