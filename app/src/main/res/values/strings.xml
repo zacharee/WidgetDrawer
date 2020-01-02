@@ -15,6 +15,7 @@
     <string name="undo">Undo</string>
     <string name="shortcut">Shortcut</string>
     <string name="drawer_background_color">Drawer Background Color</string>
+    <string name="enhanced_view_mode">Enhanced View Mode</string>
 
     <!-- Messages -->
     <string name="allow_overlay">Please allow Widget Drawer to draw over other apps</string>
@@ -22,6 +23,9 @@
     <string name="edit_instructions">Press and hold widgets to reorder.\nSwipe widgets left or right to remove.</string>
     <string name="widget_removed">Widget removed</string>
     <string name="unable_to_configure_widget">Unable to configure widget</string>
+    <string name="enhanced_view_mode_desc">Allow Widget Drawer to display above everything (apps, status bar, lock screen, etc).</string>
+    <string name="enhanced_view_mode_acc_desc">Allow Widget Drawer to display above everything (apps, status bar, lock screen, etc). Widget Drawer does not collect any personal information using this service. It is simply used to allow the drawer to show over everything.</string>
+    <string name="enable_accessibility">Please enable the Enhanced View Mode service.</string>
 
     <!-- Content Descriptions -->
     <string name="edit_mode">Edit Mode</string>

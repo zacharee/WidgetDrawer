@@ -149,6 +149,18 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
         prefs.removePrefListener(this)
     }
 
+    fun show(wm: WindowManager = this.wm, overrideType: Int = params.type) {
+        try {
+            wm.addView(this, params.apply { type = overrideType })
+        } catch (e: Exception) {}
+    }
+
+    fun hide(wm: WindowManager = this.wm) {
+        try {
+            wm.removeView(this)
+        } catch (e: Exception) {}
+    }
+
     private fun updateLayout(params: WindowManager.LayoutParams = this.params) {
         try {
             wm.updateViewLayout(this, params)

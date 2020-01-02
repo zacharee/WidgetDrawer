@@ -44,6 +44,7 @@ import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.ShortcutIdManager
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
+import tk.zwander.widgetdrawer.utils.statusBarHeight
 import tk.zwander.widgetdrawer.utils.toBase64
 import java.util.*
 
@@ -82,8 +83,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             val displaySize = context.screenSize()
             type = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
             else WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-//            flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
-//            dimAmount = 0.5f
+            flags = WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN or
+                    WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
             width = displaySize.x
             height = WindowManager.LayoutParams.MATCH_PARENT
             format = PixelFormat.RGBA_8888
@@ -240,6 +241,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        setPadding(paddingLeft, context.statusBarHeight, paddingRight, paddingBottom)
+
         handler?.postDelayed({
             val anim = ValueAnimator.ofFloat(0f, 1f)
             anim.interpolator = DecelerateInterpolator()
@@ -297,11 +300,10 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         prefs.removePrefListener(this)
     }
 
-    fun showDrawer() {
+    fun showDrawer(wm: WindowManager = this.wm, overrideType: Int = params.type) {
         try {
-            wm.addView(this, params)
-        } catch (e: Exception) {
-        }
+            wm.addView(this, params.apply { type = overrideType })
+        } catch (e: Exception) {}
     }
 
     fun hideDrawer(callListener: Boolean = true) {

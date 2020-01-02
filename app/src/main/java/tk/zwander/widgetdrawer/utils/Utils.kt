@@ -15,13 +15,32 @@ import android.provider.Settings
 import android.util.Base64
 import android.util.Log
 import android.view.WindowManager
+import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
+var accessibilityConnected = false
 
 val Context.canDrawOverlays
     get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M
             || Settings.canDrawOverlays(this)
+
+val Context.app: App
+    get() = applicationContext as App
+
+val Context.accessibilityEnabled: Boolean
+    get() = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)?.contains(packageName) == true
+
+val Context.statusBarHeight: Int
+    get() = resources.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height)
+
+val Context.prefs: PrefsManager
+    get() = PrefsManager.getInstance(this)
+
+fun getProperWLPType(): Int {
+    return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+    else WindowManager.LayoutParams.TYPE_PRIORITY_PHONE
+}
 
 fun Context.screenSize(): Point {
     val display = (getSystemService(Context.WINDOW_SERVICE) as WindowManager).defaultDisplay

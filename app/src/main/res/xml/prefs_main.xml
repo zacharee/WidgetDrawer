@@ -14,6 +14,13 @@
         android:defaultValue="false"
         />
 
+    <SwitchPreference
+        android:title="@string/enhanced_view_mode"
+        android:summary="@string/enhanced_view_mode_desc"
+        android:key="enhanced_view_mode"
+        android:defaultValue="false"
+        />
+
     <Preference
         android:title="@string/open_drawer"
         android:key="open_drawer"

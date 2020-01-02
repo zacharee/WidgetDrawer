@@ -12,18 +12,12 @@ import android.net.Uri
 import android.os.Build
 import android.os.Process
 import android.provider.Settings
-import android.view.LayoutInflater
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.canDrawOverlays
-import tk.zwander.widgetdrawer.utils.vibrate
-import tk.zwander.widgetdrawer.views.Drawer
-import tk.zwander.widgetdrawer.views.Handle
+import tk.zwander.widgetdrawer.utils.*
 
 
 @SuppressLint("InflateParams")
@@ -51,16 +45,11 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         }
     }
 
-    private val windowManager by lazy { getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     private val appOpsManager by lazy { getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager }
 
-    private val handle by lazy { Handle(this) }
-    private val drawer by lazy {
-        LayoutInflater.from(this)
-            .inflate(R.layout.drawer_layout, null, false) as Drawer
-    }
-    private val prefs by lazy { PrefsManager.getInstance(this) }
+    private val handle by lazy { app.handle }
+    private val drawer by lazy { app.drawer }
     private val overlayListener = AppOpsManager.OnOpChangedListener { op, packageName ->
         if (packageName == this.packageName) {
             when (op) {
@@ -83,12 +72,11 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         override fun onReceive(context: Context?, intent: Intent?) {
             when (intent?.action) {
                 ACTION_OPEN_DRAWER -> {
-                    remHandle()
-                    drawer.showDrawer()
+                    openDrawer()
                 }
 
                 ACTION_CLOSE_DRAWER -> {
-                    drawer.hideDrawer()
+                    closeDrawer()
                 }
             }
         }
@@ -102,6 +90,17 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER).apply {
             addAction(ACTION_CLOSE_DRAWER)
         })
+        app.accessibilityListeners.add {
+            if (drawer.isAttachedToWindow) {
+                closeDrawer()
+                openDrawer()
+            }
+
+            if (handle.isAttachedToWindow) {
+                remHandle()
+                addHandle()
+            }
+        }
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             val channel =
@@ -122,8 +121,7 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         handle.onOpenListener = {
             if (!drawer.isAttachedToWindow) {
                 vibrate(10)
-                drawer.showDrawer()
-                remHandle()
+                openDrawer()
             }
         }
 
@@ -160,18 +158,23 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
 
     private fun addHandle() {
         if (prefs.showHandle) {
-            try {
-                windowManager.addView(handle, handle.params)
-            } catch (e: Exception) {
-            }
+            if (accessibilityConnected) EnhancedViewService.addHandle(this)
+            else handle.show(overrideType = getProperWLPType())
         }
     }
 
     private fun remHandle() {
-        try {
-            windowManager.removeView(handle)
-        } catch (e: Exception) {
-        }
+        handle.hide()
+    }
+
+    private fun openDrawer() {
+        remHandle()
+        if (accessibilityConnected) EnhancedViewService.addDrawer(this)
+        else drawer.showDrawer(overrideType = getProperWLPType())
+    }
+
+    private fun closeDrawer() {
+        drawer.hideDrawer()
     }
 
     @TargetApi(Build.VERSION_CODES.M)

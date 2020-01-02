@@ -1,15 +1,19 @@
 package tk.zwander.widgetdrawer
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.widgetdrawer.services.DrawerService
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.accessibilityEnabled
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,6 +33,15 @@ class MainActivity : AppCompatActivity() {
 
             findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
                 DrawerService.openDrawer(context!!)
+                true
+            }
+
+            findPreference<SwitchPreference>("enhanced_view_mode")?.setOnPreferenceChangeListener { _, newValue ->
+                if (newValue.toString().toBoolean() || !requireContext().accessibilityEnabled) {
+                    Toast.makeText(requireContext(), R.string.enable_accessibility, Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                }
+
                 true
             }
         }
