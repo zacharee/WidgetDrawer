@@ -12,7 +12,7 @@ android {
     compileSdkVersion 28
     defaultConfig {
         applicationId "tk.zwander.widgetdrawer"
-        minSdkVersion 21
+        minSdkVersion 22
         targetSdkVersion 28
         versionCode version
         versionName version.toString()
