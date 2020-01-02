@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Resources
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Point
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
@@ -11,7 +12,11 @@ import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.provider.Settings
+import android.util.Base64
+import android.util.Log
 import android.view.WindowManager
+import java.io.ByteArrayOutputStream
+import java.io.IOException
 
 
 val Context.canDrawOverlays
@@ -47,4 +52,46 @@ fun Intent.ShortcutIconResource?.loadToDrawable(context: Context): Drawable? {
     } else {
         null
     }
+}
+
+fun Bitmap?.toByteArray(): ByteArray? {
+    if (this == null) return null
+
+    val size: Int = width * height * 4
+    val out = ByteArrayOutputStream(size)
+    return try {
+        compress(Bitmap.CompressFormat.PNG, 100, out)
+        out.flush()
+        out.close()
+        out.toByteArray()
+    } catch (e: IOException) {
+        Log.w("WidgetDrawer", "Could not write bitmap")
+        null
+    }
+}
+
+fun Bitmap?.toBase64(): String? {
+    return toByteArray()?.toBase64()
+}
+
+fun ByteArray?.toBase64(): String? {
+    if (this == null) return null
+
+    return Base64.encodeToString(this, 0, size, Base64.DEFAULT)
+}
+
+fun ByteArray?.toBitmap(): Bitmap? {
+    if (this == null) return null
+
+    return BitmapFactory.decodeByteArray(this, 0, size)
+}
+
+fun String?.base64ToByteArray(): ByteArray? {
+    if (this == null) return null
+
+    return Base64.decode(this, Base64.DEFAULT)
+}
+
+fun String?.base64ToBitmap(): Bitmap? {
+    return base64ToByteArray()?.toBitmap()
 }

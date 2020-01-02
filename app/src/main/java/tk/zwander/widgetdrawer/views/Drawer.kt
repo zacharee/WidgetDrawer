@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View.OnClickListener
@@ -44,6 +45,7 @@ import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.ShortcutIdManager
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.screenSize
+import tk.zwander.widgetdrawer.utils.toBase64
 import java.util.*
 
 
@@ -480,11 +482,13 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
                     val shortcut = BaseWidgetInfo.shortcut(
                         name ?: info?.label,
-                        iconBmp,
+                        iconBmp.toBase64(),
                         iconRes ?: info?.iconRes,
                         shortcutIdManager.allocateShortcutId(),
                         intent
                     )
+
+                    Log.e("WidgetDrawer", "$iconRes, $iconBmp")
 
                     addNewShortcut(shortcut)
                 }

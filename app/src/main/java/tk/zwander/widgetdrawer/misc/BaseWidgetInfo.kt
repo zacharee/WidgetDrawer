@@ -1,7 +1,6 @@
 package tk.zwander.widgetdrawer.misc
 
 import android.content.Intent
-import android.graphics.Bitmap
 import android.os.Parcelable
 import kotlinx.android.parcel.Parcelize
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
@@ -10,7 +9,7 @@ import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 data class BaseWidgetInfo(
     var type: Int,
     var label: String? = null,
-    var iconBmp: Bitmap? = null,
+    var iconBmpEncoded: String? = null,
     var iconRes: Intent.ShortcutIconResource? = null,
     var id: Int,
     var forcedHeight: Int = DrawerAdapter.SIZE_DEF,
@@ -20,7 +19,7 @@ data class BaseWidgetInfo(
     companion object {
         fun shortcut(
             label: String?,
-            icon: Bitmap?,
+            icon: String?,
             iconRes: Intent.ShortcutIconResource?,
             id: Int,
             intent: Intent?

@@ -29,6 +29,7 @@ import tk.zwander.widgetdrawer.observables.SelectionObservable
 import tk.zwander.widgetdrawer.observables.SizeObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.base64ToBitmap
 import tk.zwander.widgetdrawer.utils.loadToDrawable
 import tk.zwander.widgetdrawer.utils.toBitmapDrawable
 import tk.zwander.widgetdrawer.views.CustomCard
@@ -147,7 +148,7 @@ class DrawerAdapter(
                 }
             } else if (holder is ShortcutVH) {
                 holder.name = widget.label
-                holder.icon = widget.iconBmp?.toBitmapDrawable(holder.itemView.resources) ?: widget.iconRes?.loadToDrawable(holder.itemView.context)
+                holder.icon = widget.iconBmpEncoded.base64ToBitmap()?.toBitmapDrawable(holder.itemView.resources) ?: widget.iconRes?.loadToDrawable(holder.itemView.context)
                 holder.itemView.setOnClickListener {
                     holder.selection.performClick()
 
