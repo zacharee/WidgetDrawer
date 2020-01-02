@@ -5,6 +5,15 @@
         <item name="android:colorAccent">@color/colorAccent</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="android:colorPrimary">@color/colorPrimary</item>
+        <item name="buttonBarButtonStyle">@style/AppTheme.Alert.Button</item>
+        <item name="android:buttonBarButtonStyle">@style/AppTheme.Alert.Button</item>
+        <item name="materialAlertDialogTheme">@style/DialogTheme</item>
+        <item name="alertDialogTheme">@style/DialogTheme</item>
+        <item name="alertDialogStyle">@style/DialogTheme</item>
+        <item name="dialogTheme">@style/DialogTheme</item>
+        <item name="android:dialogTheme">@style/DialogTheme</item>
+        <item name="android:alertDialogStyle">@style/DialogTheme</item>
+        <item name="android:alertDialogTheme">@style/DialogTheme</item>
     </style>
 
     <style name="AppTheme.Transparent" parent="AppTheme">
@@ -23,6 +32,21 @@
 
     <style name="AppTheme.Null" parent="AppTheme.Transparent">
         <item name="android:backgroundDimEnabled">false</item>
+    </style>
+
+    <style name="DialogTheme" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog.Centered">
+        <item name="buttonBarPositiveButtonStyle">@style/AppTheme.Alert.Button</item>
+        <item name="buttonBarNeutralButtonStyle">@style/AppTheme.Alert.Button</item>
+        <item name="buttonBarNegativeButtonStyle">@style/AppTheme.Alert.Button</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/DialogTitle</item>
+    </style>
+
+    <style name="DialogTitle" parent="MaterialAlertDialog.MaterialComponents.Title.Text.CenterStacked">
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Title</item>
+    </style>
+
+    <style name="AppTheme.Alert.Button" parent="Widget.MaterialComponents.Button.TextButton">
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
 </resources>

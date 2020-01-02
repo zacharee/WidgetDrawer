@@ -66,9 +66,10 @@ dependencies {
     implementation 'com.google.android.material:material:1.2.0-alpha03'
 
     //Other
-    implementation 'com.github.zacharee:SeekBarPreference:c33ebf66c8'
+    implementation 'com.github.zacharee:SeekBarPreference:ddc62c12f2'
     implementation 'com.github.zacharee:HelperLib:0317cbd35b'
-    implementation 'com.jaredrummler:colorpicker:1.1.0'
+    implementation 'com.github.zacharee:colorpicker:9ea5085260'
+//    implementation 'com.jaredrummler:colorpicker:1.1.0'
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4'
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
