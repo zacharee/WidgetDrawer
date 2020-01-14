@@ -32,7 +32,7 @@ val Context.accessibilityEnabled: Boolean
     get() = Settings.Secure.getString(contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES)?.contains(packageName) == true
 
 val Context.statusBarHeight: Int
-    get() = resources.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_height)
+    get() = resources.getDimensionPixelSize(resources.getIdentifier("status_bar_height", "dimen", "android"))
 
 val Context.prefs: PrefsManager
     get() = PrefsManager.getInstance(this)
