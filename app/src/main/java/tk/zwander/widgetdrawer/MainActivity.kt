@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity() {
         override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
             when (key) {
                 PrefsManager.ENABLED ->
-                    (findPreference<Preference>(PrefsManager.ENABLED) as SwitchPreferenceCompat).isChecked =
+                    findPreference<SwitchPreference>(PrefsManager.ENABLED)?.isChecked =
                             preferenceManager.sharedPreferences.getBoolean(PrefsManager.ENABLED, false)
             }
         }
