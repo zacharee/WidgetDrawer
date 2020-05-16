@@ -14,28 +14,10 @@ import tk.zwander.widgetdrawer.R
 @SuppressLint("ViewConstructor")
 class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrollingChild {
     private val recView by lazy { parent.parent.parent as DrawerRecycler }
-    private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
-        override fun onScroll(e1: MotionEvent?, e2: MotionEvent?, distanceX: Float, distanceY: Float): Boolean {
-            val newEvent = MotionEvent.obtain(e2)
-
-            scaleMotionEvent(newEvent)
-
-            recView.onTouchEvent(newEvent)
-
-            newEvent.recycle()
-            return true
-        }
-    })
 
     init {
         id = R.id.drawer_view
-
-//        if (context.canUseHiddenApis) {
-//            super.setOnClickHandler(InnerOnClickHandlerPie(drawer))
-//        }
     }
-
-    val hasListView by lazy { hasListView(this) }
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
@@ -57,30 +39,8 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             callOnClick()
             true
         } else {
-            onTouchEvent(ev)
+            super.onInterceptTouchEvent(ev)
         }
-    }
-
-//    override fun setOnClickHandler(handler: RemoteViews.OnClickHandler?) {
-//        //No-op
-//    }
-
-    private var notList = false
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        val ret = super.onTouchEvent(event)
-        return if (!recView.allowReorder) {
-            when (event?.action) {
-                MotionEvent.ACTION_DOWN -> notList = notAListView(event)
-                MotionEvent.ACTION_UP -> notList = false
-            }
-
-            if (!hasListView || notList) {
-                return gestureDetector.onTouchEvent(event)
-            }
-            false
-        } else ret
     }
 
     private fun enableNestedScrolling(parent: ViewGroup) {
@@ -90,54 +50,5 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
 
             if (child is ViewGroup) enableNestedScrolling(child)
         }
-    }
-
-    private fun hasListView(parent: ViewGroup): Boolean {
-        return if (parent is ListView) true
-        else {
-            var hasList = false
-            for (i in 0 until parent.childCount) {
-                val child = parent.getChildAt(i)
-                if (child is ViewGroup) {
-                    hasList = hasListView(child)
-                    if (hasList) break
-                }
-            }
-            hasList
-        }
-    }
-
-    private fun findListView(parent: ViewGroup): ListView? {
-        return if (parent is ListView) parent
-        else {
-            var potentialList: ListView? = null
-
-            for (i in 0 until parent.childCount) {
-                val child = parent.getChildAt(i)
-                if (child is ViewGroup) potentialList = findListView(child)
-                if (potentialList != null) break
-            }
-
-            potentialList
-        }
-    }
-
-    private fun notAListView(event: MotionEvent?): Boolean {
-        if (event == null) return false
-        else {
-            val listView = findListView(this@DrawerHostView) ?: return true
-
-            val touchRect = Rect().apply { listView.getHitRect(this) }
-            if (!touchRect.contains(event.x.toInt(), event.y.toInt())) {
-                return true
-            }
-        }
-
-        return false
-    }
-
-    private fun scaleMotionEvent(event: MotionEvent) {
-        event.setLocation(event.x + left + (parent as ViewGroup).left + (parent.parent as ViewGroup).left,
-            event.y + top + (parent as ViewGroup).top + (parent.parent as ViewGroup).top)
     }
 }
