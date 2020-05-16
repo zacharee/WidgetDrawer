@@ -10,6 +10,7 @@ import android.content.*
 import android.content.res.Configuration
 import android.net.Uri
 import android.os.Build
+import android.os.PowerManager
 import android.os.Process
 import android.provider.Settings
 import android.widget.Toast
@@ -81,14 +82,39 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
             }
         }
     }
+    private val screenStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                Intent.ACTION_SCREEN_OFF -> {
+                    isScreenOn = false
+                }
+                Intent.ACTION_SCREEN_ON -> {
+                    isScreenOn = true
+                }
+            }
+
+            if (canShowHandle()) {
+                addHandle()
+            } else {
+                remHandle()
+            }
+        }
+    }
+
+    private var isScreenOn = false
 
     override fun onBind(intent: Intent) = null
 
     override fun onCreate() {
         drawer.onCreate()
+        isScreenOn = (getSystemService(Context.POWER_SERVICE) as PowerManager).isInteractive
         prefs.addPrefListener(this)
         LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER).apply {
             addAction(ACTION_CLOSE_DRAWER)
+        })
+        registerReceiver(screenStateReceiver, IntentFilter().apply {
+            addAction(Intent.ACTION_SCREEN_ON)
+            addAction(Intent.ACTION_SCREEN_OFF)
         })
         app.accessibilityListeners.add {
             if (drawer.isAttachedToWindow) {
@@ -129,6 +155,10 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
             addHandle()
         }
 
+        drawer.showListener = {
+            remHandle()
+        }
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.startWatchingMode(AppOpsManager.OPSTR_SYSTEM_ALERT_WINDOW, packageName, overlayListener)
 
@@ -152,12 +182,12 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
-            PrefsManager.SHOW_HANDLE -> if (prefs.showHandle) addHandle() else remHandle()
+            PrefsManager.SHOW_HANDLE -> if (canShowHandle()) addHandle() else remHandle()
         }
     }
 
     private fun addHandle() {
-        if (prefs.showHandle) {
+        if (canShowHandle()) {
             if (accessibilityConnected) EnhancedViewService.addHandle(this)
             else handle.show(overrideType = getProperWLPType())
         }
@@ -198,8 +228,13 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         handle.onDestroy()
         prefs.removePrefListener(this)
         LocalBroadcastManager.getInstance(this).unregisterReceiver(openReceiver)
+        unregisterReceiver(screenStateReceiver)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)
     }
+
+    private fun canShowHandle(): Boolean =
+        isScreenOn
+                && prefs.showHandle
 }

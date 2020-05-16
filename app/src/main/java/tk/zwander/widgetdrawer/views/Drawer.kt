@@ -25,6 +25,7 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.animation.doOnEnd
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
@@ -77,6 +78,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     var hideListener: (() -> Unit)? = null
+    var showListener: (() -> Unit)? = null
 
     val params: WindowManager.LayoutParams
         get() = WindowManager.LayoutParams().apply {
@@ -249,6 +251,9 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             anim.duration = ANIM_DURATION
             anim.addUpdateListener {
                 alpha = it.animatedValue.toString().toFloat()
+            }
+            anim.doOnEnd {
+                showListener?.invoke()
             }
             anim.start()
         }, 10)
