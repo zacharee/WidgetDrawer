@@ -388,6 +388,7 @@ class DrawerAdapter(
 
     class WidgetVH(view: View) : BaseItemVH(view)
 
+    @SuppressLint("ClickableViewAccessibility")
     class ShortcutVH(view: View, private val scrollCallback: (MotionEvent) -> Unit) : BaseItemVH(view) {
         var name: String?
             get() = itemView.shortcut_label.text.toString()
