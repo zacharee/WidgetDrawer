@@ -1,19 +1,20 @@
 package tk.zwander.widgetdrawer.misc
 
 import android.annotation.SuppressLint
-import android.app.ActivityManager
 import android.app.ActivityOptions
 import android.app.PendingIntent
-import android.app.WindowConfiguration
 import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Looper
 import android.view.View
 import android.widget.RemoteViews
+import net.bytebuddy.ByteBuddy
+import net.bytebuddy.android.AndroidClassLoadingStrategy
+import net.bytebuddy.implementation.MethodDelegation
+import net.bytebuddy.implementation.SuperMethodCall
 import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.DrawerHostView
 import java.lang.reflect.InvocationHandler
@@ -48,12 +49,28 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
     context,
     id,
     if (RemoteViews.OnClickHandler::class.java.isInterface)
-    Proxy.newProxyInstance(
-        RemoteViews.OnClickHandler::class.java.classLoader,
-        arrayOf(RemoteViews.OnClickHandler::class.java),
-        InnerOnClickHandlerQ(drawer)
-    ) as RemoteViews.OnClickHandler
-    else InnerOnClickHandlerPie(drawer),
+        Proxy.newProxyInstance(
+            RemoteViews.OnClickHandler::class.java.classLoader,
+            arrayOf(RemoteViews.OnClickHandler::class.java),
+            InnerOnClickHandlerQ(drawer)
+        ) as RemoteViews.OnClickHandler
+    else ByteBuddy()
+        .subclass(RemoteViews.OnClickHandler::class.java)
+        .name("OnClickHandlerPieIntercept")
+        .defineMethod("onClickHandler", Boolean::class.java)
+        .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
+        .intercept(MethodDelegation.to(InnerOnClickHandlerPie(drawer))
+            .andThen(SuperMethodCall.INSTANCE)
+        )
+        .defineMethod("onClickHandler", Boolean::class.java)
+        .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+        .intercept(MethodDelegation.to(InnerOnClickHandlerPie(drawer))
+            .andThen(SuperMethodCall.INSTANCE)
+        )
+        .make()
+        .load(DrawerHost::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
+        .loaded
+        .newInstance(),
     Looper.getMainLooper()
 ) {
     override fun onCreateView(
@@ -64,28 +81,20 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
         return DrawerHostView(context)
     }
 
-    class InnerOnClickHandlerPie(private val drawer: Drawer) : RemoteViews.OnClickHandler() {
-        private var enterAnimationId: Int = 0
-
-        override fun onClickHandler(
+    class InnerOnClickHandlerPie(private val drawer: Drawer) {
+        fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent
         ): Boolean {
-            return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
-                onClickHandler(view, pendingIntent, fillInIntent,
-                    if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) WindowConfiguration.WINDOWING_MODE_UNDEFINED
-                    else ActivityManager.StackId.INVALID_STACK_ID)
-            } else {
-                if (pendingIntent.isActivity) {
-                    drawer.hideDrawer()
-                }
-
-                super.onClickHandler(view, pendingIntent, fillInIntent)
+            if (pendingIntent.isActivity) {
+                drawer.hideDrawer()
             }
+
+            return true
         }
 
-        override fun onClickHandler(
+        fun onClickHandler(
             view: View,
             pendingIntent: PendingIntent,
             fillInIntent: Intent,
@@ -95,11 +104,7 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
                 drawer.hideDrawer()
             }
 
-            return super.onClickHandler(view, pendingIntent, fillInIntent, windowingMode)
-        }
-
-        override fun setEnterAnimationId(enterAnimationId: Int) {
-            this.enterAnimationId = enterAnimationId
+            return true
         }
     }
 

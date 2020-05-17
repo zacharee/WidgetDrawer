@@ -9,11 +9,11 @@ apply plugin: 'io.fabric'
 def version = 24
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
     defaultConfig {
         applicationId "tk.zwander.widgetdrawer"
         minSdkVersion 22
-        targetSdkVersion 28
+        targetSdkVersion 29
         versionCode version
         versionName version.toString()
     }
@@ -45,6 +45,7 @@ androidExtensions {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support.test:runner:1.0.2'
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
@@ -73,6 +74,7 @@ dependencies {
     implementation 'com.github.agrawalsuneet:DotLoadersPack-Android:v1.4'
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'net.bytebuddy:byte-buddy-android:1.10.10'
 }
 
 apply plugin: 'com.google.gms.google-services'
