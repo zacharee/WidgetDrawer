@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetHostView
 import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Looper
 import android.view.View
 import android.widget.RemoteViews
@@ -62,11 +63,15 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
         .intercept(MethodDelegation.to(InnerOnClickHandlerPie(drawer))
             .andThen(SuperMethodCall.INSTANCE)
         )
-        .defineMethod("onClickHandler", Boolean::class.java)
-        .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
-        .intercept(MethodDelegation.to(InnerOnClickHandlerPie(drawer))
-            .andThen(SuperMethodCall.INSTANCE)
-        )
+        .apply {
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.M) {
+                defineMethod("onClickHandler", Boolean::class.java)
+                    .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
+                    .intercept(MethodDelegation.to(InnerOnClickHandlerPie(drawer))
+                        .andThen(SuperMethodCall.INSTANCE)
+                    )
+            }
+        }
         .make()
         .load(DrawerHost::class.java.classLoader, AndroidClassLoadingStrategy.Wrapping(context.cacheDir))
         .loaded
