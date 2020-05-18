@@ -243,6 +243,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
 
+        host.startListening()
+
         setPadding(paddingLeft, context.statusBarHeight, paddingRight, paddingBottom)
 
         handler?.postDelayed({
@@ -261,6 +263,12 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         setBackgroundColor(prefs.drawerBg)
     }
 
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+
+        host.stopListening()
+    }
+
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefsManager.TRANSPARENT_WIDGETS -> adapter.transparentWidgets = prefs.transparentWidgets
@@ -277,7 +285,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     }
 
     fun onCreate() {
-        host.startListening()
         LocalBroadcastManager.getInstance(context).registerReceiver(localReceiver, IntentFilter().apply {
             addAction(ACTION_RESULT)
         })
@@ -297,7 +304,6 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
     fun onDestroy() {
         hideDrawer(false)
-        host.stopListening()
         prefs.currentWidgets = adapter.widgets
 
         LocalBroadcastManager.getInstance(context).unregisterReceiver(localReceiver)
@@ -347,18 +353,13 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         id: Int,
         configure: ComponentName
     ) {
-        if (context.packageManager.getActivityInfo(configure, 0).exported) {
-            val intent = Intent(ACTION_CONFIG)
-            intent.putExtra(EXTRA_APPWIDGET_CONFIGURE, configure)
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
-            intent.component = ComponentName(context, PermConfigActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        val intent = Intent(ACTION_CONFIG)
+        intent.putExtra(EXTRA_APPWIDGET_CONFIGURE, configure)
+        intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, id)
+        intent.component = ComponentName(context, PermConfigActivity::class.java)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
 
-            context.startActivity(intent)
-        } else {
-            Toast.makeText(context, R.string.unable_to_configure_widget, Toast.LENGTH_SHORT).show()
-            addNewWidget(id)
-        }
+        context.startActivity(intent)
     }
 
     private fun pickWidget() {
