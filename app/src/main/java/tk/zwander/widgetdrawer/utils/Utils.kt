@@ -14,10 +14,12 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.util.TypedValue
 import android.view.WindowManager
 import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
+import kotlin.math.roundToInt
 
 var accessibilityConnected = false
 
@@ -57,6 +59,9 @@ fun Context.vibrate(len: Long) {
         vib.vibrate(len)
     }
 }
+
+fun Context.pxAsDp(pxVal: Number) =
+    pxVal.toFloat() / resources.displayMetrics.density
 
 fun Bitmap?.toBitmapDrawable(resources: Resources): BitmapDrawable? {
     return if (this != null) BitmapDrawable(resources, this) else null

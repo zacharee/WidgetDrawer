@@ -292,7 +292,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         (widget_grid.layoutManager as StaggeredGridLayoutManager).apply {
             spanCount = 2
         }
-        adapter.addAll(prefs.currentWidgets)
+        adapter.setAll(prefs.currentWidgets)
     }
 
     fun onDestroy() {
