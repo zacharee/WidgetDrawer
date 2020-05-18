@@ -32,12 +32,12 @@ class MainActivity : AppCompatActivity() {
             preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
 
             findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
-                DrawerService.openDrawer(context!!)
+                DrawerService.openDrawer(requireContext())
                 true
             }
 
             findPreference<SwitchPreference>("enhanced_view_mode")?.setOnPreferenceChangeListener { _, newValue ->
-                if (newValue.toString().toBoolean() || !requireContext().accessibilityEnabled) {
+                if (newValue.toString().toBoolean() && !requireContext().accessibilityEnabled) {
                     Toast.makeText(requireContext(), R.string.enable_accessibility, Toast.LENGTH_SHORT).show()
                     startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
                 }
