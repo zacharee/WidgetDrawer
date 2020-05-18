@@ -300,10 +300,12 @@ class DrawerAdapter(
     inner class WidgetVH(view: View) : BaseItemVH(view) {
         init {
             sizeObservable.addObserver { _, arg ->
-                val currentWidgetInfo = widgets[adapterPosition]
+                if (adapterPosition != -1) {
+                    val currentWidgetInfo = widgets[adapterPosition]
 
-                if (arg == currentWidgetInfo.id) {
-                    updateDimens(this, getWidgetInfo(currentWidgetInfo.id), currentWidgetInfo)
+                    if (arg == currentWidgetInfo.id) {
+                        updateDimens(this, getWidgetInfo(currentWidgetInfo.id), currentWidgetInfo)
+                    }
                 }
             }
         }
@@ -385,9 +387,11 @@ class DrawerAdapter(
             }
 
             sizeObservable.addObserver { _, arg ->
-                val currentShortcut = widgets[adapterPosition]
+                if (adapterPosition != -1) {
+                    val currentShortcut = widgets[adapterPosition]
 
-                updateDimens(this, currentShortcut)
+                    updateDimens(this, currentShortcut)
+                }
             }
         }
 
