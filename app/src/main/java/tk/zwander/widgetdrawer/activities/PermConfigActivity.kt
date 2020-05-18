@@ -1,11 +1,13 @@
 package tk.zwander.widgetdrawer.activities
 
+import android.appwidget.AppWidgetHost
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import kotlinx.coroutines.flow.DEFAULT_CONCURRENCY
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.views.Drawer
@@ -17,6 +19,8 @@ class PermConfigActivity : AppCompatActivity() {
         const val SHORTCUT_CODE = 110
     }
 
+    private val dummyHost by lazy { AppWidgetHost(this, 1003) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -27,10 +31,7 @@ class PermConfigActivity : AppCompatActivity() {
                 startActivityForResult(permIntent, PERM_CODE)
             }
             Drawer.ACTION_CONFIG -> {
-                val configIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE)
-                configIntent.component = intent.getParcelableExtra(Drawer.EXTRA_APPWIDGET_CONFIGURE)
-                configIntent.putExtras(intent.extras!!)
-                startActivityForResult(configIntent, CONFIG_CODE)
+                dummyHost.startAppWidgetConfigureActivityForResult(this, intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1), 0, CONFIG_CODE, null)
             }
             Intent.ACTION_CREATE_SHORTCUT -> {
                 val info = intent.getParcelableExtra<ShortcutData>(Drawer.EXTRA_SHORTCUT_DATA)
