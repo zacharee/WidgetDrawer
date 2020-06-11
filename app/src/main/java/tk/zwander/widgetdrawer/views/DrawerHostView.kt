@@ -2,12 +2,10 @@ package tk.zwander.widgetdrawer.views
 
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetHostView
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Context
-import android.graphics.Rect
-import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ViewGroup
-import android.widget.ListView
 import androidx.core.view.NestedScrollingChild
 import tk.zwander.widgetdrawer.R
 
@@ -27,11 +25,15 @@ class DrawerHostView(context: Context) : AppWidgetHostView(context), NestedScrol
             height = ViewGroup.LayoutParams.MATCH_PARENT
         }
 
-        setPadding(0, 0, 0, 0)
-        setPaddingRelative(0, 0, 0, 0)
-
         enableNestedScrolling(this)
         isNestedScrollingEnabled = true
+    }
+
+    override fun setAppWidget(appWidgetId: Int, info: AppWidgetProviderInfo?) {
+        super.setAppWidget(appWidgetId, info)
+
+        setPadding(0, 0, 0, 0)
+        setPaddingRelative(0, 0, 0, 0)
     }
 
     override fun onInterceptTouchEvent(ev: MotionEvent?): Boolean {
