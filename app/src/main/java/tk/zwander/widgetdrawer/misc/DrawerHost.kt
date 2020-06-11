@@ -16,6 +16,7 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import net.bytebuddy.implementation.SuperMethodCall
+import tk.zwander.widgetdrawer.utils.prefs
 import tk.zwander.widgetdrawer.views.Drawer
 import tk.zwander.widgetdrawer.views.DrawerHostView
 import java.lang.reflect.InvocationHandler
@@ -131,6 +132,14 @@ class DrawerHost(val context: Context, id: Int, drawer: Drawer) : AppWidgetHost(
             if (pi.isActivity) drawer.hideDrawer()
 
             return startPendingIntent.invoke(null, view, pi, launchOptions) as Boolean
+        }
+    }
+
+    override fun deleteAppWidgetId(appWidgetId: Int) {
+        super.deleteAppWidgetId(appWidgetId)
+
+        context.prefs.apply {
+            widgetSizes = widgetSizes.apply { remove(appWidgetId) }
         }
     }
 }

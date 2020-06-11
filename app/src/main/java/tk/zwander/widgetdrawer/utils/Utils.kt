@@ -16,12 +16,16 @@ import android.util.Base64
 import android.util.Log
 import android.util.TypedValue
 import android.view.WindowManager
+import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import kotlin.math.roundToInt
 
 var accessibilityConnected = false
+
+val Context.widgetHeightUnit: Int
+    get() = dpAsPx(50)
 
 val Context.canDrawOverlays
     get() = Build.VERSION.SDK_INT < Build.VERSION_CODES.M

@@ -14,6 +14,8 @@ import com.google.gson.reflect.TypeToken
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
+import tk.zwander.widgetdrawer.misc.WidgetInfo
+import tk.zwander.widgetdrawer.misc.WidgetSizeInfo
 
 class PrefsManager private constructor(private val context: Context) {
     companion object {
@@ -29,6 +31,8 @@ class PrefsManager private constructor(private val context: Context) {
         const val CURRENT_SHORTCUT_IDS = "shortcut_ids"
         const val SHOW_HANDLE = "show_handle"
         const val CLOSE_ON_EMPTY_TAP = "close_on_empty_tap"
+        const val COLUMN_COUNT = "column_count"
+        const val WIDGET_SIZE_INFO = "widget_size_info"
 
         @SuppressLint("RtlHardcoded")
         const val HANDLE_LEFT = Gravity.LEFT
@@ -49,6 +53,8 @@ class PrefsManager private constructor(private val context: Context) {
     }
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+    val gson = GsonBuilder()
+        .create()
 
     var currentWidgets: List<BaseWidgetInfo>
         get() {
@@ -114,7 +120,7 @@ class PrefsManager private constructor(private val context: Context) {
             putBoolean(TRANSPARENT_WIDGETS, value)
         }
     var shortcutIds: Set<String>
-        get() = HashSet(getStringSet(CURRENT_SHORTCUT_IDS, HashSet()))
+        get() = HashSet(getStringSet(CURRENT_SHORTCUT_IDS, HashSet())!!)
         set(value) {
             putStringSet(CURRENT_SHORTCUT_IDS, value.toSet())
         }
@@ -133,6 +139,32 @@ class PrefsManager private constructor(private val context: Context) {
         set(value) {
             putInt(DRAWER_BACKGROUND_COLOR, value)
         }
+    var columnCount: Int
+        get() = getInt(COLUMN_COUNT, 2)
+        set(value) {
+            putInt(COLUMN_COUNT, value)
+        }
+    var widgetSizes: HashMap<Int, WidgetSizeInfo>
+        get() = gson.fromJson(
+            getString(WIDGET_SIZE_INFO, null),
+            object : TypeToken<HashMap<Int, WidgetSizeInfo>>() {}.type
+        ) ?: HashMap()
+        set(value) {
+            putString(
+                WIDGET_SIZE_INFO,
+                gson.toJson(value)
+            )
+        }
+
+    fun updateWidgetSize(id: Int, newWidth: Int, newHeight: Int) {
+        val sizeInfo = WidgetSizeInfo(newWidth, newHeight, id)
+
+        updateWidgetSize(sizeInfo)
+    }
+
+    fun updateWidgetSize(widgetSizeInfo: WidgetSizeInfo) {
+        widgetSizes = widgetSizes.apply { this[widgetSizeInfo.id] = widgetSizeInfo }
+    }
 
     fun getString(key: String, def: String?) = prefs.getString(key, def)
     fun getFloat(key: String, def: Float) = prefs.getFloat(key, def)

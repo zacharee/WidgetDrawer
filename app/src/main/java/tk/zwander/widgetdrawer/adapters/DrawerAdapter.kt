@@ -10,7 +10,6 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
-import android.util.Log
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
@@ -18,16 +17,15 @@ import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import com.arasthel.spannedgridlayoutmanager.SpanSize
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import kotlinx.android.synthetic.main.header_layout.view.*
 import kotlinx.android.synthetic.main.shortcut_holder.view.*
-import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
 import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.observables.EditingObservable
 import tk.zwander.widgetdrawer.observables.SelectionObservable
-import tk.zwander.widgetdrawer.observables.SizeObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
 import tk.zwander.widgetdrawer.utils.*
 import tk.zwander.widgetdrawer.views.CustomCard
@@ -43,15 +41,27 @@ class DrawerAdapter(
 
         const val SIZE_STEP_PX = 100
 
-        const val TYPE_HEADER = 1
-        const val TYPE_WIDGET = 0
-        const val TYPE_SHORTCUT = 2
+        const val TYPE_HEADER = BaseWidgetInfo.TYPE_HEADER
+        const val TYPE_WIDGET = BaseWidgetInfo.TYPE_WIDGET
+        const val TYPE_SHORTCUT = BaseWidgetInfo.TYPE_SHORTCUT
     }
 
     var isEditing = false
         set(value) {
             field = value
             if (!value) selectedId = -1
+            if (value) {
+                if (!widgets.contains(headerItem)) {
+                    widgets.add(0, headerItem)
+                    notifyItemInserted(0)
+                }
+            } else {
+                val index = widgets.indexOf(headerItem)
+                widgets.remove(headerItem)
+                if (index != -1) {
+                    notifyItemRemoved(index)
+                }
+            }
             editingObservable.setEditing(value)
         }
     var selectedId = -1
@@ -65,13 +75,15 @@ class DrawerAdapter(
             transparentObservable.setTransparent(value)
         }
 
+    val spanSizeLookup = SpanSizeLookup()
+
     private val editingObservable = EditingObservable()
     private val selectedObservable = SelectionObservable()
     private val transparentObservable = TransparentObservable()
-    val sizeObservable = SizeObservable()
+
+    private val headerItem = BaseWidgetInfo.header()
 
     val widgets = ArrayList<BaseWidgetInfo>()
-        .apply { add(0, BaseWidgetInfo.header()) }
 
     val selectedWidget: BaseWidgetInfo?
         get() = widgets.firstOrNull { it.id == selectedId }
@@ -84,16 +96,15 @@ class DrawerAdapter(
 
     override fun getItemId(position: Int) = widgets[position].id.toLong()
 
-    override fun getItemViewType(position: Int) =
-        if (position == 0) TYPE_HEADER
-        else {
-            val widget = widgets[position]
-            when (widget.type) {
-                BaseWidgetInfo.TYPE_WIDGET -> TYPE_WIDGET
-                BaseWidgetInfo.TYPE_SHORTCUT -> TYPE_SHORTCUT
-                else -> throw IllegalArgumentException("Bad widget type")
-            }
+    override fun getItemViewType(position: Int): Int {
+        val widget = widgets[position]
+        return when (widget.type) {
+            BaseWidgetInfo.TYPE_WIDGET -> TYPE_WIDGET
+            BaseWidgetInfo.TYPE_SHORTCUT -> TYPE_SHORTCUT
+            BaseWidgetInfo.TYPE_HEADER -> TYPE_HEADER
+            else -> throw IllegalArgumentException("Bad widget type")
         }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
         when (viewType) {
@@ -217,42 +228,38 @@ class DrawerAdapter(
         }
     }
 
-    private fun updateDimens(holder: WidgetVH, info: AppWidgetProviderInfo?, widget: BaseWidgetInfo) {
-        if (info == null) return
-        holder.itemView.apply {
-            layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-                val h = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
-                if (validLowerHeight(h))
-                    height = h
-                else {
-                    widget.forcedHeight += 1
-                    height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
-                    PrefsManager.getInstance(context).currentWidgets = widgets
-                }
-
-                isFullSpan = widget.isFullWidth
-            }
-        }
-    }
-
-    private fun updateDimens(holder: ShortcutVH, widget: BaseWidgetInfo) {
-        holder.itemView.apply {
-            layoutParams = (layoutParams as StaggeredGridLayoutManager.LayoutParams).apply {
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-                val h = computeHeight(context.dpAsPx(100), widget.forcedHeight)
-                if (validLowerHeight(h))
-                    height = h
-                else {
-                    widget.forcedHeight += 1
-                    height = computeHeight(context.dpAsPx(100), widget.forcedHeight)
-                    PrefsManager.getInstance(context).currentWidgets = widgets
-                }
-
-                isFullSpan = widget.isFullWidth
-            }
-        }
-    }
+//    private fun updateDimens(holder: WidgetVH, info: AppWidgetProviderInfo?, widget: BaseWidgetInfo) {
+//        if (info == null) return
+//        holder.itemView.apply {
+//            layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+//                width = ViewGroup.LayoutParams.MATCH_PARENT
+//                val h = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
+//                if (validLowerHeight(h))
+//                    height = h
+//                else {
+//                    widget.forcedHeight += 1
+//                    height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
+//                    PrefsManager.getInstance(context).currentWidgets = widgets
+//                }
+//            }
+//        }
+//    }
+//
+//    private fun updateDimens(holder: ShortcutVH, widget: BaseWidgetInfo) {
+//        holder.itemView.apply {
+//            layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+//                width = ViewGroup.LayoutParams.MATCH_PARENT
+//                val h = computeHeight(context.dpAsPx(100), widget.forcedHeight)
+//                if (validLowerHeight(h))
+//                    height = h
+//                else {
+//                    widget.forcedHeight += 1
+//                    height = computeHeight(context.dpAsPx(100), widget.forcedHeight)
+//                    PrefsManager.getInstance(context).currentWidgets = widgets
+//                }
+//            }
+//        }
+//    }
 
     fun addItem(widget: BaseWidgetInfo) {
         widgets.add(widget)
@@ -298,17 +305,17 @@ class DrawerAdapter(
     }
 
     inner class WidgetVH(view: View) : BaseItemVH(view) {
-        init {
-            sizeObservable.addObserver { _, arg ->
-                if (adapterPosition != -1) {
-                    val currentWidgetInfo = widgets[adapterPosition]
-
-                    if (arg == currentWidgetInfo.id) {
-                        updateDimens(this, getWidgetInfo(currentWidgetInfo.id), currentWidgetInfo)
-                    }
-                }
-            }
-        }
+//        init {
+//            sizeObservable.addObserver { _, arg ->
+//                if (adapterPosition != -1) {
+//                    val currentWidgetInfo = widgets[adapterPosition]
+//
+//                    if (arg == currentWidgetInfo.id) {
+//                        updateDimens(this, getWidgetInfo(currentWidgetInfo.id), currentWidgetInfo)
+//                    }
+//                }
+//            }
+//        }
 
         override fun onBind(widget: BaseWidgetInfo) {
             super.onBind(widget)
@@ -335,18 +342,16 @@ class DrawerAdapter(
                 addView(view)
             }
 
-            updateDimens(
-                this@WidgetVH,
-                widgetInfo,
-                widget
-            )
+//            updateDimens(
+//                this@WidgetVH,
+//                widgetInfo,
+//                widget
+//            )
 
-            itemView.post {
-                val width = itemView.context.pxAsDp(itemView.width).toInt()
-                val height = itemView.context.pxAsDp(itemView.height).toInt()
+            val width = itemView.context.pxAsDp(itemView.width).toInt()
+            val height = itemView.context.pxAsDp(itemView.height).toInt()
 
-                view.updateAppWidgetSize(null, width, height, width, height)
-            }
+            view.updateAppWidgetSize(null, width, height, width, height)
         }
     }
 
@@ -386,13 +391,13 @@ class DrawerAdapter(
                 gestureDetector.onTouchEvent(event) || scrollCheck
             }
 
-            sizeObservable.addObserver { _, arg ->
-                if (adapterPosition != -1) {
-                    val currentShortcut = widgets[adapterPosition]
-
-                    updateDimens(this, currentShortcut)
-                }
-            }
+//            sizeObservable.addObserver { _, arg ->
+//                if (adapterPosition != -1) {
+//                    val currentShortcut = widgets[adapterPosition]
+//
+//                    updateDimens(this, currentShortcut)
+//                }
+//            }
         }
 
         override fun onBind(widget: BaseWidgetInfo) {
@@ -411,7 +416,7 @@ class DrawerAdapter(
                 }
             }
 
-            updateDimens(this, widgets[adapterPosition])
+//            updateDimens(this, widgets[adapterPosition])
         }
 
         private fun scaleMotionEvent(event: MotionEvent) {
@@ -450,15 +455,12 @@ class DrawerAdapter(
         fun getWidgetInfo(id: Int): AppWidgetProviderInfo? = manager.getAppWidgetInfo(id)
         
         open fun onBind(widget: BaseWidgetInfo) {
+            updateSelectionVisibility(this)
             updateSelectionCheck(this, widget)
         }
     }
 
     inner class HeaderVH(view: View) : RecyclerView.ViewHolder(view) {
-        init {
-            (view.layoutParams as StaggeredGridLayoutManager.LayoutParams).isFullSpan = true
-        }
-
         fun onBind() {
             editingObservable.addObserver { _, _ ->
                 val height = itemView.edit_instructions
@@ -482,4 +484,18 @@ class DrawerAdapter(
             }
         }
     }
+
+    inner class SpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
+        val columnCount = appWidgetHost.context.prefs.columnCount
+        val widget = if (position < widgets.size) widgets[position] else null
+
+        if (widget?.type == TYPE_HEADER) {
+            SpanSize(columnCount, 1)
+        } else {
+            val id = widget?.id ?: -1
+            val sizeInfo = appWidgetHost.context.prefs.widgetSizes[id]
+
+            SpanSize(sizeInfo?.getSafeWidthSpanSize(appWidgetHost.context) ?: 1, sizeInfo?.safeHeightSpanSize ?: 1)
+        }
+    })
 }

@@ -5,13 +5,13 @@ import android.content.Context
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import kotlin.random.Random
 
-class ShortcutIdManager private constructor(private val context: Context) {
+class ShortcutIdManager private constructor(private val context: Context, private val host: DrawerHost) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: ShortcutIdManager? = null
 
-        fun getInstance(context: Context): ShortcutIdManager {
-            if (instance == null) instance = ShortcutIdManager(context.applicationContext)
+        fun getInstance(context: Context, host: DrawerHost): ShortcutIdManager {
+            if (instance == null) instance = ShortcutIdManager(context.applicationContext, host)
             return instance!!
         }
     }
@@ -24,7 +24,9 @@ class ShortcutIdManager private constructor(private val context: Context) {
         val random = Random(System.currentTimeMillis())
         var id = random.nextInt()
 
-        while (current.contains(id.toString())) id = random.nextInt()
+        //AppWidgetHost.appWidgetIds has existed since at least 5.1.1, just hidden
+        while (current.contains(id.toString()) && host.appWidgetIds.contains(id))
+            id = random.nextInt()
 
         prefs.addShortcutId(id.toString())
 
@@ -33,5 +35,6 @@ class ShortcutIdManager private constructor(private val context: Context) {
 
     fun removeShortcutId(id: Int) {
         prefs.removeShortcutId(id.toString())
+        prefs.widgetSizes = prefs.widgetSizes.apply { remove(id) }
     }
 }

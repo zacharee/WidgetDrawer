@@ -12,8 +12,6 @@ data class BaseWidgetInfo(
     var iconBmpEncoded: String? = null,
     var iconRes: Intent.ShortcutIconResource? = null,
     var id: Int,
-    var forcedHeight: Int = DrawerAdapter.SIZE_DEF,
-    var isFullWidth: Boolean = false,
     var shortcutIntent: Intent? = null
 ) : Parcelable {
     companion object {
@@ -30,25 +28,19 @@ data class BaseWidgetInfo(
                 icon,
                 iconRes,
                 id,
-                DrawerAdapter.SIZE_DEF,
-                false,
                 intent
             )
         }
 
         fun widget(
-            id: Int,
-            forcedHeight: Int = DrawerAdapter.SIZE_DEF,
-            isFullWidth: Boolean = false
+            id: Int
         ): BaseWidgetInfo {
             return BaseWidgetInfo(
                 TYPE_WIDGET,
                 null,
                 null,
                 null,
-                id,
-                forcedHeight,
-                isFullWidth
+                id
             )
         }
 
@@ -58,9 +50,7 @@ data class BaseWidgetInfo(
                 null,
                 null,
                 null,
-                -1,
-                DrawerAdapter.SIZE_DEF,
-                false
+                -1
             )
 
         const val TYPE_WIDGET = 0

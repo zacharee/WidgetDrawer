@@ -78,4 +78,13 @@
         app:cpv_showAlphaSlider="true"
         />
 
+    <tk.zwander.seekbarpreference.SeekBarPreference
+        android:title="@string/column_count"
+        android:summary="@string/column_count_desc"
+        android:defaultValue="2"
+        android:key="column_count"
+        app:minValue="1"
+        app:maxValue="5"
+        />
+
 </PreferenceScreen>

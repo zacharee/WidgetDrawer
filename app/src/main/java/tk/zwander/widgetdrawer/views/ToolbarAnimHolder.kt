@@ -1,13 +1,10 @@
 package tk.zwander.widgetdrawer.views
 
-import android.animation.TimeInterpolator
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
-import android.view.animation.AnticipateInterpolator
-import android.view.animation.OvershootInterpolator
 import android.widget.LinearLayout
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation

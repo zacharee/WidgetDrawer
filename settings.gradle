@@ -1,1 +1,3 @@
-include ':app'
+include ':app', ':spannedlm'
+
+project(':spannedlm').projectDir = new File("../SpannedGridLayoutManager/spannedgridlayoutmanager")

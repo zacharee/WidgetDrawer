@@ -15,6 +15,7 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Parcelable
 import android.util.AttributeSet
+import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View.OnClickListener
@@ -24,10 +25,10 @@ import android.view.animation.AlphaAnimation
 import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
-import android.widget.Toast
 import androidx.core.animation.doOnEnd
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import androidx.recyclerview.widget.StaggeredGridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
 import com.tingyik90.snackprogressbar.SnackProgressBarManager
 import kotlinx.android.synthetic.main.drawer_layout.view.*
@@ -39,14 +40,8 @@ import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.SHORTCUT_
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
-import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
-import tk.zwander.widgetdrawer.misc.DrawerHost
-import tk.zwander.widgetdrawer.misc.ShortcutData
-import tk.zwander.widgetdrawer.misc.ShortcutIdManager
-import tk.zwander.widgetdrawer.utils.PrefsManager
-import tk.zwander.widgetdrawer.utils.screenSize
-import tk.zwander.widgetdrawer.utils.statusBarHeight
-import tk.zwander.widgetdrawer.utils.toBase64
+import tk.zwander.widgetdrawer.misc.*
+import tk.zwander.widgetdrawer.utils.*
 import java.util.*
 
 
@@ -94,16 +89,15 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             screenOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         }
 
-    val snackbarManager = SnackProgressBarManager(this).apply {
-
-    }
-
+    private val snackbarManager = SnackProgressBarManager(this)
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
     private val host by lazy { DrawerHost(context.applicationContext, 1003, this) }
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
-    private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context) }
+    private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val prefs by lazy { PrefsManager.getInstance(context) }
     private val adapter by lazy { DrawerAdapter(manager, host) }
+
+    private val gridLayoutManager = SpannedGridLayoutManager(context, RecyclerView.VERTICAL, 1, context.prefs.columnCount)
 
     private val localReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
@@ -137,6 +131,9 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 prefs.transparentWidgets = !prefs.transparentWidgets
                 adapter.transparentWidgets = prefs.transparentWidgets
             }
+
+            widget_grid.layoutManager = gridLayoutManager
+            gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
 
             widget_grid.onMoveListener = { _, viewHolder, target ->
                 val fromPosition = viewHolder.adapterPosition
@@ -207,26 +204,42 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
                     when (view.id) {
                         R.id.expand_horiz -> {
-                            changed = widget.isFullWidth != true
-                            widget.isFullWidth = true
+                            changed = true
+                            prefs.apply {
+                                updateWidgetSize((widgetSizes[widget.id] ?: WidgetSizeInfo(1, 1, widget.id)).apply {
+                                    safeWidthSpanSize = getSafeWidthSpanSize(context) + 1
+                                })
+                            }
                         }
                         R.id.collapse_horiz -> {
-                            changed = widget.isFullWidth != false
-                            widget.isFullWidth = false
+                            changed = true
+                            prefs.apply {
+                                updateWidgetSize((widgetSizes[widget.id] ?: WidgetSizeInfo(1, 1, widget.id)).apply {
+                                    safeWidthSpanSize = getSafeWidthSpanSize(context) - 1
+                                })
+                            }
                         }
                         R.id.expand_vert -> {
                             changed = true
-                            widget.forcedHeight++
+                            prefs.apply {
+                                updateWidgetSize((widgetSizes[widget.id] ?: WidgetSizeInfo(1, 1, widget.id)).apply {
+                                    safeHeightSpanSize += 1
+                                })
+                            }
                         }
                         R.id.collapse_vert -> {
                             changed = true
-                            widget.forcedHeight--
+                            prefs.apply {
+                                updateWidgetSize((widgetSizes[widget.id] ?: WidgetSizeInfo(1, 1, widget.id)).apply {
+                                    safeHeightSpanSize -= 1
+                                })
+                            }
                         }
                     }
 
                     if (changed) {
                         prefs.currentWidgets = adapter.widgets
-                        adapter.sizeObservable.setSize(widget.id)
+                        adapter.notifyItemChanged(adapter.widgets.indexOf(widget))
                     }
                 }
             }
@@ -244,6 +257,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         super.onAttachedToWindow()
 
         host.startListening()
+        adapter.notifyDataSetChanged()
 
         setPadding(paddingLeft, context.statusBarHeight, paddingRight, paddingBottom)
 
@@ -272,6 +286,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         when (key) {
             PrefsManager.TRANSPARENT_WIDGETS -> adapter.transparentWidgets = prefs.transparentWidgets
+            PrefsManager.COLUMN_COUNT -> updateSpanCount()
         }
     }
 
@@ -296,9 +311,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         widget_grid.adapter = adapter
         widget_grid.isNestedScrollingEnabled = true
         widget_grid.setHasFixedSize(true)
-        (widget_grid.layoutManager as StaggeredGridLayoutManager).apply {
-            spanCount = 2
-        }
+        updateSpanCount()
         adapter.setAll(prefs.currentWidgets)
     }
 
@@ -336,6 +349,11 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
             }
         })
         anim.start()
+    }
+
+    private fun updateSpanCount() {
+        gridLayoutManager.columnCount = context.prefs.columnCount
+        gridLayoutManager.customHeight = context.widgetHeightUnit
     }
 
     private fun getWidgetPermission(id: Int, componentName: ComponentName, options: Bundle? = null) {
