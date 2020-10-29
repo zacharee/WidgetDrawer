@@ -280,7 +280,11 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     override fun onDetachedFromWindow() {
         super.onDetachedFromWindow()
 
-        host.stopListening()
+        try {
+            host.stopListening()
+        } catch (e: NullPointerException) {
+            //AppWidgetServiceImpl$ProviderId NPE
+        }
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
