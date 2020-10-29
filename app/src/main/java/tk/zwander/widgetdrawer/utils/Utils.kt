@@ -78,7 +78,7 @@ fun Intent.ShortcutIconResource?.loadToDrawable(context: Context): Drawable? {
         try {
             context.packageManager.getResourcesForApplication(packageName)
                 .run {
-                    ResourcesCompat.getDrawable(this, getIdentifier(resourceName, "drawable", packageName))
+                    ResourcesCompat.getDrawable(this, getIdentifier(resourceName, "drawable", packageName), newTheme())
                 }
         } catch (e: PackageManager.NameNotFoundException) {
             null
