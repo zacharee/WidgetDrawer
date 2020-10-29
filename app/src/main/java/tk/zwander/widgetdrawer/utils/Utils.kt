@@ -2,6 +2,7 @@ package tk.zwander.widgetdrawer.utils
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -16,6 +17,7 @@ import android.util.Base64
 import android.util.Log
 import android.util.TypedValue
 import android.view.WindowManager
+import androidx.core.content.res.ResourcesCompat
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
@@ -73,10 +75,14 @@ fun Bitmap?.toBitmapDrawable(resources: Resources): BitmapDrawable? {
 
 fun Intent.ShortcutIconResource?.loadToDrawable(context: Context): Drawable? {
     return if (this != null) {
-        context.packageManager.getResourcesForApplication(packageName)
-            .run {
-                getDrawable(getIdentifier(resourceName, "drawable", packageName))
-            }
+        try {
+            context.packageManager.getResourcesForApplication(packageName)
+                .run {
+                    ResourcesCompat.getDrawable(this, getIdentifier(resourceName, "drawable", packageName))
+                }
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
+        }
     } else {
         null
     }
