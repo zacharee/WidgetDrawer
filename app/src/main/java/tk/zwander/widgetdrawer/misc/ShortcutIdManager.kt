@@ -2,15 +2,16 @@ package tk.zwander.widgetdrawer.misc
 
 import android.annotation.SuppressLint
 import android.content.Context
+import tk.zwander.widgetdrawer.host.WidgetHostCompat
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import kotlin.random.Random
 
-class ShortcutIdManager private constructor(private val context: Context, private val host: DrawerHost) {
+class ShortcutIdManager private constructor(private val context: Context, private val host: WidgetHostCompat) {
     companion object {
         @SuppressLint("StaticFieldLeak")
         private var instance: ShortcutIdManager? = null
 
-        fun getInstance(context: Context, host: DrawerHost): ShortcutIdManager {
+        fun getInstance(context: Context, host: WidgetHostCompat): ShortcutIdManager {
             if (instance == null) instance = ShortcutIdManager(context.applicationContext, host)
             return instance!!
         }
@@ -18,6 +19,7 @@ class ShortcutIdManager private constructor(private val context: Context, privat
 
     private val prefs by lazy { PrefsManager.getInstance(context) }
 
+    @SuppressLint("NewApi")
     fun allocateShortcutId(): Int {
         val current = prefs.shortcutIds
 

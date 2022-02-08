@@ -3,7 +3,7 @@ package tk.zwander.widgetdrawer.misc
 import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class ShortcutData(

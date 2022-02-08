@@ -177,6 +177,12 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
             Configuration.ORIENTATION_PORTRAIT -> {
                 addHandle()
             }
+            Configuration.ORIENTATION_SQUARE -> {
+                addHandle()
+            }
+            Configuration.ORIENTATION_UNDEFINED -> {
+                remHandle()
+            }
         }
     }
 

@@ -2,8 +2,7 @@ package tk.zwander.widgetdrawer.misc
 
 import android.content.Intent
 import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import kotlinx.parcelize.Parcelize
 
 @Parcelize
 data class BaseWidgetInfo(

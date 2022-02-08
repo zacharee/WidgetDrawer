@@ -9,6 +9,7 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.widgetdrawer.R
+import kotlin.math.roundToInt
 
 /**
  * Modified version of Android's DividerItemDecoration
@@ -16,7 +17,6 @@ import tk.zwander.widgetdrawer.R
  * @see androidx.recyclerview.widget.DividerItemDecoration
  */
 class DividerItemDecoration(context: Context, orientation: Int) : RecyclerView.ItemDecoration() {
-
     var divider: Drawable? = null
         set(drawable) {
             if (drawable == null) {
@@ -79,7 +79,7 @@ class DividerItemDecoration(context: Context, orientation: Int) : RecyclerView.I
         for (i in 0 until childCount - 1) {
             val child = parent.getChildAt(i)
             parent.getDecoratedBoundsWithMargins(child, bounds)
-            val bottom = bounds.bottom + Math.round(child.translationY)
+            val bottom = bounds.bottom + child.translationY.roundToInt()
             val top = bottom - divider!!.intrinsicHeight
             divider!!.setBounds(left, top, right, bottom)
             divider!!.draw(canvas)
@@ -108,7 +108,7 @@ class DividerItemDecoration(context: Context, orientation: Int) : RecyclerView.I
         for (i in 0 until childCount - 1) {
             val child = parent.getChildAt(i)
             parent.layoutManager!!.getDecoratedBoundsWithMargins(child, bounds)
-            val right = bounds.right + Math.round(child.translationX)
+            val right = bounds.right + child.translationX.roundToInt()
             val left = right - divider!!.intrinsicWidth
             divider!!.setBounds(left, top, right, bottom)
             divider!!.draw(canvas)

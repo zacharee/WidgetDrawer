@@ -1,15 +1,16 @@
 package tk.zwander.widgetdrawer.views
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewConfiguration
 import android.widget.LinearLayout
+import android.widget.ViewFlipper
 import androidx.dynamicanimation.animation.DynamicAnimation
 import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
-import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.vibrate
@@ -20,7 +21,7 @@ class ToolbarAnimHolder : LinearLayout {
     constructor(context: Context, attributeSet: AttributeSet) : super(context, attributeSet)
 
     private val closedTranslation: Int
-        get() = action_bar_wrapper.height
+        get() = findViewById<ViewFlipper>(R.id.action_bar_wrapper).height
     private val openedTranslation = -context.dpAsPx(16)
     private val threshold: Float
         get() = (openedTranslation + closedTranslation) / 2f
@@ -44,14 +45,15 @@ class ToolbarAnimHolder : LinearLayout {
     private var currentlyTransitioning = false
 
     init {
-        orientation = LinearLayout.VERTICAL
+        orientation = VERTICAL
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onFinishInflate() {
         super.onFinishInflate()
 
-        open_close_toolbar.setOnTouchListener(touchListener)
-        action_bar_wrapper.setOnTouchListener(touchListener)
+        findViewById<View>(R.id.open_close_toolbar).setOnTouchListener(touchListener)
+        findViewById<View>(R.id.action_bar_wrapper).setOnTouchListener(touchListener)
     }
 
     private fun transition(isOpen: Boolean = this.isOpen) {

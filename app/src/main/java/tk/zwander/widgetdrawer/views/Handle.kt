@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.Handler
+import android.os.Looper
 import android.os.Message
 import android.util.AttributeSet
 import android.view.GestureDetector
@@ -14,6 +15,7 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.WindowManager
 import android.widget.LinearLayout
+import androidx.appcompat.content.res.AppCompatResources
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.PrefsManager
@@ -42,11 +44,11 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     private val wm = context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager
     private val prefs = PrefsManager.getInstance(context)
 
-    private val handleLeft = resources.getDrawable(R.drawable.handle_left)
-    private val handleRight = resources.getDrawable(R.drawable.handle_right)
+    private val handleLeft = AppCompatResources.getDrawable(context, R.drawable.handle_left)
+    private val handleRight = AppCompatResources.getDrawable(context, R.drawable.handle_right)
 
     private val longClickHandler = @SuppressLint("HandlerLeak")
-    object : Handler() {
+    object : Handler(Looper.getMainLooper()) {
         override fun handleMessage(msg: Message?) {
             when (msg?.what) {
                 MSG_LONG_PRESS -> gestureManager.onLongPress()
@@ -183,8 +185,8 @@ class Handle : LinearLayout, SharedPreferences.OnSharedPreferenceChangeListener 
     }
 
     private fun setTint(tint: Int) {
-        handleLeft.setTint(tint)
-        handleRight.setTint(tint)
+        handleLeft?.setTint(tint)
+        handleRight?.setTint(tint)
     }
 
     inner class GestureManager : GestureDetector.SimpleOnGestureListener() {

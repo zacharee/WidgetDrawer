@@ -32,7 +32,7 @@
             android:clickable="true"
             android:focusable="true"
             android:src="@drawable/arrow_up"
-            android:tint="@android:color/white"
+            app:tint="@android:color/white"
             android:contentDescription="@string/open_close_toolbar"
             />
 

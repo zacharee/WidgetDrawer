@@ -9,8 +9,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.app_item.view.*
 import tk.zwander.widgetdrawer.R
+import tk.zwander.widgetdrawer.databinding.AppItemBinding
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.DividerItemDecoration
 
@@ -78,12 +78,13 @@ class AppListAdapter(private val context: Context, private val selectionCallback
 
     class AppVH(view: View, private val picasso: Picasso, selectionCallback: (provider: Parcelable) -> Unit) : RecyclerView.ViewHolder(view) {
         private val adapter = WidgetListAdapter(picasso, selectionCallback)
+        private val binding = AppItemBinding.bind(itemView)
 
         fun parseInfo(info: AppInfo) {
-            itemView.widget_holder.adapter = adapter
-            itemView.widget_holder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
+            binding.widgetHolder.adapter = adapter
+            binding.widgetHolder.addItemDecoration(DividerItemDecoration(itemView.context, RecyclerView.HORIZONTAL))
 
-            itemView.app_name.text = info.appName
+            binding.appName.text = info.appName
             info.widgets.forEach {
                 adapter.addItem(it)
             }
@@ -91,7 +92,7 @@ class AppListAdapter(private val context: Context, private val selectionCallback
             picasso
                 .load(Uri.parse("${WidgetListAdapter.AppIconRequestHandler.SCHEME}:${info.appInfo.packageName}"))
                 .fit()
-                .into(itemView.app_icon)
+                .into(binding.appIcon)
         }
     }
 }

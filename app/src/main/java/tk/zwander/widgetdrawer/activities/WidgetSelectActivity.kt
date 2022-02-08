@@ -5,12 +5,11 @@ import android.appwidget.AppWidgetManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
-import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_widget_select.*
+import androidx.core.view.isVisible
 import kotlinx.coroutines.*
-import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.adapters.AppListAdapter
+import tk.zwander.widgetdrawer.databinding.ActivityWidgetSelectBinding
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.WidgetInfo
@@ -32,12 +31,13 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
             finish()
         }
     }
+    private val binding by lazy { ActivityWidgetSelectBinding.inflate(layoutInflater) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_widget_select)
+        setContentView(binding.root)
 
-        selection_list.adapter = adapter
+        binding.selectionList.adapter = adapter
 
         populateAsync()
     }
@@ -110,7 +110,7 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
         }
 
         adapter.addItems(apps.values)
-        progress.visibility = View.GONE
-        selection_list.visibility = View.VISIBLE
+        binding.progress.isVisible = false
+        binding.selectionList.isVisible = true
     }
 }

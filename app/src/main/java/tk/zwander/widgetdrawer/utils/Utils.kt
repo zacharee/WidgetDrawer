@@ -15,14 +15,12 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
-import android.util.TypedValue
 import android.view.WindowManager
 import androidx.core.content.res.ResourcesCompat
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
-import kotlin.math.roundToInt
 
 var accessibilityConnected = false
 

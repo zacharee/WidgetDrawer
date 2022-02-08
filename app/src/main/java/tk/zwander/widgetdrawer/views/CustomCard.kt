@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.drawable.GradientDrawable
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.appcompat.content.res.AppCompatResources
 import tk.zwander.widgetdrawer.R
 
 class CustomCard : FrameLayout {
@@ -11,7 +12,7 @@ class CustomCard : FrameLayout {
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 
     init {
-        background = context.getDrawable(R.drawable.card_background)
+        background = AppCompatResources.getDrawable(context, R.drawable.card_background)
     }
 
     fun setCardBackgroundColor(color: Int) {

@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Parcelable
 import android.util.AttributeSet
-import android.util.Log
 import android.view.Gravity
 import android.view.KeyEvent
 import android.view.View.OnClickListener
@@ -31,7 +30,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
 import com.tingyik90.snackprogressbar.SnackProgressBarManager
-import kotlinx.android.synthetic.main.drawer_layout.view.*
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
 import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
@@ -40,6 +38,8 @@ import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.SHORTCUT_
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
+import tk.zwander.widgetdrawer.databinding.DrawerLayoutBinding
+import tk.zwander.widgetdrawer.host.WidgetHostCompat
 import tk.zwander.widgetdrawer.misc.*
 import tk.zwander.widgetdrawer.utils.*
 import java.util.*
@@ -91,7 +91,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val snackbarManager = SnackProgressBarManager(this)
     private val wm by lazy { context.applicationContext.getSystemService(Context.WINDOW_SERVICE) as WindowManager }
-    private val host by lazy { DrawerHost(context.applicationContext, 1003, this) }
+    private val host by lazy { WidgetHostCompat.getInstance(context.applicationContext, 1003, this) }
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val prefs by lazy { PrefsManager.getInstance(context) }
@@ -121,23 +121,25 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         }
     }
 
+    private val binding by lazy { DrawerLayoutBinding.bind(this) }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
 
         if (!isInEditMode) {
-            add_widget.setOnClickListener { pickWidget() }
-            close_drawer.setOnClickListener { hideDrawer() }
-            toggle_transparent.setOnClickListener {
+            binding.addWidget.setOnClickListener { pickWidget() }
+            binding.closeDrawer.setOnClickListener { hideDrawer() }
+            binding.toggleTransparent.setOnClickListener {
                 prefs.transparentWidgets = !prefs.transparentWidgets
                 adapter.transparentWidgets = prefs.transparentWidgets
             }
 
-            widget_grid.layoutManager = gridLayoutManager
+            binding.widgetGrid.layoutManager = gridLayoutManager
             gridLayoutManager.spanSizeLookup = adapter.spanSizeLookup
 
-            widget_grid.onMoveListener = { _, viewHolder, target ->
-                val fromPosition = viewHolder.adapterPosition
-                val toPosition = target.adapterPosition
+            binding.widgetGrid.onMoveListener = { _, viewHolder, target ->
+                val fromPosition = viewHolder.bindingAdapterPosition
+                val toPosition = target.bindingAdapterPosition
 
                 if (toPosition == 0 || fromPosition == 0) false
                 else {
@@ -159,8 +161,8 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 }
             }
 
-            widget_grid.onSwipeListener = { viewHolder, _ ->
-                removeWidget(viewHolder.adapterPosition)
+            binding.widgetGrid.onSwipeListener = { viewHolder, _ ->
+                removeWidget(viewHolder.bindingAdapterPosition)
             }
 
             val inAnim = AlphaAnimation(0f, 1f).apply {
@@ -176,26 +178,24 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 override fun onAnimationRepeat(animation: Animation?) {}
                 override fun onAnimationStart(animation: Animation?) {}
                 override fun onAnimationEnd(animation: Animation?) {
-                    widget_grid.allowReorder = adapter.isEditing
+                    binding.widgetGrid.allowReorder = adapter.isEditing
                 }
             }
 
             inAnim.setAnimationListener(animListener)
             outAnim.setAnimationListener(animListener)
 
-            action_bar_wrapper.inAnimation = inAnim
-            action_bar_wrapper.outAnimation = outAnim
+            binding.actionBarWrapper.inAnimation = inAnim
+            binding.actionBarWrapper.outAnimation = outAnim
 
-            action_bar_wrapper.layoutAnimationListener
-
-            edit.setOnClickListener {
+            binding.edit.setOnClickListener {
                 adapter.isEditing = true
-                action_bar_wrapper.showNext()
+                binding.actionBarWrapper.showNext()
             }
 
-            go_back.setOnClickListener {
+            binding.goBack.setOnClickListener {
                 adapter.isEditing = false
-                action_bar_wrapper.showPrevious()
+                binding.actionBarWrapper.showPrevious()
             }
 
             val listener = OnClickListener { view ->
@@ -244,10 +244,10 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 }
             }
 
-            expand_horiz.setOnClickListener(listener)
-            expand_vert.setOnClickListener(listener)
-            collapse_horiz.setOnClickListener(listener)
-            collapse_vert.setOnClickListener(listener)
+            binding.expandHoriz.setOnClickListener(listener)
+            binding.expandVert.setOnClickListener(listener)
+            binding.collapseHoriz.setOnClickListener(listener)
+            binding.collapseVert.setOnClickListener(listener)
 
             adapter.transparentWidgets = prefs.transparentWidgets
         }
@@ -312,9 +312,9 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         })
         prefs.addPrefListener(this)
 
-        widget_grid.adapter = adapter
-        widget_grid.isNestedScrollingEnabled = true
-        widget_grid.setHasFixedSize(true)
+        binding.widgetGrid.adapter = adapter
+        binding.widgetGrid.isNestedScrollingEnabled = true
+        binding.widgetGrid.setHasFixedSize(true)
         updateSpanCount()
         adapter.setAll(prefs.currentWidgets)
     }

@@ -6,6 +6,7 @@ import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.SortedList
@@ -13,9 +14,9 @@ import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Request
 import com.squareup.picasso.RequestHandler
-import kotlinx.android.synthetic.main.widget_item.view.*
 import tk.zwander.helperlib.toBitmap
 import tk.zwander.widgetdrawer.R
+import tk.zwander.widgetdrawer.databinding.WidgetItemBinding
 import tk.zwander.widgetdrawer.misc.WidgetInfo
 
 
@@ -62,8 +63,8 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
 
     override fun onBindViewHolder(holder: WidgetVH, position: Int) {
         holder.itemView
-            .setOnClickListener { selectionCallback.invoke(widgets.get(holder.adapterPosition).component) }
-        holder.parseInfo(widgets.get(holder.adapterPosition), picasso)
+            .setOnClickListener { selectionCallback.invoke(widgets.get(holder.bindingAdapterPosition).component) }
+        holder.parseInfo(widgets.get(holder.bindingAdapterPosition), picasso)
     }
 
     override fun getItemCount() = widgets.size()
@@ -74,17 +75,13 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
     }
 
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = WidgetItemBinding.bind(itemView)
+
         fun parseInfo(info: WidgetInfo, picasso: Picasso) {
-            itemView.widget_name.text = info.widgetName
+            binding.widgetName.text = info.widgetName
 
-            val img = itemView.widget_image
-            itemView.shortcut_indicator.isVisible = info.isShortcut
-
-            val remRes = try {
-                itemView.context.packageManager.getResourcesForApplication(info.appInfo)
-            } catch (e: Exception) {
-                null
-            }
+            val img = binding.widgetImage
+            binding.shortcutIndicator.isVisible = info.isShortcut
 
             picasso
                 .load("${RemoteResourcesIconHandler.SCHEME}://${info.appInfo.packageName}/${info.previewImg}")
@@ -141,8 +138,9 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
 
             val pName = request.uri.host
             val id = pathSegments[0].toInt()
+            val remRes = pm.getResourcesForApplication(pName)
 
-            val img = pm.getResourcesForApplication(pName).getDrawable(id).toBitmap() ?: return null
+            val img = ResourcesCompat.getDrawable(remRes, id, remRes.newTheme())?.toBitmap() ?: return null
 
             return Result(img, Picasso.LoadedFrom.DISK)
         }

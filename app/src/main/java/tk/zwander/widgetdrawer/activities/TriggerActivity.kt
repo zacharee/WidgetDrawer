@@ -8,7 +8,6 @@ import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.services.DrawerService
 
 class TriggerActivity : AppCompatActivity() {
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

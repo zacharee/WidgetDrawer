@@ -5,9 +5,10 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.ImageView
+import androidx.appcompat.widget.AppCompatImageView
 import tk.zwander.helperlib.dpAsPx
 
-class ButtonImageView : ImageView {
+class ButtonImageView : AppCompatImageView {
     constructor(context: Context) : super(context)
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs)
 

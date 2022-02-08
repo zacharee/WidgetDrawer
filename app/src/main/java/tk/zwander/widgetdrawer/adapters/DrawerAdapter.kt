@@ -2,7 +2,6 @@ package tk.zwander.widgetdrawer.adapters
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.TimeInterpolator
 import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.appwidget.AppWidgetManager
@@ -19,11 +18,11 @@ import android.widget.RadioButton
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
-import kotlinx.android.synthetic.main.header_layout.view.*
-import kotlinx.android.synthetic.main.shortcut_holder.view.*
 import tk.zwander.widgetdrawer.R
+import tk.zwander.widgetdrawer.databinding.HeaderLayoutBinding
+import tk.zwander.widgetdrawer.databinding.ShortcutHolderBinding
+import tk.zwander.widgetdrawer.host.WidgetHostCompat
 import tk.zwander.widgetdrawer.misc.BaseWidgetInfo
-import tk.zwander.widgetdrawer.misc.DrawerHost
 import tk.zwander.widgetdrawer.observables.EditingObservable
 import tk.zwander.widgetdrawer.observables.SelectionObservable
 import tk.zwander.widgetdrawer.observables.TransparentObservable
@@ -34,13 +33,9 @@ import java.util.*
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
-    private val appWidgetHost: DrawerHost
+    private val appWidgetHost: WidgetHostCompat
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
-        const val SIZE_DEF = -1
-
-        const val SIZE_STEP_PX = 100
-
         const val TYPE_HEADER = BaseWidgetInfo.TYPE_HEADER
         const val TYPE_WIDGET = BaseWidgetInfo.TYPE_WIDGET
         const val TYPE_SHORTCUT = BaseWidgetInfo.TYPE_SHORTCUT
@@ -143,15 +138,13 @@ class DrawerAdapter(
     private fun updateTransparency(holder: BaseItemVH, forInit: Boolean) {
         val card = holder.widgetFrame
 
-        val background = {
-            val attr = intArrayOf(android.R.attr.colorBackground)
-            val array = card.context.obtainStyledAttributes(attr)
-            try {
-                array.getColor(0, 0)
-            } finally {
-                array.recycle()
-            }
-        }.invoke()
+        val attr = intArrayOf(android.R.attr.colorBackground)
+        val array = card.context.obtainStyledAttributes(attr)
+        val background = try {
+            array.getColor(0, 0)
+        } finally {
+            array.recycle()
+        }
 
         val elevation = card.context.resources
             .getDimensionPixelSize(R.dimen.elevation).toFloat()
@@ -228,39 +221,6 @@ class DrawerAdapter(
         }
     }
 
-//    private fun updateDimens(holder: WidgetVH, info: AppWidgetProviderInfo?, widget: BaseWidgetInfo) {
-//        if (info == null) return
-//        holder.itemView.apply {
-//            layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-//                width = ViewGroup.LayoutParams.MATCH_PARENT
-//                val h = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
-//                if (validLowerHeight(h))
-//                    height = h
-//                else {
-//                    widget.forcedHeight += 1
-//                    height = computeHeight(context.dpAsPx(info.minHeight), widget.forcedHeight)
-//                    PrefsManager.getInstance(context).currentWidgets = widgets
-//                }
-//            }
-//        }
-//    }
-//
-//    private fun updateDimens(holder: ShortcutVH, widget: BaseWidgetInfo) {
-//        holder.itemView.apply {
-//            layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
-//                width = ViewGroup.LayoutParams.MATCH_PARENT
-//                val h = computeHeight(context.dpAsPx(100), widget.forcedHeight)
-//                if (validLowerHeight(h))
-//                    height = h
-//                else {
-//                    widget.forcedHeight += 1
-//                    height = computeHeight(context.dpAsPx(100), widget.forcedHeight)
-//                    PrefsManager.getInstance(context).currentWidgets = widgets
-//                }
-//            }
-//        }
-//    }
-
     fun addItem(widget: BaseWidgetInfo) {
         widgets.add(widget)
         notifyItemInserted(widgets.lastIndex)
@@ -271,22 +231,10 @@ class DrawerAdapter(
         notifyItemInserted(index)
     }
 
-    fun addAll(widgets: List<BaseWidgetInfo>) {
-        widgets.forEach {
-            addItem(it)
-        }
-    }
-
     fun setAll(widgets: List<BaseWidgetInfo>) {
         this.widgets.removeAll { it.type != BaseWidgetInfo.TYPE_HEADER }
         this.widgets.addAll(widgets)
         notifyDataSetChanged()
-    }
-
-    fun removeItem(widget: BaseWidgetInfo) {
-        val index = widgets.indexOf(widget)
-        widgets.remove(widget)
-        notifyItemRemoved(index)
     }
 
     fun removeAt(position: Int): BaseWidgetInfo {
@@ -295,28 +243,7 @@ class DrawerAdapter(
         return removed
     }
 
-    private fun validLowerHeight(currentHeight: Int) = currentHeight > 100
-
-    private fun computeHeight(currentHeight: Int, expand: Int): Int {
-        return when (expand) {
-            SIZE_DEF -> currentHeight
-            else -> currentHeight + ((expand + 1) * SIZE_STEP_PX)
-        }
-    }
-
     inner class WidgetVH(view: View) : BaseItemVH(view) {
-//        init {
-//            sizeObservable.addObserver { _, arg ->
-//                if (adapterPosition != -1) {
-//                    val currentWidgetInfo = widgets[adapterPosition]
-//
-//                    if (arg == currentWidgetInfo.id) {
-//                        updateDimens(this, getWidgetInfo(currentWidgetInfo.id), currentWidgetInfo)
-//                    }
-//                }
-//            }
-//        }
-
         override fun onBind(widget: BaseWidgetInfo) {
             super.onBind(widget)
 
@@ -329,7 +256,7 @@ class DrawerAdapter(
             )
 
             view.setOnClickListener {
-                val newInfo = widgets[adapterPosition]
+                val newInfo = widgets[bindingAdapterPosition]
 
                 if (isEditing) {
                     selectedId = newInfo.id
@@ -342,12 +269,6 @@ class DrawerAdapter(
                 addView(view)
             }
 
-//            updateDimens(
-//                this@WidgetVH,
-//                widgetInfo,
-//                widget
-//            )
-
             val width = itemView.context.pxAsDp(itemView.width).toInt()
             val height = itemView.context.pxAsDp(itemView.height).toInt()
 
@@ -357,15 +278,17 @@ class DrawerAdapter(
 
     @SuppressLint("ClickableViewAccessibility")
     inner class ShortcutVH(view: View, private val scrollCallback: (MotionEvent) -> Unit) : BaseItemVH(view) {
+        private val binding = ShortcutHolderBinding.bind(itemView)
+
         var name: String?
-            get() = itemView.shortcut_label.text.toString()
+            get() = binding.shortcutLabel.text.toString()
             set(value) {
-                itemView.shortcut_label.text = value
+                binding.shortcutLabel.text = value
             }
         var icon: Drawable?
-            get() = itemView.shortcut_icon.drawable
+            get() = binding.shortcutIcon.drawable
             set(value) {
-                itemView.shortcut_icon.setImageDrawable(value)
+                binding.shortcutIcon.setImageDrawable(value)
             }
 
         private var wasScroll = false
@@ -415,8 +338,6 @@ class DrawerAdapter(
                             ?: return@setOnClickListener)
                 }
             }
-
-//            updateDimens(this, widgets[adapterPosition])
         }
 
         private fun scaleMotionEvent(event: MotionEvent) {
@@ -439,9 +360,9 @@ class DrawerAdapter(
             }
 
             selectedObservable.addObserver { _, _ ->
-                if (adapterPosition != -1) updateSelectionCheck(
+                if (bindingAdapterPosition != -1) updateSelectionCheck(
                     this,
-                    widgets[adapterPosition]
+                    widgets[bindingAdapterPosition]
                 )
             }
 
@@ -449,7 +370,7 @@ class DrawerAdapter(
                 updateTransparency(this, false)
             }
 
-            selection.setOnClickListener { if (isEditing) selectedId = widgets[adapterPosition].id }
+            selection.setOnClickListener { if (isEditing) selectedId = widgets[bindingAdapterPosition].id }
         }
 
         fun getWidgetInfo(id: Int): AppWidgetProviderInfo? = manager.getAppWidgetInfo(id)
@@ -461,15 +382,17 @@ class DrawerAdapter(
     }
 
     inner class HeaderVH(view: View) : RecyclerView.ViewHolder(view) {
+        private val binding = HeaderLayoutBinding.bind(itemView)
+
         fun onBind() {
             editingObservable.addObserver { _, _ ->
-                val height = itemView.edit_instructions
+                val height = binding.editInstructions
                     .apply { measure(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT) }
                     .measuredHeight
 
                 ValueAnimator.ofInt(itemView.height, if (isEditing) height else 0)
                     .apply {
-                        interpolator = if (isEditing) DecelerateInterpolator() as TimeInterpolator
+                        interpolator = if (isEditing) DecelerateInterpolator()
                         else AccelerateInterpolator()
 
                         addUpdateListener {

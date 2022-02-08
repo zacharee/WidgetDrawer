@@ -2,9 +2,9 @@ apply plugin: 'com.android.application'
 
 apply plugin: 'kotlin-android'
 
-apply plugin: 'kotlin-android-extensions'
-
 apply plugin: 'com.google.firebase.crashlytics'
+
+apply plugin: 'kotlin-parcelize'
 
 def version = 29
 
@@ -37,10 +37,9 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
-}
-
-androidExtensions {
-    experimental = true
+    buildFeatures {
+        viewBinding true
+    }
 }
 
 dependencies {

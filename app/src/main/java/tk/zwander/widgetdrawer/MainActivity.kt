@@ -29,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     class Prefs : PreferenceFragmentCompat(), SharedPreferences.OnSharedPreferenceChangeListener {
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             setPreferencesFromResource(R.xml.prefs_main, rootKey)
-            preferenceManager.sharedPreferences.registerOnSharedPreferenceChangeListener(this)
+            preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
 
             findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
                 DrawerService.openDrawer(requireContext())
@@ -50,11 +50,12 @@ class MainActivity : AppCompatActivity() {
             when (key) {
                 PrefsManager.ENABLED ->
                     findPreference<SwitchPreference>(PrefsManager.ENABLED)?.isChecked =
-                            preferenceManager.sharedPreferences.getBoolean(PrefsManager.ENABLED, false)
+                            preferenceManager.sharedPreferences?.getBoolean(PrefsManager.ENABLED, false) ?: false
             }
         }
 
-        override fun onCreateAdapter(preferenceScreen: PreferenceScreen?): RecyclerView.Adapter<*> {
+        @SuppressLint("RestrictedApi")
+        override fun onCreateAdapter(preferenceScreen: PreferenceScreen): RecyclerView.Adapter<*> {
             return object : PreferenceGroupAdapter(preferenceScreen) {
                 @SuppressLint("RestrictedApi")
                 override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
@@ -63,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                     if (preference is PreferenceCategory)
                         setZeroPaddingToLayoutChildren(holder.itemView)
                     else
-                        holder.itemView.findViewById<View?>(R.id.icon_frame)?.visibility = if (preference.icon == null) View.GONE else View.VISIBLE
+                        holder.itemView.findViewById<View?>(R.id.icon_frame)?.visibility = if (preference?.icon == null) View.GONE else View.VISIBLE
                 }
             }
         }
@@ -81,7 +82,7 @@ class MainActivity : AppCompatActivity() {
         override fun onDestroy() {
             super.onDestroy()
 
-            preferenceManager.sharedPreferences.unregisterOnSharedPreferenceChangeListener(this)
+            preferenceManager.sharedPreferences?.unregisterOnSharedPreferenceChangeListener(this)
         }
     }
 }
