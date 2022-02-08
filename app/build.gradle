@@ -6,7 +6,7 @@ apply plugin: 'com.google.firebase.crashlytics'
 
 apply plugin: 'kotlin-parcelize'
 
-def version = 29
+def version = 30
 
 android {
     compileSdkVersion 31
