@@ -18,7 +18,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup,GoogleAppIndexingWarning">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -30,12 +31,14 @@
             android:excludeFromRecents="true"
             android:launchMode="singleTop"
             android:theme="@style/AppTheme.Null"
+            android:exported="true"
             />
         <activity
             android:name=".activities.WidgetSelectActivity"
             android:configChanges="orientation|screenLayout|screenSize|keyboard|keyboardHidden"
             android:excludeFromRecents="true"
             android:label="@string/add_widget"
+            android:exported="true"
             />
         <activity android:name=".activities.TriggerActivity"
             android:label="@string/open_drawer"
@@ -70,6 +73,7 @@
         </service>
         <service android:name=".services.EnhancedViewService"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE"
+            android:exported="true"
             android:label="@string/enhanced_view_mode">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />

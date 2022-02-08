@@ -68,6 +68,7 @@ dependencies {
     implementation 'com.github.zacharee:SeekBarPreference:b0b9567cd0'
     implementation 'com.github.zacharee:HelperLib:0317cbd35b'
     implementation 'com.github.zacharee:colorpicker:9ea5085260'
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.2'
 //    implementation 'com.github.zacharee:SpannedGridLayoutManager:b44693ba2d'
     implementation project(':spannedlm')
 //    implementation 'com.jaredrummler:colorpicker:1.1.0'
