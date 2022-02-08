@@ -11,6 +11,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.widgetdrawer.services.DrawerService
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.accessibilityEnabled
@@ -36,10 +37,22 @@ class MainActivity : AppCompatActivity() {
                 true
             }
 
-            findPreference<SwitchPreference>("enhanced_view_mode")?.setOnPreferenceChangeListener { _, newValue ->
+            findPreference<SwitchPreference>("enhanced_view_mode")?.setOnPreferenceChangeListener { pref, newValue ->
                 if (newValue.toString().toBoolean() && !requireContext().accessibilityEnabled) {
-                    Toast.makeText(requireContext(), R.string.enable_accessibility, Toast.LENGTH_SHORT).show()
-                    startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                    MaterialAlertDialogBuilder(requireContext())
+                        .setTitle(R.string.enhanced_view_mode)
+                        .setMessage(R.string.enhanced_view_mode_grant_desc)
+                        .setPositiveButton(android.R.string.ok) { _, _ ->
+                            Toast.makeText(requireContext(), R.string.enable_accessibility, Toast.LENGTH_SHORT).show()
+                            startActivity(Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS))
+                        }
+                        .setNegativeButton(android.R.string.cancel) { _, _ ->
+                            (pref as SwitchPreference).isChecked = false
+                        }
+                        .setOnCancelListener {
+                            (pref as SwitchPreference).isChecked = false
+                        }
+                        .show()
                 }
 
                 true
