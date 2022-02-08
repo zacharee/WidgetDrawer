@@ -9,15 +9,23 @@ import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.Drawable
+import android.os.Build
+import android.os.Bundle
+import android.util.SizeF
 import android.view.*
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.AnticipateInterpolator
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.widget.ListView
 import android.widget.RadioButton
+import androidx.core.view.forEach
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpanSize
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.databinding.HeaderLayoutBinding
 import tk.zwander.widgetdrawer.databinding.ShortcutHolderBinding
@@ -33,8 +41,9 @@ import java.util.*
 
 class DrawerAdapter(
     private val manager: AppWidgetManager,
-    private val appWidgetHost: WidgetHostCompat
-) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val appWidgetHost: WidgetHostCompat,
+    private val params: WindowManager.LayoutParams
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>(), CoroutineScope by MainScope() {
     companion object {
         const val TYPE_HEADER = BaseWidgetInfo.TYPE_HEADER
         const val TYPE_WIDGET = BaseWidgetInfo.TYPE_WIDGET
@@ -129,7 +138,9 @@ class DrawerAdapter(
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is BaseItemVH) {
             val widget = widgets[position]
-            holder.onBind(widget)
+            launch {
+                holder.onBind(widget)
+            }
         } else if (holder is HeaderVH) {
             holder.onBind()
         }
@@ -234,45 +245,86 @@ class DrawerAdapter(
     fun setAll(widgets: List<BaseWidgetInfo>) {
         this.widgets.removeAll { it.type != BaseWidgetInfo.TYPE_HEADER }
         this.widgets.addAll(widgets)
-        notifyDataSetChanged()
     }
 
     fun removeAt(position: Int): BaseWidgetInfo {
-        val removed = widgets.removeAt(position)
-        notifyItemRemoved(position)
-        return removed
+        return widgets.removeAt(position)
     }
 
     inner class WidgetVH(view: View) : BaseItemVH(view) {
         override fun onBind(widget: BaseWidgetInfo) {
             super.onBind(widget)
 
+            widgetFrame.removeAllViews()
+
             val widgetInfo = getWidgetInfo(widget.id)
+
+            val span = spanSizeLookup.getSpanSize(bindingAdapterPosition)
+            val calculatedWidth = itemView.calculateWidgetWidth(params.width, span)
+            val calculatedHeight = itemView.calculateWidgetHeight(span)
+
+            itemView.apply {
+                layoutParams = (layoutParams as ViewGroup.LayoutParams).apply {
+                    width = calculatedWidth
+                    height = calculatedHeight
+                }
+            }
 
             val view = appWidgetHost.createView(
                 itemView.context,
                 widget.id,
                 widgetInfo
-            )
+            ).apply {
+                findListViewsInHierarchy(this).forEach { list ->
+                    list.isNestedScrollingEnabled = true
+                }
 
-            view.setOnClickListener {
-                val newInfo = widgets[bindingAdapterPosition]
+                this.setOnHierarchyChangeListener(object : ViewGroup.OnHierarchyChangeListener {
+                    override fun onChildViewAdded(parent: View, child: View?) {
+                        findListViewsInHierarchy(parent).forEach { list ->
+                            list.isNestedScrollingEnabled = true
+                        }
+                    }
 
-                if (isEditing) {
-                    selectedId = newInfo.id
-                    this@WidgetVH.selection.isChecked = true
+                    override fun onChildViewRemoved(parent: View?, child: View?) {}
+                })
+
+                val width = itemView.context.pxAsDp(calculatedWidth).toInt()
+                val height = itemView.context.pxAsDp(calculatedHeight).toInt()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    updateAppWidgetSize(Bundle(), listOf(SizeF(width.toFloat(), height.toFloat())))
+                } else {
+                    updateAppWidgetSize(Bundle(), width, height, width, height)
+                }
+
+                setOnClickListener {
+                    val newInfo = widgets[bindingAdapterPosition]
+
+                    if (isEditing) {
+                        selectedId = newInfo.id
+                        this@WidgetVH.selection.isChecked = true
+                    }
                 }
             }
 
-            widgetFrame.apply {
-                removeAllViews()
-                addView(view)
+            widgetFrame.addView(view)
+        }
+
+        private fun findListViewsInHierarchy(root: View): List<ListView> {
+            val ret = arrayListOf<ListView>()
+
+            if (root is ViewGroup) {
+                root.forEach { child ->
+                    if (child is ListView) {
+                        ret.add(child)
+                    } else if (child is ViewGroup) {
+                        ret.addAll(findListViewsInHierarchy(child))
+                    }
+                }
             }
 
-            val width = itemView.context.pxAsDp(itemView.width).toInt()
-            val height = itemView.context.pxAsDp(itemView.height).toInt()
-
-            view.updateAppWidgetSize(null, width, height, width, height)
+            return ret
         }
     }
 

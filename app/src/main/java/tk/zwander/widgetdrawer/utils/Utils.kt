@@ -15,14 +15,25 @@ import android.os.Vibrator
 import android.provider.Settings
 import android.util.Base64
 import android.util.Log
+import android.view.View
 import android.view.WindowManager
 import androidx.core.content.res.ResourcesCompat
+import com.arasthel.spannedgridlayoutmanager.SpanSize
 import tk.zwander.helperlib.dpAsPx
 import tk.zwander.widgetdrawer.App
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 var accessibilityConnected = false
+
+fun View.calculateWidgetWidth(frameWidth: Int, size: SpanSize?): Int {
+    return frameWidth / context.prefs.columnCount *
+            (size?.width ?: 1)
+}
+
+fun View.calculateWidgetHeight(size: SpanSize?): Int {
+    return (size?.height ?: 1) * context.widgetHeightUnit
+}
 
 val Context.widgetHeightUnit: Int
     get() = dpAsPx(50)

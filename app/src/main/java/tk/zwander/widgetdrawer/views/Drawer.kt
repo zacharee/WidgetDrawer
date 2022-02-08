@@ -10,10 +10,7 @@ import android.content.*
 import android.content.pm.ActivityInfo
 import android.graphics.Bitmap
 import android.graphics.PixelFormat
-import android.os.Build
-import android.os.Bundle
-import android.os.CountDownTimer
-import android.os.Parcelable
+import android.os.*
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.KeyEvent
@@ -95,7 +92,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
     private val manager by lazy { AppWidgetManager.getInstance(context.applicationContext) }
     private val shortcutIdManager by lazy { ShortcutIdManager.getInstance(context, host) }
     private val prefs by lazy { PrefsManager.getInstance(context) }
-    private val adapter by lazy { DrawerAdapter(manager, host) }
+    private val adapter by lazy { DrawerAdapter(manager, host, params) }
 
     private val gridLayoutManager = SpannedGridLayoutManager(context, RecyclerView.VERTICAL, 1, context.prefs.columnCount)
 
@@ -257,7 +254,9 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         super.onAttachedToWindow()
 
         host.startListening()
-        adapter.notifyDataSetChanged()
+        Handler(Looper.getMainLooper()).postDelayed({
+            adapter.notifyItemRangeChanged(0, adapter.itemCount)
+        }, 50)
 
         setPadding(paddingLeft, context.statusBarHeight, paddingRight, paddingBottom)
 

@@ -71,7 +71,6 @@ class WidgetListAdapter(private val picasso: Picasso, private val selectionCallb
 
     fun addItem(item: WidgetInfo) {
         widgets.add(item)
-        notifyDataSetChanged()
     }
 
     class WidgetVH(view: View) : RecyclerView.ViewHolder(view) {

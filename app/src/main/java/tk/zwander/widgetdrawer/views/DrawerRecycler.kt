@@ -40,8 +40,7 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
             viewHolder: ViewHolder,
             target: ViewHolder
         ): Boolean {
-            return allowReorder
-                    && onMoveListener?.invoke(recyclerView, viewHolder, target) == true
+            return allowReorder && onMoveListener?.invoke(recyclerView, viewHolder, target) == true
         }
 
         override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
@@ -135,7 +134,6 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
             }
         }
     }
-
 
     override fun onNestedScrollAccepted(child: View, target: View, axes: Int) {
         if (axes and View.SCROLL_AXIS_VERTICAL != 0) {
