@@ -48,8 +48,8 @@ dependencies {
 
     //Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
 
     //AndroidX
     implementation 'androidx.appcompat:appcompat:1.4.1'
@@ -60,15 +60,15 @@ dependencies {
     implementation "androidx.core:core-ktx:1.7.0"
 
     //Google
-    implementation 'com.google.code.gson:gson:2.8.7'
-    implementation 'com.google.firebase:firebase-core:20.0.2'
-    implementation 'com.google.android.material:material:1.6.0-alpha02'
+    implementation 'com.google.code.gson:gson:2.8.9'
+    implementation 'com.google.firebase:firebase-core:21.0.0'
+    implementation 'com.google.android.material:material:1.7.0-alpha01'
 
     //Other
     implementation 'com.github.zacharee:SeekBarPreference:b0b9567cd0'
     implementation 'com.github.zacharee:HelperLib:0317cbd35b'
     implementation 'com.github.zacharee:colorpicker:9ea5085260'
-    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.2'
+    implementation 'org.lsposed.hiddenapibypass:hiddenapibypass:4.3'
 //    implementation 'com.github.zacharee:SpannedGridLayoutManager:b44693ba2d'
     implementation project(':spannedlm')
 //    implementation 'com.jaredrummler:colorpicker:1.1.0'
@@ -76,8 +76,8 @@ dependencies {
     implementation 'com.github.tingyik90:snackprogressbar:6.1'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'net.bytebuddy:byte-buddy-android:1.11.12'
-    implementation 'com.google.firebase:firebase-crashlytics:18.2.7'
-    implementation 'com.google.firebase:firebase-analytics:20.0.2'
+    implementation 'com.google.firebase:firebase-crashlytics:18.2.10'
+    implementation 'com.google.firebase:firebase-analytics:21.0.0'
 }
 
 apply plugin: 'com.google.gms.google-services'
