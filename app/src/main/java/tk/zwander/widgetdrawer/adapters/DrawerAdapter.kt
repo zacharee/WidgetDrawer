@@ -248,7 +248,9 @@ class DrawerAdapter(
     }
 
     fun removeAt(position: Int): BaseWidgetInfo {
-        return widgets.removeAt(position)
+        return widgets.removeAt(position).also {
+            notifyItemRemoved(position)
+        }
     }
 
     inner class WidgetVH(view: View) : BaseItemVH(view) {
@@ -412,10 +414,12 @@ class DrawerAdapter(
             }
 
             selectedObservable.addObserver { _, _ ->
-                if (bindingAdapterPosition != -1) updateSelectionCheck(
-                    this,
-                    widgets[bindingAdapterPosition]
-                )
+                widgets.getOrNull(bindingAdapterPosition)?.let {
+                    updateSelectionCheck(
+                        this,
+                        it
+                    )
+                }
             }
 
             transparentObservable.addObserver { _, _ ->

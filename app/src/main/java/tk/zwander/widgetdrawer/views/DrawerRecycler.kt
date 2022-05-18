@@ -33,7 +33,7 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
         }
     })
 
-    private val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(
+    val touchCallback = object : ItemTouchHelper.SimpleCallback(
         ItemTouchHelper.UP or ItemTouchHelper.DOWN or ItemTouchHelper.START or ItemTouchHelper.END,
         ItemTouchHelper.START or ItemTouchHelper.END
     ) {
@@ -46,7 +46,9 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
         }
 
         override fun onSwiped(viewHolder: ViewHolder, direction: Int) {
-            if (allowReorder) onSwipeListener?.invoke(viewHolder, direction)
+            if (allowReorder) {
+                onSwipeListener?.invoke(viewHolder, direction)
+            }
         }
 
         override fun getMovementFlags(recyclerView: RecyclerView, viewHolder: ViewHolder): Int {
@@ -56,8 +58,9 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
 
         override fun isItemViewSwipeEnabled() = allowReorder
         override fun isLongPressDragEnabled() = allowReorder
-    })
+    }
 
+    private val touchHelper = ItemTouchHelper(touchCallback)
 
     var onMoveListener: ((
         recyclerView: RecyclerView,
@@ -128,7 +131,7 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
                 nestedScrollTargetIsBeingDragged = true
                 nestedScrollTargetWasUnableToScroll = false
             }
-            else if (dyConsumed == 0 && dyUnconsumed != 0) {
+            else if (dyUnconsumed != 0) {
                 // The descendant tried scrolling in response to touch movements but was not able to do so.
                 // We remember that in order to allow RecyclerView to take over scrolling.
                 nestedScrollTargetWasUnableToScroll = true
