@@ -61,13 +61,11 @@ class PermConfigActivity : AppCompatActivity() {
             Drawer.ACTION_PERM -> {
                 val permIntent = Intent(AppWidgetManager.ACTION_APPWIDGET_BIND)
                 permIntent.putExtras(intent.extras!!)
-                widgetBindLauncher.launch(intent)
+                widgetBindLauncher.launch(permIntent)
             }
             Drawer.ACTION_CONFIG -> {
                 //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
-                val intentSender = IAppWidgetService.Stub.asInterface(
-                    ServiceManager.getService(
-                        Context.APPWIDGET_SERVICE))
+                val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
                     .createAppWidgetConfigIntentSender(opPackageName, intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1), 0)
 
                 if (intentSender != null) {

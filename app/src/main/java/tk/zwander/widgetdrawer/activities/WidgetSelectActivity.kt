@@ -71,9 +71,13 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                     app = apps[appInfo.packageName]!!
                 }
 
-                app.widgets.add(WidgetInfo(widgetName,
-                    it.previewImage.run { if (this != 0) this else appInfo.icon },
-                    it, appInfo))
+                app.widgets.add(
+                    WidgetInfo(
+                        widgetName,
+                        it.previewImage.run { if (this != 0) this else appInfo.icon },
+                        it, appInfo
+                    )
+                )
             }
 
             val shortcuts = packageManager.queryIntentActivities(
@@ -103,8 +107,9 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
                             Intent.ShortcutIconResource()
                                 .apply {
                                     packageName = appInfo.packageName
-                                    resourceName = packageManager.getResourcesForApplication(appInfo)
-                                        .getResourceName(it.iconResource)
+                                    resourceName =
+                                        packageManager.getResourcesForApplication(appInfo)
+                                            .getResourceName(it.iconResource)
                                 },
                             it.activityInfo
                         ),

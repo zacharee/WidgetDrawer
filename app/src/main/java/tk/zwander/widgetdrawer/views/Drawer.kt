@@ -315,6 +315,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener, 
             Event.PickFailedResult -> {
                 showDrawer()
             }
+            else -> {}
         }
     }
 
