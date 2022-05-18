@@ -5,9 +5,11 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import tk.zwander.widgetdrawer.R
-import tk.zwander.widgetdrawer.services.DrawerService
+import tk.zwander.widgetdrawer.utils.Event
+import tk.zwander.widgetdrawer.utils.eventManager
 
 class TriggerActivity : AppCompatActivity() {
+    @Suppress("DEPRECATION")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -27,7 +29,7 @@ class TriggerActivity : AppCompatActivity() {
             setResult(Activity.RESULT_OK, resultIntent)
             finish()
         } else {
-            DrawerService.openDrawer(this)
+            eventManager.sendEvent(Event.ShowDrawer())
 
             finish()
         }

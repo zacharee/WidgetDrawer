@@ -3,12 +3,10 @@ package tk.zwander.widgetdrawer.views
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
-import android.app.Activity
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProviderInfo
 import android.content.*
 import android.content.pm.ActivityInfo
-import android.graphics.Bitmap
 import android.graphics.PixelFormat
 import android.os.*
 import android.util.AttributeSet
@@ -22,18 +20,13 @@ import android.view.animation.Animation
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import androidx.core.animation.doOnEnd
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.recyclerview.widget.RecyclerView
 import com.arasthel.spannedgridlayoutmanager.SpannedGridLayoutManager
 import com.tingyik90.snackprogressbar.SnackProgressBar
 import com.tingyik90.snackprogressbar.SnackProgressBarManager
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.activities.PermConfigActivity
-import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.CONFIG_CODE
-import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.PERM_CODE
-import tk.zwander.widgetdrawer.activities.PermConfigActivity.Companion.SHORTCUT_CODE
 import tk.zwander.widgetdrawer.activities.WidgetSelectActivity
-import tk.zwander.widgetdrawer.activities.WidgetSelectActivity.Companion.PICK_CODE
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.databinding.DrawerLayoutBinding
 import tk.zwander.widgetdrawer.host.WidgetHostCompat
@@ -41,29 +34,16 @@ import tk.zwander.widgetdrawer.misc.*
 import tk.zwander.widgetdrawer.utils.*
 import java.util.*
 
-
-class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
+class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener, EventObserver {
     companion object {
         const val ACTION_PERM = "PERMISSION"
         const val ACTION_CONFIG = "CONFIGURATION"
 
-        const val ACTION_RESULT = "PICK_WIDGET"
-
-        const val EXTRA_CODE = "code"
-        const val EXTRA_DATA = "data"
         const val EXTRA_SHORTCUT_DATA = "shortcut_data"
         const val EXTRA_APPWIDGET_CONFIGURE = "configure"
 
         const val ANIM_DURATION = 200L
         const val UNDO_DURATION = 3000L
-
-        fun onResult(context: Context, result: Int, code: Int, data: Intent?) {
-            val intent = Intent(ACTION_RESULT)
-            intent.putExtra(Intent.EXTRA_RETURN_RESULT, result)
-            intent.putExtra(EXTRA_CODE, code)
-            intent.putExtra(EXTRA_DATA, data)
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-        }
     }
 
     constructor(context: Context) : super(context)
@@ -96,18 +76,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
     private val gridLayoutManager = SpannedGridLayoutManager(context, RecyclerView.VERTICAL, 1, context.prefs.columnCount)
 
-    private val localReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent) {
-            when (intent.action) {
-                ACTION_RESULT -> onActivityResult(
-                    intent.getIntExtra(EXTRA_CODE, -1000),
-                    intent.getIntExtra(Intent.EXTRA_RETURN_RESULT, -1000),
-                    intent.getParcelableExtra(EXTRA_DATA)
-                )
-            }
-        }
-    }
-
+    @Suppress("DEPRECATION")
     private val globalReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent) {
             when (intent.action) {
@@ -302,11 +271,56 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         return super.dispatchKeyEvent(event)
     }
 
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.PermissionResult -> {
+                if (event.success) {
+                    tryBindWidget(manager.getAppWidgetInfo(event.widgetId))
+                }
+            }
+            is Event.WidgetConfigResult -> {
+                if (event.success) {
+                    addNewWidget(event.widgetId)
+                } else {
+                    showDrawer()
+                }
+            }
+            is Event.ShortcutConfigResult -> {
+                if (event.success) {
+                    addNewShortcut(
+                        BaseWidgetInfo.shortcut(
+                            event.name ?: event.data?.label,
+                            event.iconBmp.toBase64(),
+                            event.iconRes ?: event.data?.iconRes,
+                            shortcutIdManager.allocateShortcutId(),
+                            event.intent
+                        )
+                    )
+                }
+            }
+            is Event.PickWidgetResult -> {
+                if (event.success) {
+                    tryBindWidget(event.providerInfo)
+                } else {
+                    showDrawer()
+                }
+            }
+            is Event.PickShortcutResult -> {
+                if (event.success) {
+                    tryBindShortcut(event.shortcutData)
+                } else {
+                    showDrawer()
+                }
+            }
+            Event.PickFailedResult -> {
+                showDrawer()
+            }
+        }
+    }
+
     fun onCreate() {
-        LocalBroadcastManager.getInstance(context).registerReceiver(localReceiver, IntentFilter().apply {
-            addAction(ACTION_RESULT)
-        })
         context.registerReceiver(globalReceiver, IntentFilter().apply {
+            @Suppress("DEPRECATION")
             addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS)
         })
         prefs.addPrefListener(this)
@@ -316,21 +330,22 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
         binding.widgetGrid.setHasFixedSize(true)
         updateSpanCount()
         adapter.setAll(prefs.currentWidgets)
+        context.eventManager.addObserver(this)
     }
 
     fun onDestroy() {
         hideDrawer(false)
         prefs.currentWidgets = adapter.widgets
 
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(localReceiver)
         context.unregisterReceiver(globalReceiver)
         prefs.removePrefListener(this)
+        context.eventManager.removeObserver(this)
     }
 
     fun showDrawer(wm: WindowManager = this.wm, overrideType: Int = params.type) {
         try {
             wm.addView(this, params.apply { type = overrideType })
-        } catch (e: Exception) {}
+        } catch (_: Exception) {}
     }
 
     fun hideDrawer(callListener: Boolean = true) {
@@ -346,7 +361,7 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
                 handler?.postDelayed({
                     try {
                         wm.removeView(this@Drawer)
-                    } catch (e: Exception) {
+                    } catch (_: Exception) {
                     }
                 }, 10)
             }
@@ -466,57 +481,5 @@ class Drawer : FrameLayout, SharedPreferences.OnSharedPreferenceChangeListener {
 
         snackbarManager.show(snackbar, SnackProgressBarManager.LENGTH_INDEFINITE, 100)
         timer.start()
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        when (requestCode) {
-            PERM_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    tryBindWidget(
-                        manager.getAppWidgetInfo(
-                            data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                        )
-                    )
-                }
-            }
-            CONFIG_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: return
-                    if (id == -1) return
-                    addNewWidget(id)
-                } else
-                    showDrawer()
-            }
-            PICK_CODE -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    val res = data?.getParcelableExtra<Parcelable>(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER)
-
-                    if (res is AppWidgetProviderInfo) tryBindWidget(res)
-                    else if (res is ShortcutData) tryBindShortcut(res)
-                } else
-                    showDrawer()
-            }
-            SHORTCUT_CODE -> {
-                val intent = data?.getParcelableExtra<Intent>(Intent.EXTRA_SHORTCUT_INTENT)
-
-                if (intent != null) {
-                    val info = data.getParcelableExtra<ShortcutData>(EXTRA_SHORTCUT_DATA)
-                    val name = data.getStringExtra(Intent.EXTRA_SHORTCUT_NAME)
-                    val iconRes =
-                        data.getParcelableExtra<Intent.ShortcutIconResource?>(Intent.EXTRA_SHORTCUT_ICON_RESOURCE)
-                    val iconBmp = data.getParcelableExtra<Bitmap?>(Intent.EXTRA_SHORTCUT_ICON)
-
-                    val shortcut = BaseWidgetInfo.shortcut(
-                        name ?: info?.label,
-                        iconBmp.toBase64(),
-                        iconRes ?: info?.iconRes,
-                        shortcutIdManager.allocateShortcutId(),
-                        intent
-                    )
-
-                    addNewShortcut(shortcut)
-                }
-            }
-        }
     }
 }

@@ -13,8 +13,10 @@ import androidx.preference.*
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import tk.zwander.widgetdrawer.services.DrawerService
+import tk.zwander.widgetdrawer.utils.Event
 import tk.zwander.widgetdrawer.utils.PrefsManager
 import tk.zwander.widgetdrawer.utils.accessibilityEnabled
+import tk.zwander.widgetdrawer.utils.eventManager
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +35,7 @@ class MainActivity : AppCompatActivity() {
             preferenceManager.sharedPreferences?.registerOnSharedPreferenceChangeListener(this)
 
             findPreference<Preference>("open_drawer")?.setOnPreferenceClickListener {
-                DrawerService.openDrawer(requireContext())
+                requireContext().eventManager.sendEvent(Event.ShowDrawer())
                 true
             }
 

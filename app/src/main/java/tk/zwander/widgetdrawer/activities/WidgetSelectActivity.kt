@@ -1,7 +1,7 @@
 package tk.zwander.widgetdrawer.activities
 
-import android.app.Activity
 import android.appwidget.AppWidgetManager
+import android.appwidget.AppWidgetProviderInfo
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -13,20 +13,28 @@ import tk.zwander.widgetdrawer.databinding.ActivityWidgetSelectBinding
 import tk.zwander.widgetdrawer.misc.AppInfo
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.misc.WidgetInfo
-import tk.zwander.widgetdrawer.views.Drawer
-
+import tk.zwander.widgetdrawer.utils.Event
+import tk.zwander.widgetdrawer.utils.eventManager
 
 class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() {
-    companion object {
-        const val PICK_CODE = 104
-    }
-
     private val appWidgetManager by lazy { AppWidgetManager.getInstance(this) }
     private val adapter by lazy {
         AppListAdapter(this) {
-            Drawer.onResult(this, Activity.RESULT_OK, PICK_CODE, Intent().apply {
-                putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, it)
-            })
+            val event = when (it) {
+                is AppWidgetProviderInfo -> Event.PickWidgetResult(
+                    success = true,
+                    providerInfo = it
+                )
+                is ShortcutData -> Event.PickShortcutResult(
+                    success = true,
+                    shortcutData = it
+                )
+                else -> null
+            }
+
+            event?.let {
+                eventManager.sendEvent(event)
+            }
 
             finish()
         }
@@ -43,8 +51,7 @@ class WidgetSelectActivity : AppCompatActivity(), CoroutineScope by MainScope() 
     }
 
     override fun onBackPressed() {
-        Drawer.onResult(this, Activity.RESULT_CANCELED, PICK_CODE, null)
-
+        eventManager.sendEvent(Event.PickFailedResult)
         finish()
     }
 

@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import tk.zwander.widgetdrawer.adapters.DrawerAdapter
 import tk.zwander.widgetdrawer.services.DrawerService
+import tk.zwander.widgetdrawer.utils.Event
 import tk.zwander.widgetdrawer.utils.PrefsManager
+import tk.zwander.widgetdrawer.utils.eventManager
 
 //Nested scrolling implementation from https://medium.com/widgetlabs-engineering/scrollable-nestedscrollviews-inside-recyclerview-ca65050d828a
 class DrawerRecycler : RecyclerView, NestedScrollingParent {
@@ -25,7 +27,7 @@ class DrawerRecycler : RecyclerView, NestedScrollingParent {
     private val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
         override fun onSingleTapUp(e: MotionEvent?): Boolean {
             return if (PrefsManager.getInstance(context).closeOnEmptyTap && !allowReorder) {
-                DrawerService.closeDrawer(context)
+                context.eventManager.sendEvent(Event.CloseDrawer)
                 true
             } else false
         }

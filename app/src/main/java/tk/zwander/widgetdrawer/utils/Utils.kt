@@ -138,3 +138,6 @@ fun String?.base64ToByteArray(): ByteArray? {
 fun String?.base64ToBitmap(): Bitmap? {
     return base64ToByteArray()?.toBitmap()
 }
+
+val Context.eventManager: EventManager
+    get() = EventManager.getInstance(this)

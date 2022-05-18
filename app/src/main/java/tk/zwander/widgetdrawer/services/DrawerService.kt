@@ -13,20 +13,19 @@ import android.os.Build
 import android.os.PowerManager
 import android.os.Process
 import android.provider.Settings
+import android.view.LayoutInflater
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import tk.zwander.widgetdrawer.R
 import tk.zwander.widgetdrawer.utils.*
+import tk.zwander.widgetdrawer.views.Drawer
+import tk.zwander.widgetdrawer.views.Handle
 
 
 @SuppressLint("InflateParams")
-class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListener {
+class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListener, EventObserver {
     companion object {
-        const val ACTION_OPEN_DRAWER = "open_drawer"
-        const val ACTION_CLOSE_DRAWER = "close_drawer"
-
         private const val CHANNEL = "widget_drawer_main"
 
         fun start(context: Context) {
@@ -36,21 +35,16 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         fun stop(context: Context) {
             context.stopService(Intent(context, DrawerService::class.java))
         }
-
-        fun openDrawer(context: Context) {
-            LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_OPEN_DRAWER))
-        }
-
-        fun closeDrawer(context: Context) {
-            LocalBroadcastManager.getInstance(context).sendBroadcast(Intent(ACTION_CLOSE_DRAWER))
-        }
     }
 
     private val nm by lazy { getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager }
     private val appOpsManager by lazy { getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager }
 
-    private val handle by lazy { app.handle }
-    private val drawer by lazy { app.drawer }
+    private val drawer by lazy {
+        LayoutInflater.from(this)
+            .inflate(R.layout.drawer_layout, null, false) as Drawer
+    }
+    private val handle by lazy { Handle(this) }
     private val overlayListener = AppOpsManager.OnOpChangedListener { op, packageName ->
         if (packageName == this.packageName) {
             when (op) {
@@ -65,19 +59,6 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
                         stopForeground(true)
                         stopSelf()
                     }
-                }
-            }
-        }
-    }
-    private val openReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                ACTION_OPEN_DRAWER -> {
-                    openDrawer()
-                }
-
-                ACTION_CLOSE_DRAWER -> {
-                    closeDrawer()
                 }
             }
         }
@@ -109,24 +90,10 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         drawer.onCreate()
         isScreenOn = (getSystemService(Context.POWER_SERVICE) as PowerManager).isInteractive
         prefs.addPrefListener(this)
-        LocalBroadcastManager.getInstance(this).registerReceiver(openReceiver, IntentFilter(ACTION_OPEN_DRAWER).apply {
-            addAction(ACTION_CLOSE_DRAWER)
-        })
         registerReceiver(screenStateReceiver, IntentFilter().apply {
             addAction(Intent.ACTION_SCREEN_ON)
             addAction(Intent.ACTION_SCREEN_OFF)
         })
-        app.accessibilityListeners.add {
-            if (drawer.isAttachedToWindow) {
-                closeDrawer()
-                openDrawer()
-            }
-
-            if (handle.isAttachedToWindow) {
-                remHandle()
-                addHandle()
-            }
-        }
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1) {
             val channel =
@@ -143,6 +110,8 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .build()
         )
+
+        eventManager.addObserver(this)
 
         handle.onOpenListener = {
             if (!drawer.isAttachedToWindow) {
@@ -170,6 +139,7 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
     }
 
     override fun onConfigurationChanged(newConfig: Configuration?) {
+        @Suppress("DEPRECATION")
         when (newConfig?.orientation) {
             Configuration.ORIENTATION_LANDSCAPE -> {
                 remHandle()
@@ -192,9 +162,43 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         }
     }
 
+    override fun onEvent(event: Event) {
+        when (event) {
+            is Event.ShowDrawer -> {
+                if (event.wm != null) {
+                    drawer.showDrawer(event.wm, event.type)
+                } else {
+                    drawer.showDrawer(overrideType = event.type)
+                }
+            }
+            is Event.ShowHandle -> {
+                if (event.wm != null) {
+                    handle.show(event.wm, event.type)
+                } else {
+                    handle.show(overrideType = event.type)
+                }
+            }
+            Event.AccessibilityConnected, Event.AccessibilityDisconnected -> {
+                if (drawer.isAttachedToWindow) {
+                    closeDrawer()
+                    openDrawer()
+                }
+
+                if (handle.isAttachedToWindow) {
+                    remHandle()
+                    addHandle()
+                }
+            }
+            Event.CloseDrawer -> {
+                closeDrawer()
+            }
+            else -> {}
+        }
+    }
+
     private fun addHandle() {
         if (canShowHandle()) {
-            if (accessibilityConnected) EnhancedViewService.addHandle(this)
+            if (accessibilityConnected) eventManager.sendEvent(Event.AddHandleFromAccessibility)
             else handle.show(overrideType = getProperWLPType())
         }
     }
@@ -205,7 +209,7 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
 
     private fun openDrawer() {
         remHandle()
-        if (accessibilityConnected) EnhancedViewService.addDrawer(this)
+        if (accessibilityConnected) eventManager.sendEvent(Event.OpenDrawerFromAccessibility)
         else drawer.showDrawer(overrideType = getProperWLPType())
     }
 
@@ -233,11 +237,12 @@ class DrawerService : Service(), SharedPreferences.OnSharedPreferenceChangeListe
         drawer.onDestroy()
         handle.onDestroy()
         prefs.removePrefListener(this)
-        LocalBroadcastManager.getInstance(this).unregisterReceiver(openReceiver)
         unregisterReceiver(screenStateReceiver)
 
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1)
             appOpsManager.stopWatchingMode(overlayListener)
+
+        eventManager.removeObserver(this)
     }
 
     private fun canShowHandle(): Boolean =
