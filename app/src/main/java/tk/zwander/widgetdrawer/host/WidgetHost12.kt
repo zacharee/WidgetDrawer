@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.widget.RemoteViews
-import tk.zwander.widgetdrawer.views.Drawer
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
@@ -19,14 +18,14 @@ import java.lang.reflect.Proxy
  * of [RemoteViews.OnClickHandler].
  */
 @SuppressLint("PrivateApi")
-class WidgetHost12(context: Context, id: Int, drawer: Drawer) : WidgetHostCompat(
+class WidgetHost12(context: Context, id: Int) : WidgetHostCompat(
     context, id, Proxy.newProxyInstance(
         Class.forName("android.widget.RemoteViews\$InteractionHandler").classLoader,
         arrayOf(Class.forName("android.widget.RemoteViews\$InteractionHandler")),
-        InnerOnClickHandler12(context, drawer)
+        InnerOnClickHandler12(context)
     )
 ) {
-    class InnerOnClickHandler12(context: Context, drawer: Drawer) : BaseInnerOnClickHandler(context, drawer),
+    class InnerOnClickHandler12(context: Context) : BaseInnerOnClickHandler(context),
         InvocationHandler {
         @SuppressLint("BlockedPrivateApi", "PrivateApi")
         override fun invoke(proxy: Any?, method: Method?, args: Array<out Any>): Any {

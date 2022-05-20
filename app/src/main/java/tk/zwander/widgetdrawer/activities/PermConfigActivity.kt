@@ -12,26 +12,21 @@ import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import com.android.internal.appwidget.IAppWidgetService
+import tk.zwander.widgetdrawer.host.WidgetHostCompat
 import tk.zwander.widgetdrawer.misc.ShortcutData
 import tk.zwander.widgetdrawer.utils.Event
 import tk.zwander.widgetdrawer.utils.eventManager
 import tk.zwander.widgetdrawer.views.Drawer
 
 class PermConfigActivity : AppCompatActivity() {
+    companion object {
+        private const val CONFIGURE_REQ = 1000
+    }
+
     private val widgetBindLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
 
         eventManager.sendEvent(Event.PermissionResult(
-            success = result.resultCode == Activity.RESULT_OK && id != -1,
-            widgetId = id
-        ))
-        finish()
-    }
-
-    private val configLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
-        val id = result.data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1) ?: -1
-
-        eventManager.sendEvent(Event.WidgetConfigResult(
             success = result.resultCode == Activity.RESULT_OK && id != -1,
             widgetId = id
         ))
@@ -53,6 +48,8 @@ class PermConfigActivity : AppCompatActivity() {
         finish()
     }
 
+    private val configLauncher = ConfigureLauncher()
+
     @SuppressLint("NewApi")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -64,16 +61,7 @@ class PermConfigActivity : AppCompatActivity() {
                 widgetBindLauncher.launch(permIntent)
             }
             Drawer.ACTION_CONFIG -> {
-                //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
-                val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
-                    .createAppWidgetConfigIntentSender(opPackageName, intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1), 0)
-
-                if (intentSender != null) {
-                    try {
-                        configLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
-                        return
-                    } catch (_: Exception) {}
-                }
+                configLauncher.launch(intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1))
             }
             Intent.ACTION_CREATE_SHORTCUT -> {
                 val info = intent.getParcelableExtra<ShortcutData>(Drawer.EXTRA_SHORTCUT_DATA)
@@ -83,6 +71,47 @@ class PermConfigActivity : AppCompatActivity() {
                 outIntent.component = ComponentName(info.activityInfo!!.packageName, info.activityInfo!!.name)
 
                 shortcutConfigLauncher.launch(outIntent)
+            }
+        }
+    }
+
+    private inner class ConfigureLauncher {
+        private val configLauncher = registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            onActivityResult(CONFIGURE_REQ, result.resultCode, result.data)
+        }
+
+        @SuppressLint("NewApi")
+        fun launch(id: Int): Boolean {
+            //Use the system API instead of ACTION_APPWIDGET_CONFIGURE to try to avoid some permissions issues
+            try {
+                val intentSender = IAppWidgetService.Stub.asInterface(ServiceManager.getService(Context.APPWIDGET_SERVICE))
+                    .createAppWidgetConfigIntentSender(opPackageName, id, 0)
+
+                if (intentSender != null) {
+                    configLauncher.launch(IntentSenderRequest.Builder(intentSender).build())
+                    return true
+                }
+            } catch (_: Exception) {}
+
+            try {
+                WidgetHostCompat.getInstance(this@PermConfigActivity, 1003).startAppWidgetConfigureActivityForResult(
+                    this@PermConfigActivity,
+                    id, 0, CONFIGURE_REQ, null
+                )
+                return true
+            } catch (_: Exception) {}
+
+            return false
+        }
+
+        fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+            if (requestCode == CONFIGURE_REQ) {
+                val id = data?.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
+
+                eventManager.sendEvent(Event.WidgetConfigResult(
+                    success = resultCode == Activity.RESULT_OK && id != -1,
+                    widgetId = id ?: -1
+                ))
             }
         }
     }

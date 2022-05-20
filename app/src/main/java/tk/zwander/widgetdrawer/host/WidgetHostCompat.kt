@@ -5,8 +5,9 @@ import android.app.PendingIntent
 import android.appwidget.AppWidgetHost
 import android.content.Context
 import android.widget.RemoteViews
+import tk.zwander.widgetdrawer.utils.Event
+import tk.zwander.widgetdrawer.utils.eventManager
 import tk.zwander.widgetdrawer.utils.prefs
-import tk.zwander.widgetdrawer.views.Drawer
 
 /**
  * Base widget host class. [WidgetHostClass], [WidgetHostInterface], and [WidgetHost12] extend this class and
@@ -28,15 +29,15 @@ abstract class WidgetHostCompat(
         private var instance: WidgetHostCompat? = null
 
         @SuppressLint("PrivateApi")
-        fun getInstance(context: Context, id: Int, drawer: Drawer): WidgetHostCompat {
+        fun getInstance(context: Context, id: Int): WidgetHostCompat {
             return instance ?: run {
                 if (!onClickHandlerExists) {
-                    WidgetHost12(context.applicationContext ?: context, id, drawer)
+                    WidgetHost12(context.applicationContext ?: context, id)
                 } else {
                     (if (Class.forName("android.widget.RemoteViews\$OnClickHandler").isInterface) {
-                        WidgetHostInterface(context.applicationContext ?: context, id, drawer)
+                        WidgetHostInterface(context.applicationContext ?: context, id)
                     } else {
-                        WidgetHostClass(context.applicationContext ?: context, id, drawer)
+                        WidgetHostClass(context.applicationContext ?: context, id)
                     }).also {
                         instance = it
                     }
@@ -65,11 +66,11 @@ abstract class WidgetHostCompat(
             }
     }
 
-    open class BaseInnerOnClickHandler(internal val context: Context, private val drawer: Drawer) {
+    open class BaseInnerOnClickHandler(internal val context: Context) {
         @SuppressLint("NewApi")
         fun checkPendingIntent(pendingIntent: PendingIntent) {
             if (pendingIntent.isActivity) {
-                drawer.hideDrawer()
+                context.eventManager.sendEvent(Event.CloseDrawer)
             }
         }
     }

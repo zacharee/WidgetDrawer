@@ -12,7 +12,6 @@ import net.bytebuddy.ByteBuddy
 import net.bytebuddy.android.AndroidClassLoadingStrategy
 import net.bytebuddy.implementation.MethodDelegation
 import net.bytebuddy.implementation.SuperMethodCall
-import tk.zwander.widgetdrawer.views.Drawer
 
 /**
  * An implementation of [AppWidgetHost] used on devices where the hidden API object
@@ -22,7 +21,7 @@ import tk.zwander.widgetdrawer.views.Drawer
  * visible to it is an interface, so we can't just create a stub class.
  */
 @SuppressLint("PrivateApi")
-class WidgetHostClass(context: Context, id: Int, drawer: Drawer)
+class WidgetHostClass(context: Context, id: Int)
     : WidgetHostCompat(
     context, id, ByteBuddy()
         .subclass(Class.forName("android.widget.RemoteViews\$OnClickHandler"))
@@ -30,7 +29,7 @@ class WidgetHostClass(context: Context, id: Int, drawer: Drawer)
         .defineMethod("onClickHandler", Boolean::class.java)
         .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java)
         .intercept(
-            MethodDelegation.to(InnerOnClickHandlerPie(context, drawer))
+            MethodDelegation.to(InnerOnClickHandlerPie(context))
                 .andThen(SuperMethodCall.INSTANCE)
         )
         .apply {
@@ -38,7 +37,7 @@ class WidgetHostClass(context: Context, id: Int, drawer: Drawer)
                 defineMethod("onClickHandler", Boolean::class.java)
                     .withParameters(View::class.java, PendingIntent::class.java, Intent::class.java, Int::class.java)
                     .intercept(
-                        MethodDelegation.to(InnerOnClickHandlerPie(context, drawer))
+                        MethodDelegation.to(InnerOnClickHandlerPie(context))
                         .andThen(SuperMethodCall.INSTANCE)
                     )
             }
@@ -48,7 +47,7 @@ class WidgetHostClass(context: Context, id: Int, drawer: Drawer)
         .loaded
         .newInstance()
 ) {
-    class InnerOnClickHandlerPie(context: Context, drawer: Drawer): BaseInnerOnClickHandler(context, drawer) {
+    class InnerOnClickHandlerPie(context: Context): BaseInnerOnClickHandler(context) {
         @Suppress("UNUSED_PARAMETER")
         fun onClickHandler(
             view: View,
