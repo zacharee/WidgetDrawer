@@ -91,6 +91,8 @@ fun Intent.ShortcutIconResource?.loadToDrawable(context: Context): Drawable? {
                 }
         } catch (e: PackageManager.NameNotFoundException) {
             null
+        } catch (e: Resources.NotFoundException) {
+            null
         }
     } else {
         null

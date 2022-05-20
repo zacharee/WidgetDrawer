@@ -466,7 +466,7 @@ class DrawerAdapter(
 
     inner class SpanSizeLookup : SpannedGridLayoutManager.SpanSizeLookup({ position ->
         val columnCount = appWidgetHost.context.prefs.columnCount
-        val widget = if (position < widgets.size) widgets[position] else null
+        val widget = widgets.getOrNull(position)
 
         if (widget?.type == TYPE_HEADER) {
             SpanSize(columnCount, 1)
